@@ -48,11 +48,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Subscribers
 
-- [ ] **SUBS-01**: User can list all subscribers
-- [ ] **SUBS-02**: User can get a subscriber by ID
-- [ ] **SUBS-03**: User can create a new subscriber
-- [ ] **SUBS-04**: User can update a subscriber
-- [ ] **SUBS-05**: User can delete a subscriber with confirmation prompt
+- [x] **SUBS-01**: User can list all subscribers
+- [x] **SUBS-02**: User can get a subscriber by ID
+- [x] **SUBS-03**: User can create a new subscriber
+- [x] **SUBS-04**: User can update a subscriber
+- [x] **SUBS-05**: User can delete a subscriber with confirmation prompt
 
 ### Subscriptions
 
@@ -199,11 +199,11 @@ Requirements for initial release. Each maps to roadmap phases.
 | AIMD-06 | Phase 4 | Complete |
 | AIMD-07 | Phase 4 | Complete |
 | AIMD-08 | Phase 4 | Complete |
-| SUBS-01 | Phase 5 | Pending |
-| SUBS-02 | Phase 5 | Pending |
-| SUBS-03 | Phase 5 | Pending |
-| SUBS-04 | Phase 5 | Pending |
-| SUBS-05 | Phase 5 | Pending |
+| SUBS-01 | Phase 5 | Complete |
+| SUBS-02 | Phase 5 | Complete |
+| SUBS-03 | Phase 5 | Complete |
+| SUBS-04 | Phase 5 | Complete |
+| SUBS-05 | Phase 5 | Complete |
 | SUBR-01 | Phase 5 | Pending |
 | SUBR-02 | Phase 5 | Pending |
 | SUBR-03 | Phase 5 | Pending |

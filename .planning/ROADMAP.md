@@ -97,7 +97,7 @@ Plans:
   2. `revenium subscriptions list/get/create/update/delete` fully manages subscription records
   3. `revenium subscriptions update <id>` supports both full update (PUT) and partial update (PATCH via `--patch` or similar)
   4. Delete commands for both resources prompt for confirmation with `--yes` override
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 
 Plans:
 - [ ] 05-01-PLAN.md — Subscribers CRUD (list, get, create, update, delete) + tests + main.go registration
@@ -204,7 +204,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> ... -> 11
 | 2. Output Layer | 1/2 | In Progress|  |
 | 3. First Resource (Sources) | 2/2 | Complete   | 2026-03-12 |
 | 4. AI Models & Pricing | 2/2 | Complete   | 2026-03-12 |
-| 5. Subscribers & Subscriptions | 0/2 | Not started | - |
+| 5. Subscribers & Subscriptions | 1/2 | In Progress|  |
 | 6. Products & Tools | 0/2 | Not started | - |
 | 7. Teams & Users | 0/2 | Not started | - |
 | 8. Anomalies & Alerts | 0/2 | Not started | - |
