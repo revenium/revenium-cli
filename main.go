@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/revenium/revenium-cli/cmd"
+	"github.com/revenium/revenium-cli/cmd/models"
 	"github.com/revenium/revenium-cli/cmd/sources"
 	apierrors "github.com/revenium/revenium-cli/internal/errors"
 	"github.com/revenium/revenium-cli/internal/output"
@@ -17,6 +18,7 @@ func init() {
 	// Resource packages (cmd/sources, etc.) import cmd for APIClient/Output,
 	// so cmd/root.go cannot import them directly.
 	cmd.RegisterCommand(sources.Cmd, "resources")
+	cmd.RegisterCommand(models.Cmd, "resources")
 }
 
 func main() {
