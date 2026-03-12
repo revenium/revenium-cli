@@ -9,19 +9,19 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Foundation
 
-- [ ] **FNDN-01**: CLI binary named `revenium` with Cobra-based command structure and root help
+- [x] **FNDN-01**: CLI binary named `revenium` with Cobra-based command structure and root help
 - [x] **FNDN-02**: Config file at `~/.revenium/config.yaml` storing API key and API URL
 - [x] **FNDN-03**: `revenium config set key <value>` and `revenium config set api-url <value>` commands
 - [x] **FNDN-04**: Environment variable override (`REVENIUM_API_KEY`, `REVENIUM_API_URL`) taking precedence over config file
-- [ ] **FNDN-05**: HTTP client with x-api-key auth header, proper timeouts, and response body cleanup
+- [x] **FNDN-05**: HTTP client with x-api-key auth header, proper timeouts, and response body cleanup
 - [x] **FNDN-06**: Helpful error messages mapping HTTP status codes to actionable guidance (401 → "Invalid API key", etc.)
-- [ ] **FNDN-07**: Non-zero exit codes on all error paths
+- [x] **FNDN-07**: Non-zero exit codes on all error paths
 - [ ] **FNDN-08**: Styled table output using Lip Gloss v2 as default display format
 - [ ] **FNDN-09**: `--json` flag on all output commands for machine-readable output
 - [ ] **FNDN-10**: TTY detection — disable colors/styling when output is piped, respect `NO_COLOR` env var
 - [ ] **FNDN-11**: Shell completions for bash, zsh, and fish via Cobra built-in
-- [ ] **FNDN-12**: `revenium version` command with build-time version/commit/date embedding
-- [ ] **FNDN-13**: `--help` with usage examples on every command
+- [x] **FNDN-12**: `revenium version` command with build-time version/commit/date embedding
+- [x] **FNDN-13**: `--help` with usage examples on every command
 - [ ] **FNDN-14**: Distribution via GoReleaser with cross-platform binaries
 - [ ] **FNDN-15**: Homebrew tap for macOS/Linux installation
 - [ ] **FNDN-16**: `--quiet` / `-q` flag to suppress non-error output
@@ -169,19 +169,19 @@ Requirements for initial release. Each maps to roadmap phases.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FNDN-01 | Phase 1 | Pending |
+| FNDN-01 | Phase 1 | Complete |
 | FNDN-02 | Phase 1 | Complete |
 | FNDN-03 | Phase 1 | Complete |
 | FNDN-04 | Phase 1 | Complete |
-| FNDN-05 | Phase 1 | Pending |
+| FNDN-05 | Phase 1 | Complete |
 | FNDN-06 | Phase 1 | Complete |
-| FNDN-07 | Phase 1 | Pending |
+| FNDN-07 | Phase 1 | Complete |
 | FNDN-08 | Phase 2 | Pending |
 | FNDN-09 | Phase 2 | Pending |
 | FNDN-10 | Phase 2 | Pending |
 | FNDN-11 | Phase 11 | Pending |
-| FNDN-12 | Phase 1 | Pending |
-| FNDN-13 | Phase 1 | Pending |
+| FNDN-12 | Phase 1 | Complete |
+| FNDN-13 | Phase 1 | Complete |
 | FNDN-14 | Phase 11 | Pending |
 | FNDN-15 | Phase 11 | Pending |
 | FNDN-16 | Phase 2 | Pending |
