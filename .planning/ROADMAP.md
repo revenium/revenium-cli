@@ -159,8 +159,8 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 09-01: TBD
-- [ ] 09-02: TBD
+- [ ] 09-01-PLAN.md — Credentials CRUD with secret masking + tests + main.go registration
+- [ ] 09-02-PLAN.md — Charts CRUD (standard pattern) + tests + main.go registration
 
 ### Phase 10: Metrics
 **Goal**: User can query all Revenium metric types with time range filtering and meaningful output
