@@ -82,11 +82,11 @@ Plans:
   2. `revenium models update <id>` patches model pricing and `revenium models delete <id>` removes a model
   3. `revenium models pricing list <model-id>` displays pricing dimensions for a specific model
   4. `revenium models pricing create/update/delete` manages individual pricing dimensions
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 04-01: TBD
-- [ ] 04-02: TBD
+- [ ] 04-01-PLAN.md — Model CRUD commands (list, get, PATCH update, delete) + registration in main.go
+- [ ] 04-02-PLAN.md — Nested pricing dimension subcommands (list, create, update, delete)
 
 ### Phase 5: Subscribers & Subscriptions
 **Goal**: User can manage API consumers and their subscription mappings to sources
