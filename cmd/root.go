@@ -29,6 +29,9 @@ var jsonMode bool
 // quiet controls quiet output mode (suppress non-error output).
 var quiet bool
 
+// yesMode controls whether to skip confirmation prompts.
+var yesMode bool
+
 // rootCmd is the base command for the Revenium CLI.
 var rootCmd = &cobra.Command{
 	Use:   "revenium",
@@ -73,10 +76,17 @@ func JSONMode() bool {
 	return jsonMode
 }
 
+// YesMode returns true if --yes flag is active. Used by subcommands
+// to skip confirmation prompts.
+func YesMode() bool {
+	return yesMode
+}
+
 func init() {
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Enable verbose output")
 	rootCmd.PersistentFlags().BoolVar(&jsonMode, "json", false, "Output as JSON")
 	rootCmd.PersistentFlags().BoolVarP(&quiet, "quiet", "q", false, "Suppress non-error output")
+	rootCmd.PersistentFlags().BoolVarP(&yesMode, "yes", "y", false, "Skip confirmation prompts")
 
 	rootCmd.AddGroup(
 		&cobra.Group{ID: "resources", Title: "Core Resources:"},
