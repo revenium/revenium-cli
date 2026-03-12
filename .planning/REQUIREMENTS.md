@@ -91,11 +91,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Users
 
-- [ ] **USER-01**: User can list all users
-- [ ] **USER-02**: User can get a user by ID
-- [ ] **USER-03**: User can create a new user
-- [ ] **USER-04**: User can update a user
-- [ ] **USER-05**: User can delete a user with confirmation prompt
+- [x] **USER-01**: User can list all users
+- [x] **USER-02**: User can get a user by ID
+- [x] **USER-03**: User can create a new user
+- [x] **USER-04**: User can update a user
+- [x] **USER-05**: User can delete a user with confirmation prompt
 
 ### Anomalies & Alerts
 
@@ -227,11 +227,11 @@ Requirements for initial release. Each maps to roadmap phases.
 | TEAM-05 | Phase 7 | Pending |
 | TEAM-06 | Phase 7 | Pending |
 | TEAM-07 | Phase 7 | Pending |
-| USER-01 | Phase 7 | Pending |
-| USER-02 | Phase 7 | Pending |
-| USER-03 | Phase 7 | Pending |
-| USER-04 | Phase 7 | Pending |
-| USER-05 | Phase 7 | Pending |
+| USER-01 | Phase 7 | Complete |
+| USER-02 | Phase 7 | Complete |
+| USER-03 | Phase 7 | Complete |
+| USER-04 | Phase 7 | Complete |
+| USER-05 | Phase 7 | Complete |
 | ALRT-01 | Phase 8 | Pending |
 | ALRT-02 | Phase 8 | Pending |
 | ALRT-03 | Phase 8 | Pending |
