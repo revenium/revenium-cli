@@ -6,6 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/revenium/revenium-cli/cmd"
 	"github.com/revenium/revenium-cli/internal/output"
 )
 
@@ -21,7 +22,10 @@ var Cmd = &cobra.Command{
 }
 
 func init() {
-	// Subcommands will be registered here
+	Cmd.AddCommand(newListCmd())
+	Cmd.AddCommand(newGetCmd())
+	Cmd.AddCommand(newUpdateCmd())
+	Cmd.AddCommand(newDeleteCmd())
 }
 
 // modelTableDef defines the table layout for model output.
@@ -54,6 +58,11 @@ func str(m map[string]interface{}, key string) string {
 
 // renderModel renders a single model as a single-row table or JSON.
 func renderModel(model map[string]interface{}) error {
-	_ = model
-	return nil
+	rows := [][]string{{
+		str(model, "id"),
+		str(model, "name"),
+		str(model, "provider"),
+		str(model, "mode"),
+	}}
+	return cmd.Output.Render(modelTableDef, rows, model)
 }
