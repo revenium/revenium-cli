@@ -73,11 +73,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Tools
 
-- [ ] **TOOL-01**: User can list all tools
-- [ ] **TOOL-02**: User can get a tool by ID
-- [ ] **TOOL-03**: User can create a new tool
-- [ ] **TOOL-04**: User can update a tool
-- [ ] **TOOL-05**: User can delete a tool with confirmation prompt
+- [x] **TOOL-01**: User can list all tools
+- [x] **TOOL-02**: User can get a tool by ID
+- [x] **TOOL-03**: User can create a new tool
+- [x] **TOOL-04**: User can update a tool
+- [x] **TOOL-05**: User can delete a tool with confirmation prompt
 
 ### Teams
 
@@ -215,11 +215,11 @@ Requirements for initial release. Each maps to roadmap phases.
 | PROD-03 | Phase 6 | Complete |
 | PROD-04 | Phase 6 | Complete |
 | PROD-05 | Phase 6 | Complete |
-| TOOL-01 | Phase 6 | Pending |
-| TOOL-02 | Phase 6 | Pending |
-| TOOL-03 | Phase 6 | Pending |
-| TOOL-04 | Phase 6 | Pending |
-| TOOL-05 | Phase 6 | Pending |
+| TOOL-01 | Phase 6 | Complete |
+| TOOL-02 | Phase 6 | Complete |
+| TOOL-03 | Phase 6 | Complete |
+| TOOL-04 | Phase 6 | Complete |
+| TOOL-05 | Phase 6 | Complete |
 | TEAM-01 | Phase 7 | Pending |
 | TEAM-02 | Phase 7 | Pending |
 | TEAM-03 | Phase 7 | Pending |
