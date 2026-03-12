@@ -10,5 +10,8 @@ revenium
 *.swp
 *.swo
 
+# Generated completions
+completions/
+
 # OS
 .DS_Store
