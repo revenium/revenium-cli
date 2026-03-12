@@ -175,9 +175,8 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 10-01: TBD
-- [ ] 10-02: TBD
-- [ ] 10-03: TBD
+- [ ] 10-01-PLAN.md — Metrics parent command + shared helpers (buildPath, formatNumber) + 5 AI metric subcommands (ai, completions, audio, image, video)
+- [ ] 10-02-PLAN.md — Traces (traceId grouping), squads, api, tool-events subcommands + main.go registration
 
 ### Phase 11: Distribution & Shell Completions
 **Goal**: User can install the CLI via Homebrew or download a binary, and set up shell completions
@@ -209,5 +208,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> ... -> 11
 | 7. Teams & Users | 2/2 | Complete   | 2026-03-12 |
 | 8. Anomalies & Alerts | 0/2 | Not started | - |
 | 9. Credentials & Charts | 2/2 | Complete   | 2026-03-12 |
-| 10. Metrics | 0/3 | Not started | - |
+| 10. Metrics | 0/2 | Not started | - |
 | 11. Distribution & Shell Completions | 0/2 | Not started | - |
