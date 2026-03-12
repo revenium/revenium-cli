@@ -29,11 +29,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Sources
 
-- [ ] **SRCS-01**: User can list all sources with styled table output
-- [ ] **SRCS-02**: User can get a source by ID with detailed view
+- [x] **SRCS-01**: User can list all sources with styled table output
+- [x] **SRCS-02**: User can get a source by ID with detailed view
 - [ ] **SRCS-03**: User can create a new source
 - [ ] **SRCS-04**: User can update an existing source
-- [ ] **SRCS-05**: User can delete a source with confirmation prompt (`--yes` to skip)
+- [x] **SRCS-05**: User can delete a source with confirmation prompt (`--yes` to skip)
 
 ### AI Models
 
@@ -186,11 +186,11 @@ Requirements for initial release. Each maps to roadmap phases.
 | FNDN-15 | Phase 11 | Pending |
 | FNDN-16 | Phase 2 | Complete |
 | FNDN-17 | Phase 2 | Complete |
-| SRCS-01 | Phase 3 | Pending |
-| SRCS-02 | Phase 3 | Pending |
+| SRCS-01 | Phase 3 | Complete |
+| SRCS-02 | Phase 3 | Complete |
 | SRCS-03 | Phase 3 | Pending |
 | SRCS-04 | Phase 3 | Pending |
-| SRCS-05 | Phase 3 | Pending |
+| SRCS-05 | Phase 3 | Complete |
 | AIMD-01 | Phase 4 | Pending |
 | AIMD-02 | Phase 4 | Pending |
 | AIMD-03 | Phase 4 | Pending |
