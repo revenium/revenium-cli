@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: completed
-stopped_at: Completed 08-01-PLAN.md
-last_updated: "2026-03-12T18:03:40.635Z"
+stopped_at: Completed 08-02-PLAN.md
+last_updated: "2026-03-12T18:09:44.069Z"
 last_activity: 2026-03-12 — Completed plan 06-01
 progress:
   total_phases: 11
-  completed_phases: 7
+  completed_phases: 8
   total_plans: 16
-  completed_plans: 15
+  completed_plans: 16
   percent: 92
 ---
 
@@ -67,6 +67,7 @@ Progress: [█████████░] 92%
 | Phase 07-teams-users P02 | 2min | 2 tasks | 12 files |
 | Phase 07-teams-users P01 | 3min | 2 tasks | 17 files |
 | Phase 08-anomalies-alerts P01 | 2min | 2 tasks | 11 files |
+| Phase 08-anomalies-alerts P02 | 2min | 3 tasks | 20 files |
 
 ## Accumulated Context
 
@@ -113,6 +114,9 @@ Recent decisions affecting current work:
 - [Phase 07]: Bool flags for prompt-capture set require --enabled=true syntax (cobra bool flag behavior)
 - [Phase 08]: Anomaly table uses label field for Name column per API research
 - [Phase 08]: Anomaly create requires --name only; API validates additional fields
+- [Phase 08]: Alert create posts to anomaly endpoint since alerts are generated from anomaly rules
+- [Phase 08]: Budget create/update/delete proxy to anomaly API with CUMULATIVE_USAGE type for full CRUD UX
+- [Phase 08]: formatCurrency uses dollar prefix for USD/empty, currency code prefix for others
 
 ### Pending Todos
 
@@ -125,6 +129,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-12T18:03:40.632Z
-Stopped at: Completed 08-01-PLAN.md
+Last session: 2026-03-12T18:09:44.067Z
+Stopped at: Completed 08-02-PLAN.md
 Resume file: None

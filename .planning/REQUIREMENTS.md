@@ -104,9 +104,9 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **ALRT-03**: User can create an anomaly detection rule
 - [x] **ALRT-04**: User can update an anomaly rule
 - [x] **ALRT-05**: User can delete an anomaly rule
-- [ ] **ALRT-06**: User can list AI alerts
-- [ ] **ALRT-07**: User can create AI alert rules
-- [ ] **ALRT-08**: User can manage budget alert thresholds
+- [x] **ALRT-06**: User can list AI alerts
+- [x] **ALRT-07**: User can create AI alert rules
+- [x] **ALRT-08**: User can manage budget alert thresholds
 
 ### Credentials & Charts
 
@@ -237,9 +237,9 @@ Requirements for initial release. Each maps to roadmap phases.
 | ALRT-03 | Phase 8 | Complete |
 | ALRT-04 | Phase 8 | Complete |
 | ALRT-05 | Phase 8 | Complete |
-| ALRT-06 | Phase 8 | Pending |
-| ALRT-07 | Phase 8 | Pending |
-| ALRT-08 | Phase 8 | Pending |
+| ALRT-06 | Phase 8 | Complete |
+| ALRT-07 | Phase 8 | Complete |
+| ALRT-08 | Phase 8 | Complete |
 | CRED-01 | Phase 9 | Pending |
 | CRED-02 | Phase 9 | Pending |
 | CRED-03 | Phase 9 | Pending |
