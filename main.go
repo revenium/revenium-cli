@@ -9,6 +9,7 @@ import (
 	"github.com/revenium/revenium-cli/cmd"
 	"github.com/revenium/revenium-cli/cmd/models"
 	"github.com/revenium/revenium-cli/cmd/sources"
+	"github.com/revenium/revenium-cli/cmd/subscribers"
 	apierrors "github.com/revenium/revenium-cli/internal/errors"
 	"github.com/revenium/revenium-cli/internal/output"
 )
@@ -19,6 +20,7 @@ func init() {
 	// so cmd/root.go cannot import them directly.
 	cmd.RegisterCommand(sources.Cmd, "resources")
 	cmd.RegisterCommand(models.Cmd, "resources")
+	cmd.RegisterCommand(subscribers.Cmd, "resources")
 }
 
 func main() {
