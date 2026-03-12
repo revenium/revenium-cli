@@ -25,7 +25,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **FNDN-14**: Distribution via GoReleaser with cross-platform binaries
 - [ ] **FNDN-15**: Homebrew tap for macOS/Linux installation
 - [x] **FNDN-16**: `--quiet` / `-q` flag to suppress non-error output
-- [ ] **FNDN-17**: `--verbose` / `-v` flag to show HTTP request/response details for debugging
+- [x] **FNDN-17**: `--verbose` / `-v` flag to show HTTP request/response details for debugging
 
 ### Sources
 
@@ -185,7 +185,7 @@ Requirements for initial release. Each maps to roadmap phases.
 | FNDN-14 | Phase 11 | Pending |
 | FNDN-15 | Phase 11 | Pending |
 | FNDN-16 | Phase 2 | Complete |
-| FNDN-17 | Phase 2 | Pending |
+| FNDN-17 | Phase 2 | Complete |
 | SRCS-01 | Phase 3 | Pending |
 | SRCS-02 | Phase 3 | Pending |
 | SRCS-03 | Phase 3 | Pending |
