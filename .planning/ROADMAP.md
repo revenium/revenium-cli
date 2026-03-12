@@ -32,16 +32,15 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Requirements**: FNDN-01, FNDN-02, FNDN-03, FNDN-04, FNDN-05, FNDN-06, FNDN-07, FNDN-12, FNDN-13
 **Success Criteria** (what must be TRUE):
   1. Running `revenium` displays help with usage examples; running `revenium version` shows version/commit/date
-  2. User can run `revenium config set key <value>` and `revenium config set api-url <value>` and values persist in `~/.revenium/config.yaml`
+  2. User can run `revenium config set key <value>` and `revenium config set api-url <value>` and values persist in `~/.config/revenium/config.yaml`
   3. Setting `REVENIUM_API_KEY` overrides the config file value for authentication
   4. API calls include `x-api-key` header, and a 401 response produces "Invalid API key" (not a raw HTTP error)
   5. All error paths exit with non-zero status codes
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 01-01: TBD
-- [ ] 01-02: TBD
-- [ ] 01-03: TBD
+- [ ] 01-01-PLAN.md — Go module scaffold + internal packages (config, build, errors)
+- [ ] 01-02-PLAN.md — API client + Cobra commands (root, config, version) + main.go + Makefile
 
 ### Phase 2: Output Layer
 **Goal**: All commands render beautiful styled tables by default, with JSON/quiet/verbose alternatives
@@ -197,11 +196,11 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → ... → 11
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> ... -> 11
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Project Scaffold & Config | 0/3 | Not started | - |
+| 1. Project Scaffold & Config | 0/2 | Not started | - |
 | 2. Output Layer | 0/2 | Not started | - |
 | 3. First Resource (Sources) | 0/2 | Not started | - |
 | 4. AI Models & Pricing | 0/2 | Not started | - |
