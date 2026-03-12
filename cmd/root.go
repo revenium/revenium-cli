@@ -51,9 +51,16 @@ var rootCmd = &cobra.Command{
 		// Always initialize the output formatter so all commands can use it
 		Output = output.New(jsonMode, quiet)
 
-		// Skip config loading for version and config commands
+		// Skip config loading for version, config, and completion commands
 		if cmd.Name() == "version" || cmd.Parent() != nil && cmd.Parent().Name() == "config" || cmd.Name() == "config" {
 			return nil
+		}
+		// Completion commands (bash, zsh, fish, powershell) are children of
+		// the Cobra-generated "completion" command and don't need API access.
+		for p := cmd; p != nil; p = p.Parent() {
+			if p.Name() == "completion" {
+				return nil
+			}
 		}
 
 		cfg, err := internalconfig.Load()

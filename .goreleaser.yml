@@ -1,0 +1,59 @@
+version: 2
+
+before:
+  hooks:
+    - go mod tidy
+    - sh scripts/completions.sh
+
+builds:
+  - main: .
+    binary: revenium
+    env:
+      - CGO_ENABLED=0
+    ldflags:
+      - -s -w
+      - -X github.com/revenium/revenium-cli/internal/build.Version={{.Version}}
+      - -X github.com/revenium/revenium-cli/internal/build.Commit={{.Commit}}
+      - -X github.com/revenium/revenium-cli/internal/build.Date={{.Date}}
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+
+archives:
+  - format: tar.gz
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - README*
+      - LICENSE*
+      - completions/*
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore:"
+
+brews:
+  - repository:
+      owner: revenium
+      name: homebrew-tap
+      token: "{{ .Env.TAP_GITHUB_TOKEN }}"
+    directory: Formula
+    homepage: https://github.com/revenium/revenium-cli
+    description: Manage your Revenium account from the command line
+    license: MIT
+    install: |-
+      bin.install "revenium"
+      bash_completion.install "completions/revenium.bash" => "revenium"
+      zsh_completion.install "completions/revenium.zsh" => "_revenium"
+      fish_completion.install "completions/revenium.fish"
+    test: |
+      system "#{bin}/revenium", "version"
