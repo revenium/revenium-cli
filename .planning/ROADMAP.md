@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Project Scaffold & Config** - Go binary, Cobra root command, config management, HTTP client, error handling (completed 2026-03-12)
 - [ ] **Phase 2: Output Layer** - Styled table rendering, JSON output, TTY detection, quiet/verbose flags
-- [ ] **Phase 3: First Resource (Sources)** - Prove the full CRUD vertical slice end-to-end
+- [x] **Phase 3: First Resource (Sources)** - Prove the full CRUD vertical slice end-to-end (completed 2026-03-12)
 - [ ] **Phase 4: AI Models & Pricing** - Model CRUD plus nested pricing dimension management
 - [ ] **Phase 5: Subscribers & Subscriptions** - Consumer management and source-to-subscriber mappings
 - [ ] **Phase 6: Products & Tools** - Product catalog and tool registration CRUD
@@ -67,7 +67,7 @@ Plans:
   3. `revenium sources create` creates a source and displays the result
   4. `revenium sources update <id>` updates a source and displays the result
   5. `revenium sources delete <id>` prompts for confirmation (skippable with `--yes`) and deletes the source
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 
 Plans:
 - [ ] 03-01-PLAN.md — Shared resource helpers (ConfirmDelete), --yes flag, sources list + get commands
@@ -202,7 +202,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> ... -> 11
 |-------|----------------|--------|-----------|
 | 1. Project Scaffold & Config | 1/2 | Complete    | 2026-03-12 |
 | 2. Output Layer | 1/2 | In Progress|  |
-| 3. First Resource (Sources) | 0/2 | Not started | - |
+| 3. First Resource (Sources) | 2/2 | Complete   | 2026-03-12 |
 | 4. AI Models & Pricing | 0/2 | Not started | - |
 | 5. Subscribers & Subscriptions | 0/2 | Not started | - |
 | 6. Products & Tools | 0/2 | Not started | - |
