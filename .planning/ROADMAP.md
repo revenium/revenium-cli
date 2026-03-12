@@ -111,11 +111,11 @@ Plans:
   1. `revenium products list/get/create/update/delete` fully manages product records
   2. `revenium tools list/get/create/update/delete` fully manages tool records
   3. Both resources follow the established CRUD pattern with styled tables, JSON output, and delete confirmation
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 06-01: TBD
-- [ ] 06-02: TBD
+- [ ] 06-01-PLAN.md — Products CRUD (list, get, create, update, delete) + tests + main.go registration
+- [ ] 06-02-PLAN.md — Tools CRUD (list, get, create, update, delete) + tests + main.go registration
 
 ### Phase 7: Teams & Users
 **Goal**: User can manage team structures (including team-level settings) and user accounts
