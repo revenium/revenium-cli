@@ -110,11 +110,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Credentials & Charts
 
-- [ ] **CRED-01**: User can list provider credentials (masked display)
-- [ ] **CRED-02**: User can get a provider credential by ID (masked)
-- [ ] **CRED-03**: User can create a provider credential
-- [ ] **CRED-04**: User can update a provider credential
-- [ ] **CRED-05**: User can delete/deactivate a provider credential
+- [x] **CRED-01**: User can list provider credentials (masked display)
+- [x] **CRED-02**: User can get a provider credential by ID (masked)
+- [x] **CRED-03**: User can create a provider credential
+- [x] **CRED-04**: User can update a provider credential
+- [x] **CRED-05**: User can delete/deactivate a provider credential
 - [ ] **CHRT-01**: User can list chart definitions
 - [ ] **CHRT-02**: User can get a chart definition by ID
 - [ ] **CHRT-03**: User can create a chart definition
@@ -240,11 +240,11 @@ Requirements for initial release. Each maps to roadmap phases.
 | ALRT-06 | Phase 8 | Complete |
 | ALRT-07 | Phase 8 | Complete |
 | ALRT-08 | Phase 8 | Complete |
-| CRED-01 | Phase 9 | Pending |
-| CRED-02 | Phase 9 | Pending |
-| CRED-03 | Phase 9 | Pending |
-| CRED-04 | Phase 9 | Pending |
-| CRED-05 | Phase 9 | Pending |
+| CRED-01 | Phase 9 | Complete |
+| CRED-02 | Phase 9 | Complete |
+| CRED-03 | Phase 9 | Complete |
+| CRED-04 | Phase 9 | Complete |
+| CRED-05 | Phase 9 | Complete |
 | CHRT-01 | Phase 9 | Pending |
 | CHRT-02 | Phase 9 | Pending |
 | CHRT-03 | Phase 9 | Pending |
