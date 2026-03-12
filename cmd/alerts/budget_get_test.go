@@ -19,7 +19,7 @@ func TestBudgetGet(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "/v2/api/ai/alerts/anom-1/budget/progress", r.URL.Path)
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `{"currentValue": 750.50, "remainingBudget": 249.50, "percentUsed": 75.05, "budgetThreshold": 1000.00, "currency": "USD"}`)
+		fmt.Fprint(w, `{"alertId": "anom-1", "name": "Demo Budget", "currentValue": 750.50, "remaining": 249.50, "percentUsed": 75.05, "threshold": 1000.00, "risk": "WARNING", "currency": "USD"}`)
 	}))
 	defer srv.Close()
 
@@ -38,12 +38,13 @@ func TestBudgetGet(t *testing.T) {
 	assert.Contains(t, out, "$750.50")
 	assert.Contains(t, out, "$249.50")
 	assert.Contains(t, out, "75.0%")
+	assert.Contains(t, out, "WARNING")
 }
 
 func TestBudgetGetJSON(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `{"currentValue": 750.50, "remainingBudget": 249.50, "percentUsed": 75.05, "budgetThreshold": 1000.00, "currency": "USD"}`)
+		fmt.Fprint(w, `{"alertId": "anom-1", "name": "Demo Budget", "currentValue": 750.50, "remaining": 249.50, "percentUsed": 75.05, "threshold": 1000.00, "risk": "WARNING", "currency": "USD"}`)
 	}))
 	defer srv.Close()
 
@@ -60,6 +61,6 @@ func TestBudgetGetJSON(t *testing.T) {
 	var result map[string]interface{}
 	err = json.Unmarshal(buf.Bytes(), &result)
 	require.NoError(t, err)
-	assert.Equal(t, float64(1000), result["budgetThreshold"])
+	assert.Equal(t, float64(1000), result["threshold"])
 	assert.Equal(t, "USD", result["currency"])
 }

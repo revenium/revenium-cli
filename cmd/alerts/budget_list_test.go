@@ -19,7 +19,7 @@ func TestBudgetList(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "/v2/api/ai/alerts/budgets/portfolio", r.URL.Path)
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `[{"anomalyId": "anom-1", "budgetThreshold": 1000.00, "currentValue": 750.50, "remainingBudget": 249.50, "percentUsed": 75.1, "currency": "USD"}]`)
+		fmt.Fprint(w, `[{"alertId": "X5oekv", "name": "Demo Budget", "threshold": 1000.00, "currentValue": 750.50, "remaining": 249.50, "percentUsed": 75.1, "risk": "WARNING", "currency": "USD"}]`)
 	}))
 	defer srv.Close()
 
@@ -33,11 +33,13 @@ func TestBudgetList(t *testing.T) {
 
 	require.NoError(t, err)
 	out := buf.String()
-	assert.Contains(t, out, "anom-1")
+	assert.Contains(t, out, "X5oekv")
+	assert.Contains(t, out, "Demo Budget")
 	assert.Contains(t, out, "$1,000.00")
 	assert.Contains(t, out, "$750.50")
 	assert.Contains(t, out, "$249.50")
 	assert.Contains(t, out, "75.1%")
+	assert.Contains(t, out, "WARNING")
 }
 
 func TestBudgetListEmpty(t *testing.T) {
@@ -62,7 +64,7 @@ func TestBudgetListEmpty(t *testing.T) {
 func TestBudgetListJSON(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `[{"anomalyId": "anom-1", "budgetThreshold": 1000.00, "currentValue": 750.50, "remainingBudget": 249.50, "percentUsed": 75.1, "currency": "USD"}]`)
+		fmt.Fprint(w, `[{"alertId": "X5oekv", "name": "Demo Budget", "threshold": 1000.00, "currentValue": 750.50, "remaining": 249.50, "percentUsed": 75.1, "risk": "WARNING", "currency": "USD"}]`)
 	}))
 	defer srv.Close()
 
@@ -79,5 +81,5 @@ func TestBudgetListJSON(t *testing.T) {
 	err = json.Unmarshal(buf.Bytes(), &result)
 	require.NoError(t, err)
 	assert.Len(t, result, 1)
-	assert.Equal(t, "anom-1", result[0]["anomalyId"])
+	assert.Equal(t, "X5oekv", result[0]["alertId"])
 }

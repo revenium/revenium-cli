@@ -29,8 +29,8 @@ func initBudget() {
 }
 
 var budgetTableDef = output.TableDef{
-	Headers:      []string{"Anomaly ID", "Budget", "Current", "Remaining", "% Used"},
-	StatusColumn: -1,
+	Headers:      []string{"Alert ID", "Name", "Budget", "Current", "Remaining", "% Used", "Risk"},
+	StatusColumn: 6,
 }
 
 // formatCurrency formats a number as currency with commas and 2 decimal places.
@@ -81,11 +81,13 @@ func toBudgetRows(budgets []map[string]interface{}) [][]string {
 	for i, b := range budgets {
 		currency := str(b, "currency")
 		rows[i] = []string{
-			str(b, "anomalyId"),
-			formatCurrency(floatVal(b, "budgetThreshold"), currency),
+			str(b, "alertId"),
+			str(b, "name"),
+			formatCurrency(floatVal(b, "threshold"), currency),
 			formatCurrency(floatVal(b, "currentValue"), currency),
-			formatCurrency(floatVal(b, "remainingBudget"), currency),
+			formatCurrency(floatVal(b, "remaining"), currency),
 			fmt.Sprintf("%.1f%%", floatVal(b, "percentUsed")),
+			str(b, "risk"),
 		}
 	}
 	return rows

@@ -19,19 +19,21 @@ func newBudgetGetCmd() *cobra.Command {
   # Get budget progress as JSON
   revenium alerts budget get anom-123 --json`,
 		RunE: func(c *cobra.Command, args []string) error {
-			anomalyID := args[0]
-			path := fmt.Sprintf("/v2/api/ai/alerts/%s/budget/progress", anomalyID)
+			alertID := args[0]
+			path := fmt.Sprintf("/v2/api/ai/alerts/%s/budget/progress", alertID)
 			var progress map[string]interface{}
 			if err := cmd.APIClient.Do(c.Context(), "GET", path, nil, &progress); err != nil {
 				return err
 			}
 			currency := str(progress, "currency")
 			rows := [][]string{{
-				anomalyID,
-				formatCurrency(floatVal(progress, "budgetThreshold"), currency),
+				alertID,
+				str(progress, "name"),
+				formatCurrency(floatVal(progress, "threshold"), currency),
 				formatCurrency(floatVal(progress, "currentValue"), currency),
-				formatCurrency(floatVal(progress, "remainingBudget"), currency),
+				formatCurrency(floatVal(progress, "remaining"), currency),
 				fmt.Sprintf("%.1f%%", floatVal(progress, "percentUsed")),
+				str(progress, "risk"),
 			}}
 			return cmd.Output.Render(budgetTableDef, rows, progress)
 		},
