@@ -11,6 +11,7 @@ import (
 	"github.com/revenium/revenium-cli/cmd/anomalies"
 	"github.com/revenium/revenium-cli/cmd/charts"
 	"github.com/revenium/revenium-cli/cmd/credentials"
+	"github.com/revenium/revenium-cli/cmd/metrics"
 	"github.com/revenium/revenium-cli/cmd/models"
 	"github.com/revenium/revenium-cli/cmd/products"
 	"github.com/revenium/revenium-cli/cmd/sources"
@@ -39,6 +40,7 @@ func init() {
 	cmd.RegisterCommand(alerts.Cmd, "resources")
 	cmd.RegisterCommand(credentials.Cmd, "resources")
 	cmd.RegisterCommand(charts.Cmd, "resources")
+	cmd.RegisterCommand(metrics.Cmd, "monitoring")
 }
 
 func main() {

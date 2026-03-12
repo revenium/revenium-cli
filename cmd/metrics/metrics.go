@@ -37,7 +37,10 @@ func init() {
 	Cmd.AddCommand(newAudioCmd())
 	Cmd.AddCommand(newImageCmd())
 	Cmd.AddCommand(newVideoCmd())
-	// Plan 02: newTracesCmd(), newSquadsCmd(), newAPICmd(), newToolEventsCmd()
+	Cmd.AddCommand(newTracesCmd())
+	Cmd.AddCommand(newSquadsCmd())
+	Cmd.AddCommand(newAPIMetricsCmd())
+	Cmd.AddCommand(newToolEventsCmd())
 }
 
 // buildPath constructs the API path with time range query parameters.
