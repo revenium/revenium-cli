@@ -51,7 +51,7 @@ Plans:
   2. Adding `--json` to any output command produces valid, parseable JSON
   3. Piping output to another command (e.g., `revenium sources list | wc -l`) produces clean unstyled text and respects `NO_COLOR`
   4. `--quiet` suppresses all non-error output; `--verbose` shows HTTP request/response details
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 
 Plans:
 - [ ] 02-01-PLAN.md — Output package: Formatter, styled tables, JSON rendering, TTY detection
@@ -201,7 +201,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> ... -> 11
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Project Scaffold & Config | 1/2 | Complete    | 2026-03-12 |
-| 2. Output Layer | 0/2 | Not started | - |
+| 2. Output Layer | 1/2 | In Progress|  |
 | 3. First Resource (Sources) | 0/2 | Not started | - |
 | 4. AI Models & Pricing | 0/2 | Not started | - |
 | 5. Subscribers & Subscriptions | 0/2 | Not started | - |

@@ -16,15 +16,15 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **FNDN-05**: HTTP client with x-api-key auth header, proper timeouts, and response body cleanup
 - [x] **FNDN-06**: Helpful error messages mapping HTTP status codes to actionable guidance (401 → "Invalid API key", etc.)
 - [x] **FNDN-07**: Non-zero exit codes on all error paths
-- [ ] **FNDN-08**: Styled table output using Lip Gloss v2 as default display format
-- [ ] **FNDN-09**: `--json` flag on all output commands for machine-readable output
-- [ ] **FNDN-10**: TTY detection — disable colors/styling when output is piped, respect `NO_COLOR` env var
+- [x] **FNDN-08**: Styled table output using Lip Gloss v2 as default display format
+- [x] **FNDN-09**: `--json` flag on all output commands for machine-readable output
+- [x] **FNDN-10**: TTY detection — disable colors/styling when output is piped, respect `NO_COLOR` env var
 - [ ] **FNDN-11**: Shell completions for bash, zsh, and fish via Cobra built-in
 - [x] **FNDN-12**: `revenium version` command with build-time version/commit/date embedding
 - [x] **FNDN-13**: `--help` with usage examples on every command
 - [ ] **FNDN-14**: Distribution via GoReleaser with cross-platform binaries
 - [ ] **FNDN-15**: Homebrew tap for macOS/Linux installation
-- [ ] **FNDN-16**: `--quiet` / `-q` flag to suppress non-error output
+- [x] **FNDN-16**: `--quiet` / `-q` flag to suppress non-error output
 - [ ] **FNDN-17**: `--verbose` / `-v` flag to show HTTP request/response details for debugging
 
 ### Sources
@@ -176,15 +176,15 @@ Requirements for initial release. Each maps to roadmap phases.
 | FNDN-05 | Phase 1 | Complete |
 | FNDN-06 | Phase 1 | Complete |
 | FNDN-07 | Phase 1 | Complete |
-| FNDN-08 | Phase 2 | Pending |
-| FNDN-09 | Phase 2 | Pending |
-| FNDN-10 | Phase 2 | Pending |
+| FNDN-08 | Phase 2 | Complete |
+| FNDN-09 | Phase 2 | Complete |
+| FNDN-10 | Phase 2 | Complete |
 | FNDN-11 | Phase 11 | Pending |
 | FNDN-12 | Phase 1 | Complete |
 | FNDN-13 | Phase 1 | Complete |
 | FNDN-14 | Phase 11 | Pending |
 | FNDN-15 | Phase 11 | Pending |
-| FNDN-16 | Phase 2 | Pending |
+| FNDN-16 | Phase 2 | Complete |
 | FNDN-17 | Phase 2 | Pending |
 | SRCS-01 | Phase 3 | Pending |
 | SRCS-02 | Phase 3 | Pending |
