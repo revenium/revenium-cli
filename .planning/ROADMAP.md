@@ -82,7 +82,7 @@ Plans:
   2. `revenium models update <id>` patches model pricing and `revenium models delete <id>` removes a model
   3. `revenium models pricing list <model-id>` displays pricing dimensions for a specific model
   4. `revenium models pricing create/update/delete` manages individual pricing dimensions
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 
 Plans:
 - [ ] 04-01-PLAN.md — Model CRUD commands (list, get, PATCH update, delete) + registration in main.go
@@ -203,7 +203,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> ... -> 11
 | 1. Project Scaffold & Config | 1/2 | Complete    | 2026-03-12 |
 | 2. Output Layer | 1/2 | In Progress|  |
 | 3. First Resource (Sources) | 2/2 | Complete   | 2026-03-12 |
-| 4. AI Models & Pricing | 0/2 | Not started | - |
+| 4. AI Models & Pricing | 1/2 | In Progress|  |
 | 5. Subscribers & Subscriptions | 0/2 | Not started | - |
 | 6. Products & Tools | 0/2 | Not started | - |
 | 7. Teams & Users | 0/2 | Not started | - |

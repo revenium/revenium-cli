@@ -37,10 +37,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### AI Models
 
-- [ ] **AIMD-01**: User can list all AI models
-- [ ] **AIMD-02**: User can get an AI model by ID
-- [ ] **AIMD-03**: User can update AI model pricing (PATCH)
-- [ ] **AIMD-04**: User can delete an AI model
+- [x] **AIMD-01**: User can list all AI models
+- [x] **AIMD-02**: User can get an AI model by ID
+- [x] **AIMD-03**: User can update AI model pricing (PATCH)
+- [x] **AIMD-04**: User can delete an AI model
 - [ ] **AIMD-05**: User can list pricing dimensions for a model
 - [ ] **AIMD-06**: User can create a pricing dimension for a model
 - [ ] **AIMD-07**: User can update a pricing dimension
@@ -191,10 +191,10 @@ Requirements for initial release. Each maps to roadmap phases.
 | SRCS-03 | Phase 3 | Complete |
 | SRCS-04 | Phase 3 | Complete |
 | SRCS-05 | Phase 3 | Complete |
-| AIMD-01 | Phase 4 | Pending |
-| AIMD-02 | Phase 4 | Pending |
-| AIMD-03 | Phase 4 | Pending |
-| AIMD-04 | Phase 4 | Pending |
+| AIMD-01 | Phase 4 | Complete |
+| AIMD-02 | Phase 4 | Complete |
+| AIMD-03 | Phase 4 | Complete |
+| AIMD-04 | Phase 4 | Complete |
 | AIMD-05 | Phase 4 | Pending |
 | AIMD-06 | Phase 4 | Pending |
 | AIMD-07 | Phase 4 | Pending |
