@@ -20,7 +20,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 6: Products & Tools** - Product catalog and tool registration CRUD (completed 2026-03-12)
 - [x] **Phase 7: Teams & Users** - Team management with settings, user account CRUD (completed 2026-03-12)
 - [ ] **Phase 8: Anomalies & Alerts** - AI anomaly detection rules and alert/budget threshold management
-- [ ] **Phase 9: Credentials & Charts** - Provider credential management (masked) and chart definitions
+- [x] **Phase 9: Credentials & Charts** - Provider credential management (masked) and chart definitions (completed 2026-03-12)
 - [ ] **Phase 10: Metrics** - AI, completion, audio, image, video, trace, squad, API, and tool event metrics
 - [ ] **Phase 11: Distribution & Shell Completions** - GoReleaser, Homebrew tap, shell completions
 
@@ -156,7 +156,7 @@ Plans:
   2. `revenium credentials create/update/delete` manages credential records; delete can also deactivate
   3. `revenium charts list/get/create/update/delete` fully manages chart definitions
   4. Both resources follow the established output pattern (styled tables, `--json`, delete confirmation)
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 
 Plans:
 - [ ] 09-01-PLAN.md — Credentials CRUD with secret masking + tests + main.go registration
@@ -208,6 +208,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> ... -> 11
 | 6. Products & Tools | 2/2 | Complete   | 2026-03-12 |
 | 7. Teams & Users | 2/2 | Complete   | 2026-03-12 |
 | 8. Anomalies & Alerts | 0/2 | Not started | - |
-| 9. Credentials & Charts | 0/2 | Not started | - |
+| 9. Credentials & Charts | 2/2 | Complete   | 2026-03-12 |
 | 10. Metrics | 0/3 | Not started | - |
 | 11. Distribution & Shell Completions | 0/2 | Not started | - |

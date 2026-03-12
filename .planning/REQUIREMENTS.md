@@ -115,11 +115,11 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **CRED-03**: User can create a provider credential
 - [x] **CRED-04**: User can update a provider credential
 - [x] **CRED-05**: User can delete/deactivate a provider credential
-- [ ] **CHRT-01**: User can list chart definitions
-- [ ] **CHRT-02**: User can get a chart definition by ID
-- [ ] **CHRT-03**: User can create a chart definition
-- [ ] **CHRT-04**: User can update a chart definition
-- [ ] **CHRT-05**: User can delete a chart definition
+- [x] **CHRT-01**: User can list chart definitions
+- [x] **CHRT-02**: User can get a chart definition by ID
+- [x] **CHRT-03**: User can create a chart definition
+- [x] **CHRT-04**: User can update a chart definition
+- [x] **CHRT-05**: User can delete a chart definition
 
 ### Metrics
 
@@ -245,11 +245,11 @@ Requirements for initial release. Each maps to roadmap phases.
 | CRED-03 | Phase 9 | Complete |
 | CRED-04 | Phase 9 | Complete |
 | CRED-05 | Phase 9 | Complete |
-| CHRT-01 | Phase 9 | Pending |
-| CHRT-02 | Phase 9 | Pending |
-| CHRT-03 | Phase 9 | Pending |
-| CHRT-04 | Phase 9 | Pending |
-| CHRT-05 | Phase 9 | Pending |
+| CHRT-01 | Phase 9 | Complete |
+| CHRT-02 | Phase 9 | Complete |
+| CHRT-03 | Phase 9 | Complete |
+| CHRT-04 | Phase 9 | Complete |
+| CHRT-05 | Phase 9 | Complete |
 | METR-01 | Phase 10 | Pending |
 | METR-02 | Phase 10 | Pending |
 | METR-03 | Phase 10 | Pending |
