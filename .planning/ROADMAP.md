@@ -145,7 +145,7 @@ Plans:
 
 Plans:
 - [ ] 08-01-PLAN.md — Anomalies full CRUD (list, get, create, update, delete) + tests
-- [ ] 08-02-PLAN.md — Alerts list/get/create + budget list/get with currency formatting + main.go registration
+- [ ] 08-02-PLAN.md — Alerts list/get/create + budget full CRUD (proxied to anomaly API) with currency formatting + main.go registration
 
 ### Phase 9: Credentials & Charts
 **Goal**: User can manage provider credentials (with sensitive data masked) and chart definitions
