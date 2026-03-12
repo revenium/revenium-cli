@@ -56,12 +56,12 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Subscriptions
 
-- [ ] **SUBR-01**: User can list all subscriptions
-- [ ] **SUBR-02**: User can get a subscription by ID
-- [ ] **SUBR-03**: User can create a new subscription
-- [ ] **SUBR-04**: User can update a subscription
-- [ ] **SUBR-05**: User can partially update a subscription (PATCH)
-- [ ] **SUBR-06**: User can delete a subscription with confirmation prompt
+- [x] **SUBR-01**: User can list all subscriptions
+- [x] **SUBR-02**: User can get a subscription by ID
+- [x] **SUBR-03**: User can create a new subscription
+- [x] **SUBR-04**: User can update a subscription
+- [x] **SUBR-05**: User can partially update a subscription (PATCH)
+- [x] **SUBR-06**: User can delete a subscription with confirmation prompt
 
 ### Products
 
@@ -204,12 +204,12 @@ Requirements for initial release. Each maps to roadmap phases.
 | SUBS-03 | Phase 5 | Complete |
 | SUBS-04 | Phase 5 | Complete |
 | SUBS-05 | Phase 5 | Complete |
-| SUBR-01 | Phase 5 | Pending |
-| SUBR-02 | Phase 5 | Pending |
-| SUBR-03 | Phase 5 | Pending |
-| SUBR-04 | Phase 5 | Pending |
-| SUBR-05 | Phase 5 | Pending |
-| SUBR-06 | Phase 5 | Pending |
+| SUBR-01 | Phase 5 | Complete |
+| SUBR-02 | Phase 5 | Complete |
+| SUBR-03 | Phase 5 | Complete |
+| SUBR-04 | Phase 5 | Complete |
+| SUBR-05 | Phase 5 | Complete |
+| SUBR-06 | Phase 5 | Complete |
 | PROD-01 | Phase 6 | Pending |
 | PROD-02 | Phase 6 | Pending |
 | PROD-03 | Phase 6 | Pending |
