@@ -99,11 +99,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Anomalies & Alerts
 
-- [ ] **ALRT-01**: User can list AI anomalies
-- [ ] **ALRT-02**: User can get an anomaly by ID
-- [ ] **ALRT-03**: User can create an anomaly detection rule
-- [ ] **ALRT-04**: User can update an anomaly rule
-- [ ] **ALRT-05**: User can delete an anomaly rule
+- [x] **ALRT-01**: User can list AI anomalies
+- [x] **ALRT-02**: User can get an anomaly by ID
+- [x] **ALRT-03**: User can create an anomaly detection rule
+- [x] **ALRT-04**: User can update an anomaly rule
+- [x] **ALRT-05**: User can delete an anomaly rule
 - [ ] **ALRT-06**: User can list AI alerts
 - [ ] **ALRT-07**: User can create AI alert rules
 - [ ] **ALRT-08**: User can manage budget alert thresholds
@@ -232,11 +232,11 @@ Requirements for initial release. Each maps to roadmap phases.
 | USER-03 | Phase 7 | Complete |
 | USER-04 | Phase 7 | Complete |
 | USER-05 | Phase 7 | Complete |
-| ALRT-01 | Phase 8 | Pending |
-| ALRT-02 | Phase 8 | Pending |
-| ALRT-03 | Phase 8 | Pending |
-| ALRT-04 | Phase 8 | Pending |
-| ALRT-05 | Phase 8 | Pending |
+| ALRT-01 | Phase 8 | Complete |
+| ALRT-02 | Phase 8 | Complete |
+| ALRT-03 | Phase 8 | Complete |
+| ALRT-04 | Phase 8 | Complete |
+| ALRT-05 | Phase 8 | Complete |
 | ALRT-06 | Phase 8 | Pending |
 | ALRT-07 | Phase 8 | Pending |
 | ALRT-08 | Phase 8 | Pending |
