@@ -186,11 +186,10 @@ Plans:
   1. `brew install revenium/tap/revenium` installs the CLI on macOS/Linux
   2. GitHub Releases contain cross-platform binaries built by GoReleaser with embedded version info
   3. `revenium completion bash/zsh/fish` outputs valid shell completion scripts that work when sourced
-**Plans:** 2 plans
+**Plans:** 1 plan
 
 Plans:
-- [ ] 11-01: TBD
-- [ ] 11-02: TBD
+- [ ] 11-01-PLAN.md — GoReleaser config + completions script + GitHub Actions release workflow
 
 ## Progress
 
@@ -209,4 +208,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> ... -> 11
 | 8. Anomalies & Alerts | 0/2 | Not started | - |
 | 9. Credentials & Charts | 2/2 | Complete   | 2026-03-12 |
 | 10. Metrics | 2/2 | Complete    | 2026-03-12 |
-| 11. Distribution & Shell Completions | 0/2 | Not started | - |
+| 11. Distribution & Shell Completions | 0/1 | Not started | - |
