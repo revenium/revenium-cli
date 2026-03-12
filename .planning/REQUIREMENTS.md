@@ -65,11 +65,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Products
 
-- [ ] **PROD-01**: User can list all products
-- [ ] **PROD-02**: User can get a product by ID
-- [ ] **PROD-03**: User can create a new product
-- [ ] **PROD-04**: User can update a product
-- [ ] **PROD-05**: User can delete a product with confirmation prompt
+- [x] **PROD-01**: User can list all products
+- [x] **PROD-02**: User can get a product by ID
+- [x] **PROD-03**: User can create a new product
+- [x] **PROD-04**: User can update a product
+- [x] **PROD-05**: User can delete a product with confirmation prompt
 
 ### Tools
 
@@ -210,11 +210,11 @@ Requirements for initial release. Each maps to roadmap phases.
 | SUBR-04 | Phase 5 | Complete |
 | SUBR-05 | Phase 5 | Complete |
 | SUBR-06 | Phase 5 | Complete |
-| PROD-01 | Phase 6 | Pending |
-| PROD-02 | Phase 6 | Pending |
-| PROD-03 | Phase 6 | Pending |
-| PROD-04 | Phase 6 | Pending |
-| PROD-05 | Phase 6 | Pending |
+| PROD-01 | Phase 6 | Complete |
+| PROD-02 | Phase 6 | Complete |
+| PROD-03 | Phase 6 | Complete |
+| PROD-04 | Phase 6 | Complete |
+| PROD-05 | Phase 6 | Complete |
 | TOOL-01 | Phase 6 | Pending |
 | TOOL-02 | Phase 6 | Pending |
 | TOOL-03 | Phase 6 | Pending |

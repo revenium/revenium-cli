@@ -17,7 +17,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 3: First Resource (Sources)** - Prove the full CRUD vertical slice end-to-end (completed 2026-03-12)
 - [x] **Phase 4: AI Models & Pricing** - Model CRUD plus nested pricing dimension management (completed 2026-03-12)
 - [x] **Phase 5: Subscribers & Subscriptions** - Consumer management and source-to-subscriber mappings (completed 2026-03-12)
-- [ ] **Phase 6: Products & Tools** - Product catalog and tool registration CRUD
+- [x] **Phase 6: Products & Tools** - Product catalog and tool registration CRUD (completed 2026-03-12)
 - [ ] **Phase 7: Teams & Users** - Team management with settings, user account CRUD
 - [ ] **Phase 8: Anomalies & Alerts** - AI anomaly detection rules and alert/budget threshold management
 - [ ] **Phase 9: Credentials & Charts** - Provider credential management (masked) and chart definitions
@@ -111,7 +111,7 @@ Plans:
   1. `revenium products list/get/create/update/delete` fully manages product records
   2. `revenium tools list/get/create/update/delete` fully manages tool records
   3. Both resources follow the established CRUD pattern with styled tables, JSON output, and delete confirmation
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 
 Plans:
 - [ ] 06-01-PLAN.md — Products CRUD (list, get, create, update, delete) + tests + main.go registration
@@ -205,7 +205,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> ... -> 11
 | 3. First Resource (Sources) | 2/2 | Complete   | 2026-03-12 |
 | 4. AI Models & Pricing | 2/2 | Complete   | 2026-03-12 |
 | 5. Subscribers & Subscriptions | 2/2 | Complete   | 2026-03-12 |
-| 6. Products & Tools | 0/2 | Not started | - |
+| 6. Products & Tools | 2/2 | Complete   | 2026-03-12 |
 | 7. Teams & Users | 0/2 | Not started | - |
 | 8. Anomalies & Alerts | 0/2 | Not started | - |
 | 9. Credentials & Charts | 0/2 | Not started | - |
