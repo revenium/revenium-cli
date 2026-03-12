@@ -169,13 +169,102 @@ Requirements for initial release. Each maps to roadmap phases.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (Populated during roadmap creation) | | |
+| FNDN-01 | Phase 1 | Pending |
+| FNDN-02 | Phase 1 | Pending |
+| FNDN-03 | Phase 1 | Pending |
+| FNDN-04 | Phase 1 | Pending |
+| FNDN-05 | Phase 1 | Pending |
+| FNDN-06 | Phase 1 | Pending |
+| FNDN-07 | Phase 1 | Pending |
+| FNDN-08 | Phase 2 | Pending |
+| FNDN-09 | Phase 2 | Pending |
+| FNDN-10 | Phase 2 | Pending |
+| FNDN-11 | Phase 11 | Pending |
+| FNDN-12 | Phase 1 | Pending |
+| FNDN-13 | Phase 1 | Pending |
+| FNDN-14 | Phase 11 | Pending |
+| FNDN-15 | Phase 11 | Pending |
+| FNDN-16 | Phase 2 | Pending |
+| FNDN-17 | Phase 2 | Pending |
+| SRCS-01 | Phase 3 | Pending |
+| SRCS-02 | Phase 3 | Pending |
+| SRCS-03 | Phase 3 | Pending |
+| SRCS-04 | Phase 3 | Pending |
+| SRCS-05 | Phase 3 | Pending |
+| AIMD-01 | Phase 4 | Pending |
+| AIMD-02 | Phase 4 | Pending |
+| AIMD-03 | Phase 4 | Pending |
+| AIMD-04 | Phase 4 | Pending |
+| AIMD-05 | Phase 4 | Pending |
+| AIMD-06 | Phase 4 | Pending |
+| AIMD-07 | Phase 4 | Pending |
+| AIMD-08 | Phase 4 | Pending |
+| SUBS-01 | Phase 5 | Pending |
+| SUBS-02 | Phase 5 | Pending |
+| SUBS-03 | Phase 5 | Pending |
+| SUBS-04 | Phase 5 | Pending |
+| SUBS-05 | Phase 5 | Pending |
+| SUBR-01 | Phase 5 | Pending |
+| SUBR-02 | Phase 5 | Pending |
+| SUBR-03 | Phase 5 | Pending |
+| SUBR-04 | Phase 5 | Pending |
+| SUBR-05 | Phase 5 | Pending |
+| SUBR-06 | Phase 5 | Pending |
+| PROD-01 | Phase 6 | Pending |
+| PROD-02 | Phase 6 | Pending |
+| PROD-03 | Phase 6 | Pending |
+| PROD-04 | Phase 6 | Pending |
+| PROD-05 | Phase 6 | Pending |
+| TOOL-01 | Phase 6 | Pending |
+| TOOL-02 | Phase 6 | Pending |
+| TOOL-03 | Phase 6 | Pending |
+| TOOL-04 | Phase 6 | Pending |
+| TOOL-05 | Phase 6 | Pending |
+| TEAM-01 | Phase 7 | Pending |
+| TEAM-02 | Phase 7 | Pending |
+| TEAM-03 | Phase 7 | Pending |
+| TEAM-04 | Phase 7 | Pending |
+| TEAM-05 | Phase 7 | Pending |
+| TEAM-06 | Phase 7 | Pending |
+| TEAM-07 | Phase 7 | Pending |
+| USER-01 | Phase 7 | Pending |
+| USER-02 | Phase 7 | Pending |
+| USER-03 | Phase 7 | Pending |
+| USER-04 | Phase 7 | Pending |
+| USER-05 | Phase 7 | Pending |
+| ALRT-01 | Phase 8 | Pending |
+| ALRT-02 | Phase 8 | Pending |
+| ALRT-03 | Phase 8 | Pending |
+| ALRT-04 | Phase 8 | Pending |
+| ALRT-05 | Phase 8 | Pending |
+| ALRT-06 | Phase 8 | Pending |
+| ALRT-07 | Phase 8 | Pending |
+| ALRT-08 | Phase 8 | Pending |
+| CRED-01 | Phase 9 | Pending |
+| CRED-02 | Phase 9 | Pending |
+| CRED-03 | Phase 9 | Pending |
+| CRED-04 | Phase 9 | Pending |
+| CRED-05 | Phase 9 | Pending |
+| CHRT-01 | Phase 9 | Pending |
+| CHRT-02 | Phase 9 | Pending |
+| CHRT-03 | Phase 9 | Pending |
+| CHRT-04 | Phase 9 | Pending |
+| CHRT-05 | Phase 9 | Pending |
+| METR-01 | Phase 10 | Pending |
+| METR-02 | Phase 10 | Pending |
+| METR-03 | Phase 10 | Pending |
+| METR-04 | Phase 10 | Pending |
+| METR-05 | Phase 10 | Pending |
+| METR-06 | Phase 10 | Pending |
+| METR-07 | Phase 10 | Pending |
+| METR-08 | Phase 10 | Pending |
+| METR-09 | Phase 10 | Pending |
 
 **Coverage:**
-- v1 requirements: 89 total
-- Mapped to phases: 0
-- Unmapped: 89 ⚠️
+- v1 requirements: 90 total
+- Mapped to phases: 90
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-11*
-*Last updated: 2026-03-11 after initial definition*
+*Last updated: 2026-03-11 after roadmap creation*
