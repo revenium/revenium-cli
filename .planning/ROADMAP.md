@@ -51,11 +51,11 @@ Plans:
   2. Adding `--json` to any output command produces valid, parseable JSON
   3. Piping output to another command (e.g., `revenium sources list | wc -l`) produces clean unstyled text and respects `NO_COLOR`
   4. `--quiet` suppresses all non-error output; `--verbose` shows HTTP request/response details
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 02-01: TBD
-- [ ] 02-02: TBD
+- [ ] 02-01-PLAN.md — Output package: Formatter, styled tables, JSON rendering, TTY detection
+- [ ] 02-02-PLAN.md — Wire --json/--quiet flags to root command + JSON error handling in main.go
 
 ### Phase 3: First Resource (Sources)
 **Goal**: User can fully manage Sources, proving the CRUD pattern that all subsequent resources will follow
