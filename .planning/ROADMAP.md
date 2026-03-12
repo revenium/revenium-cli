@@ -97,11 +97,11 @@ Plans:
   2. `revenium subscriptions list/get/create/update/delete` fully manages subscription records
   3. `revenium subscriptions update <id>` supports both full update (PUT) and partial update (PATCH via `--patch` or similar)
   4. Delete commands for both resources prompt for confirmation with `--yes` override
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 05-01: TBD
-- [ ] 05-02: TBD
+- [ ] 05-01-PLAN.md — Subscribers CRUD (list, get, create, update, delete) + tests + main.go registration
+- [ ] 05-02-PLAN.md — Subscriptions CRUD (list, get, create, update with PUT/PATCH, delete) + tests + main.go registration
 
 ### Phase 6: Products & Tools
 **Goal**: User can manage product catalog entries and tool registrations
