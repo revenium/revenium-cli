@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRootCommandExists(t *testing.T) {
@@ -37,4 +38,55 @@ func TestExecuteWithoutConfig(t *testing.T) {
 	// Execute with no args just shows help and returns no error
 	err := rootCmd.Execute()
 	assert.NoError(t, err)
+}
+
+func TestJSONFlagRegistered(t *testing.T) {
+	flag := rootCmd.PersistentFlags().Lookup("json")
+	require.NotNil(t, flag, "--json persistent flag should be registered")
+	assert.Equal(t, "false", flag.DefValue)
+}
+
+func TestQuietFlagRegistered(t *testing.T) {
+	flag := rootCmd.PersistentFlags().Lookup("quiet")
+	require.NotNil(t, flag, "--quiet persistent flag should be registered")
+	assert.Equal(t, "false", flag.DefValue)
+}
+
+func TestQuietShortFlag(t *testing.T) {
+	flag := rootCmd.PersistentFlags().ShorthandLookup("q")
+	require.NotNil(t, flag, "-q shorthand should be registered")
+	assert.Equal(t, "quiet", flag.Name)
+}
+
+func TestOutputFormatterInitialized(t *testing.T) {
+	// The Output var should be accessible (non-nil after PersistentPreRunE runs).
+	// For config/version commands, it should still be initialized.
+	// We test that the var exists and is of the right type by checking it's declared.
+	// After running the version command (which skips config loading), Output should be set.
+	oldOutput := Output
+	defer func() { Output = oldOutput }()
+
+	Output = nil
+	rootCmd.SetArgs([]string{"version"})
+	err := rootCmd.Execute()
+	assert.NoError(t, err)
+	assert.NotNil(t, Output, "Output formatter should be initialized even for version command")
+}
+
+func TestVerboseFlagStillWorks(t *testing.T) {
+	flag := rootCmd.PersistentFlags().Lookup("verbose")
+	require.NotNil(t, flag, "--verbose flag should still be registered")
+	assert.Equal(t, "v", flag.Shorthand)
+}
+
+func TestJSONModeFunction(t *testing.T) {
+	// JSONMode should return the current state of the jsonMode var
+	oldVal := jsonMode
+	defer func() { jsonMode = oldVal }()
+
+	jsonMode = false
+	assert.False(t, JSONMode())
+
+	jsonMode = true
+	assert.True(t, JSONMode())
 }
