@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: completed
-stopped_at: Completed 10-01-PLAN.md
-last_updated: "2026-03-12T19:31:28.939Z"
+stopped_at: Completed 10-02-PLAN.md
+last_updated: "2026-03-12T19:35:31.366Z"
 last_activity: 2026-03-12 — Completed plan 06-01
 progress:
   total_phases: 11
-  completed_phases: 9
+  completed_phases: 10
   total_plans: 20
-  completed_plans: 19
+  completed_plans: 20
   percent: 92
 ---
 
@@ -71,6 +71,7 @@ Progress: [█████████░] 92%
 | Phase 09-credentials-charts P01 | 2min | 2 tasks | 13 files |
 | Phase 09-credentials-charts P02 | 2min | 2 tasks | 12 files |
 | Phase 10-metrics P01 | 2min | 2 tasks | 12 files |
+| Phase 10-metrics P02 | 2min | 2 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -128,6 +129,9 @@ Recent decisions affecting current work:
 - [Phase 10-metrics]: buildPath() defaults to 24h window when both --from and --to are omitted
 - [Phase 10-metrics]: formatNumber() uses integer-only comma grouping, distinct from formatCurrency()
 - [Phase 10-metrics]: Cost columns use $%.4f format for precision in metric display
+- [Phase 10-metrics]: Traces group by traceId in table mode; JSON passes raw ungrouped data
+- [Phase 10-metrics]: Tool events endpoint uses /v2/api/sources/metrics/tools by convention (LOW confidence)
+- [Phase 10-metrics]: Metrics registered under monitoring group in main.go
 
 ### Pending Todos
 
@@ -140,6 +144,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-12T19:31:28.934Z
-Stopped at: Completed 10-01-PLAN.md
+Last session: 2026-03-12T19:35:31.364Z
+Stopped at: Completed 10-02-PLAN.md
 Resume file: None

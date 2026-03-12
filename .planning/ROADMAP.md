@@ -21,7 +21,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 7: Teams & Users** - Team management with settings, user account CRUD (completed 2026-03-12)
 - [ ] **Phase 8: Anomalies & Alerts** - AI anomaly detection rules and alert/budget threshold management
 - [x] **Phase 9: Credentials & Charts** - Provider credential management (masked) and chart definitions (completed 2026-03-12)
-- [ ] **Phase 10: Metrics** - AI, completion, audio, image, video, trace, squad, API, and tool event metrics
+- [x] **Phase 10: Metrics** - AI, completion, audio, image, video, trace, squad, API, and tool event metrics (completed 2026-03-12)
 - [ ] **Phase 11: Distribution & Shell Completions** - GoReleaser, Homebrew tap, shell completions
 
 ## Phase Details
@@ -172,7 +172,7 @@ Plans:
   3. `revenium metrics traces` displays AI traces aggregated by traceId; `revenium metrics squads` displays multi-agent workflow metrics
   4. `revenium metrics api` queries API metrics; `revenium metrics tool-events` queries tool event metrics
   5. All metric commands support `--json` output and display results in styled tables
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [ ] 10-01-PLAN.md — Metrics parent command + shared helpers (buildPath, formatNumber) + 5 AI metric subcommands (ai, completions, audio, image, video)
@@ -208,5 +208,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> ... -> 11
 | 7. Teams & Users | 2/2 | Complete   | 2026-03-12 |
 | 8. Anomalies & Alerts | 0/2 | Not started | - |
 | 9. Credentials & Charts | 2/2 | Complete   | 2026-03-12 |
-| 10. Metrics | 1/2 | In Progress|  |
+| 10. Metrics | 2/2 | Complete   | 2026-03-12 |
 | 11. Distribution & Shell Completions | 0/2 | Not started | - |

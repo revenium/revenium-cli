@@ -128,10 +128,10 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **METR-03**: User can query AI audio metrics
 - [x] **METR-04**: User can query AI image metrics
 - [x] **METR-05**: User can query AI video metrics
-- [ ] **METR-06**: User can query AI traces (aggregated by traceId)
-- [ ] **METR-07**: User can query squad metrics (multi-agent workflows)
-- [ ] **METR-08**: User can query API metrics
-- [ ] **METR-09**: User can query tool event metrics
+- [x] **METR-06**: User can query AI traces (aggregated by traceId)
+- [x] **METR-07**: User can query squad metrics (multi-agent workflows)
+- [x] **METR-08**: User can query API metrics
+- [x] **METR-09**: User can query tool event metrics
 
 ## v2 Requirements
 
@@ -255,10 +255,10 @@ Requirements for initial release. Each maps to roadmap phases.
 | METR-03 | Phase 10 | Complete |
 | METR-04 | Phase 10 | Complete |
 | METR-05 | Phase 10 | Complete |
-| METR-06 | Phase 10 | Pending |
-| METR-07 | Phase 10 | Pending |
-| METR-08 | Phase 10 | Pending |
-| METR-09 | Phase 10 | Pending |
+| METR-06 | Phase 10 | Complete |
+| METR-07 | Phase 10 | Complete |
+| METR-08 | Phase 10 | Complete |
+| METR-09 | Phase 10 | Complete |
 
 **Coverage:**
 - v1 requirements: 90 total
