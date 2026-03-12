@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Project Scaffold & Config** - Go binary, Cobra root command, config management, HTTP client, error handling (completed 2026-03-12)
 - [ ] **Phase 2: Output Layer** - Styled table rendering, JSON output, TTY detection, quiet/verbose flags
 - [x] **Phase 3: First Resource (Sources)** - Prove the full CRUD vertical slice end-to-end (completed 2026-03-12)
-- [ ] **Phase 4: AI Models & Pricing** - Model CRUD plus nested pricing dimension management
+- [x] **Phase 4: AI Models & Pricing** - Model CRUD plus nested pricing dimension management (completed 2026-03-12)
 - [ ] **Phase 5: Subscribers & Subscriptions** - Consumer management and source-to-subscriber mappings
 - [ ] **Phase 6: Products & Tools** - Product catalog and tool registration CRUD
 - [ ] **Phase 7: Teams & Users** - Team management with settings, user account CRUD
@@ -82,7 +82,7 @@ Plans:
   2. `revenium models update <id>` patches model pricing and `revenium models delete <id>` removes a model
   3. `revenium models pricing list <model-id>` displays pricing dimensions for a specific model
   4. `revenium models pricing create/update/delete` manages individual pricing dimensions
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [ ] 04-01-PLAN.md — Model CRUD commands (list, get, PATCH update, delete) + registration in main.go
@@ -203,7 +203,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> ... -> 11
 | 1. Project Scaffold & Config | 1/2 | Complete    | 2026-03-12 |
 | 2. Output Layer | 1/2 | In Progress|  |
 | 3. First Resource (Sources) | 2/2 | Complete   | 2026-03-12 |
-| 4. AI Models & Pricing | 1/2 | In Progress|  |
+| 4. AI Models & Pricing | 2/2 | Complete   | 2026-03-12 |
 | 5. Subscribers & Subscriptions | 0/2 | Not started | - |
 | 6. Products & Tools | 0/2 | Not started | - |
 | 7. Teams & Users | 0/2 | Not started | - |

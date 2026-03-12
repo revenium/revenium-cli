@@ -41,10 +41,10 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **AIMD-02**: User can get an AI model by ID
 - [x] **AIMD-03**: User can update AI model pricing (PATCH)
 - [x] **AIMD-04**: User can delete an AI model
-- [ ] **AIMD-05**: User can list pricing dimensions for a model
-- [ ] **AIMD-06**: User can create a pricing dimension for a model
-- [ ] **AIMD-07**: User can update a pricing dimension
-- [ ] **AIMD-08**: User can delete a pricing dimension
+- [x] **AIMD-05**: User can list pricing dimensions for a model
+- [x] **AIMD-06**: User can create a pricing dimension for a model
+- [x] **AIMD-07**: User can update a pricing dimension
+- [x] **AIMD-08**: User can delete a pricing dimension
 
 ### Subscribers
 
@@ -195,10 +195,10 @@ Requirements for initial release. Each maps to roadmap phases.
 | AIMD-02 | Phase 4 | Complete |
 | AIMD-03 | Phase 4 | Complete |
 | AIMD-04 | Phase 4 | Complete |
-| AIMD-05 | Phase 4 | Pending |
-| AIMD-06 | Phase 4 | Pending |
-| AIMD-07 | Phase 4 | Pending |
-| AIMD-08 | Phase 4 | Pending |
+| AIMD-05 | Phase 4 | Complete |
+| AIMD-06 | Phase 4 | Complete |
+| AIMD-07 | Phase 4 | Complete |
+| AIMD-08 | Phase 4 | Complete |
 | SUBS-01 | Phase 5 | Pending |
 | SUBS-02 | Phase 5 | Pending |
 | SUBS-03 | Phase 5 | Pending |
