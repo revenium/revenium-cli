@@ -126,11 +126,11 @@ Plans:
   2. `revenium teams prompt-capture get <team-id>` and `revenium teams prompt-capture set <team-id>` view and update prompt capture settings
   3. `revenium users list/get/create/update/delete` fully manages user records
   4. Both resources follow the established CRUD pattern with styled tables, JSON output, and delete confirmation
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 07-01: TBD
-- [ ] 07-02: TBD
+- [ ] 07-01-PLAN.md — Teams CRUD (list, get, create, update, delete) + prompt-capture subcommands (get, set)
+- [ ] 07-02-PLAN.md — Users CRUD (list, get, create, update, delete) with string slice flags
 
 ### Phase 8: Anomalies & Alerts
 **Goal**: User can manage AI anomaly detection rules, alert configurations, and budget thresholds
@@ -141,7 +141,7 @@ Plans:
   2. `revenium alerts list` displays AI alert configurations; `revenium alerts create` creates new alert rules
   3. `revenium alerts budget` manages budget alert thresholds
   4. All commands follow the established output pattern (styled tables, `--json`, delete confirmation)
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
 - [ ] 08-01: TBD
@@ -156,7 +156,7 @@ Plans:
   2. `revenium credentials create/update/delete` manages credential records; delete can also deactivate
   3. `revenium charts list/get/create/update/delete` fully manages chart definitions
   4. Both resources follow the established output pattern (styled tables, `--json`, delete confirmation)
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
 - [ ] 09-01: TBD
@@ -172,7 +172,7 @@ Plans:
   3. `revenium metrics traces` displays AI traces aggregated by traceId; `revenium metrics squads` displays multi-agent workflow metrics
   4. `revenium metrics api` queries API metrics; `revenium metrics tool-events` queries tool event metrics
   5. All metric commands support `--json` output and display results in styled tables
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
 - [ ] 10-01: TBD
@@ -187,7 +187,7 @@ Plans:
   1. `brew install revenium/tap/revenium` installs the CLI on macOS/Linux
   2. GitHub Releases contain cross-platform binaries built by GoReleaser with embedded version info
   3. `revenium completion bash/zsh/fish` outputs valid shell completion scripts that work when sourced
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
 - [ ] 11-01: TBD
