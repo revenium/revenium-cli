@@ -38,6 +38,7 @@ func init() {
 	cmd.RegisterCommand(anomalies.Cmd, "resources")
 	cmd.RegisterCommand(alerts.Cmd, "resources")
 	cmd.RegisterCommand(credentials.Cmd, "resources")
+	cmd.RegisterCommand(charts.Cmd, "resources")
 }
 
 func main() {
