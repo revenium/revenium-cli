@@ -81,13 +81,13 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Teams
 
-- [ ] **TEAM-01**: User can list all teams
-- [ ] **TEAM-02**: User can get a team by ID
-- [ ] **TEAM-03**: User can create a new team
-- [ ] **TEAM-04**: User can update a team
-- [ ] **TEAM-05**: User can delete a team with confirmation prompt
-- [ ] **TEAM-06**: User can view prompt capture settings for a team
-- [ ] **TEAM-07**: User can update prompt capture settings for a team
+- [x] **TEAM-01**: User can list all teams
+- [x] **TEAM-02**: User can get a team by ID
+- [x] **TEAM-03**: User can create a new team
+- [x] **TEAM-04**: User can update a team
+- [x] **TEAM-05**: User can delete a team with confirmation prompt
+- [x] **TEAM-06**: User can view prompt capture settings for a team
+- [x] **TEAM-07**: User can update prompt capture settings for a team
 
 ### Users
 
@@ -220,13 +220,13 @@ Requirements for initial release. Each maps to roadmap phases.
 | TOOL-03 | Phase 6 | Complete |
 | TOOL-04 | Phase 6 | Complete |
 | TOOL-05 | Phase 6 | Complete |
-| TEAM-01 | Phase 7 | Pending |
-| TEAM-02 | Phase 7 | Pending |
-| TEAM-03 | Phase 7 | Pending |
-| TEAM-04 | Phase 7 | Pending |
-| TEAM-05 | Phase 7 | Pending |
-| TEAM-06 | Phase 7 | Pending |
-| TEAM-07 | Phase 7 | Pending |
+| TEAM-01 | Phase 7 | Complete |
+| TEAM-02 | Phase 7 | Complete |
+| TEAM-03 | Phase 7 | Complete |
+| TEAM-04 | Phase 7 | Complete |
+| TEAM-05 | Phase 7 | Complete |
+| TEAM-06 | Phase 7 | Complete |
+| TEAM-07 | Phase 7 | Complete |
 | USER-01 | Phase 7 | Complete |
 | USER-02 | Phase 7 | Complete |
 | USER-03 | Phase 7 | Complete |

@@ -18,7 +18,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 4: AI Models & Pricing** - Model CRUD plus nested pricing dimension management (completed 2026-03-12)
 - [x] **Phase 5: Subscribers & Subscriptions** - Consumer management and source-to-subscriber mappings (completed 2026-03-12)
 - [x] **Phase 6: Products & Tools** - Product catalog and tool registration CRUD (completed 2026-03-12)
-- [ ] **Phase 7: Teams & Users** - Team management with settings, user account CRUD
+- [x] **Phase 7: Teams & Users** - Team management with settings, user account CRUD (completed 2026-03-12)
 - [ ] **Phase 8: Anomalies & Alerts** - AI anomaly detection rules and alert/budget threshold management
 - [ ] **Phase 9: Credentials & Charts** - Provider credential management (masked) and chart definitions
 - [ ] **Phase 10: Metrics** - AI, completion, audio, image, video, trace, squad, API, and tool event metrics
@@ -126,7 +126,7 @@ Plans:
   2. `revenium teams prompt-capture get <team-id>` and `revenium teams prompt-capture set <team-id>` view and update prompt capture settings
   3. `revenium users list/get/create/update/delete` fully manages user records
   4. Both resources follow the established CRUD pattern with styled tables, JSON output, and delete confirmation
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 
 Plans:
 - [ ] 07-01-PLAN.md — Teams CRUD (list, get, create, update, delete) + prompt-capture subcommands (get, set)
@@ -206,7 +206,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> ... -> 11
 | 4. AI Models & Pricing | 2/2 | Complete   | 2026-03-12 |
 | 5. Subscribers & Subscriptions | 2/2 | Complete   | 2026-03-12 |
 | 6. Products & Tools | 2/2 | Complete   | 2026-03-12 |
-| 7. Teams & Users | 0/2 | Not started | - |
+| 7. Teams & Users | 2/2 | Complete   | 2026-03-12 |
 | 8. Anomalies & Alerts | 0/2 | Not started | - |
 | 9. Credentials & Charts | 0/2 | Not started | - |
 | 10. Metrics | 0/3 | Not started | - |
