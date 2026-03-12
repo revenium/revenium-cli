@@ -30,6 +30,8 @@ func TestDeleteSourceWithYes(t *testing.T) {
 	cmd.Output = output.NewWithWriter(&buf, &buf, false, false)
 
 	c := newDeleteCmd()
+	// Register --yes flag for standalone test (inherited from rootCmd at runtime)
+	c.Flags().Bool("yes", false, "Skip confirmation prompts")
 	c.SetOut(&buf)
 	c.SetArgs([]string{"src-1", "--yes"})
 	err := c.Execute()
@@ -51,6 +53,8 @@ func TestDeleteSourceQuiet(t *testing.T) {
 	cmd.Output = output.NewWithWriter(&buf, &buf, false, true)
 
 	c := newDeleteCmd()
+	// Register --yes flag for standalone test (inherited from rootCmd at runtime)
+	c.Flags().Bool("yes", false, "Skip confirmation prompts")
 	c.SetOut(&buf)
 	c.SetArgs([]string{"src-1", "--yes"})
 	err := c.Execute()
