@@ -22,7 +22,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 8: Anomalies & Alerts** - AI anomaly detection rules and alert/budget threshold management
 - [x] **Phase 9: Credentials & Charts** - Provider credential management (masked) and chart definitions (completed 2026-03-12)
 - [x] **Phase 10: Metrics** - AI, completion, audio, image, video, trace, squad, API, and tool event metrics (completed 2026-03-12)
-- [ ] **Phase 11: Distribution & Shell Completions** - GoReleaser, Homebrew tap, shell completions
+- [x] **Phase 11: Distribution & Shell Completions** - GoReleaser, Homebrew tap, shell completions (completed 2026-03-12)
 
 ## Phase Details
 
@@ -186,7 +186,7 @@ Plans:
   1. `brew install revenium/tap/revenium` installs the CLI on macOS/Linux
   2. GitHub Releases contain cross-platform binaries built by GoReleaser with embedded version info
   3. `revenium completion bash/zsh/fish` outputs valid shell completion scripts that work when sourced
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
 - [ ] 11-01-PLAN.md — GoReleaser config + completions script + GitHub Actions release workflow
@@ -208,4 +208,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> ... -> 11
 | 8. Anomalies & Alerts | 0/2 | Not started | - |
 | 9. Credentials & Charts | 2/2 | Complete   | 2026-03-12 |
 | 10. Metrics | 2/2 | Complete    | 2026-03-12 |
-| 11. Distribution & Shell Completions | 0/1 | Not started | - |
+| 11. Distribution & Shell Completions | 1/1 | Complete   | 2026-03-12 |
