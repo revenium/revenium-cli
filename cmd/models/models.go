@@ -26,6 +26,8 @@ func init() {
 	Cmd.AddCommand(newGetCmd())
 	Cmd.AddCommand(newUpdateCmd())
 	Cmd.AddCommand(newDeleteCmd())
+	Cmd.AddCommand(pricingCmd)
+	initPricing()
 }
 
 // modelTableDef defines the table layout for model output.
