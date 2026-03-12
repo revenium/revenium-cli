@@ -12,7 +12,9 @@ import (
 	"github.com/revenium/revenium-cli/cmd/sources"
 	"github.com/revenium/revenium-cli/cmd/subscribers"
 	"github.com/revenium/revenium-cli/cmd/subscriptions"
+	"github.com/revenium/revenium-cli/cmd/teams"
 	"github.com/revenium/revenium-cli/cmd/tools"
+	"github.com/revenium/revenium-cli/cmd/users"
 	apierrors "github.com/revenium/revenium-cli/internal/errors"
 	"github.com/revenium/revenium-cli/internal/output"
 )
@@ -27,6 +29,8 @@ func init() {
 	cmd.RegisterCommand(subscriptions.Cmd, "resources")
 	cmd.RegisterCommand(products.Cmd, "resources")
 	cmd.RegisterCommand(tools.Cmd, "resources")
+	cmd.RegisterCommand(teams.Cmd, "resources")
+	cmd.RegisterCommand(users.Cmd, "resources")
 }
 
 func main() {
