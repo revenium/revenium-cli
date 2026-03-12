@@ -172,7 +172,7 @@ Plans:
   3. `revenium metrics traces` displays AI traces aggregated by traceId; `revenium metrics squads` displays multi-agent workflow metrics
   4. `revenium metrics api` queries API metrics; `revenium metrics tool-events` queries tool event metrics
   5. All metric commands support `--json` output and display results in styled tables
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 
 Plans:
 - [ ] 10-01-PLAN.md — Metrics parent command + shared helpers (buildPath, formatNumber) + 5 AI metric subcommands (ai, completions, audio, image, video)
@@ -208,5 +208,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> ... -> 11
 | 7. Teams & Users | 2/2 | Complete   | 2026-03-12 |
 | 8. Anomalies & Alerts | 0/2 | Not started | - |
 | 9. Credentials & Charts | 2/2 | Complete   | 2026-03-12 |
-| 10. Metrics | 0/2 | Not started | - |
+| 10. Metrics | 1/2 | In Progress|  |
 | 11. Distribution & Shell Completions | 0/2 | Not started | - |

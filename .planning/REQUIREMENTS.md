@@ -123,11 +123,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Metrics
 
-- [ ] **METR-01**: User can query AI metrics with `--from` and `--to` time range flags
-- [ ] **METR-02**: User can query AI completion metrics
-- [ ] **METR-03**: User can query AI audio metrics
-- [ ] **METR-04**: User can query AI image metrics
-- [ ] **METR-05**: User can query AI video metrics
+- [x] **METR-01**: User can query AI metrics with `--from` and `--to` time range flags
+- [x] **METR-02**: User can query AI completion metrics
+- [x] **METR-03**: User can query AI audio metrics
+- [x] **METR-04**: User can query AI image metrics
+- [x] **METR-05**: User can query AI video metrics
 - [ ] **METR-06**: User can query AI traces (aggregated by traceId)
 - [ ] **METR-07**: User can query squad metrics (multi-agent workflows)
 - [ ] **METR-08**: User can query API metrics
@@ -250,11 +250,11 @@ Requirements for initial release. Each maps to roadmap phases.
 | CHRT-03 | Phase 9 | Complete |
 | CHRT-04 | Phase 9 | Complete |
 | CHRT-05 | Phase 9 | Complete |
-| METR-01 | Phase 10 | Pending |
-| METR-02 | Phase 10 | Pending |
-| METR-03 | Phase 10 | Pending |
-| METR-04 | Phase 10 | Pending |
-| METR-05 | Phase 10 | Pending |
+| METR-01 | Phase 10 | Complete |
+| METR-02 | Phase 10 | Complete |
+| METR-03 | Phase 10 | Complete |
+| METR-04 | Phase 10 | Complete |
+| METR-05 | Phase 10 | Complete |
 | METR-06 | Phase 10 | Pending |
 | METR-07 | Phase 10 | Pending |
 | METR-08 | Phase 10 | Pending |
