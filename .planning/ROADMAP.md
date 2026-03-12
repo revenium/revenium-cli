@@ -67,11 +67,11 @@ Plans:
   3. `revenium sources create` creates a source and displays the result
   4. `revenium sources update <id>` updates a source and displays the result
   5. `revenium sources delete <id>` prompts for confirmation (skippable with `--yes`) and deletes the source
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 03-01: TBD
-- [ ] 03-02: TBD
+- [ ] 03-01-PLAN.md — Shared resource helpers (ConfirmDelete), --yes flag, sources list + get commands
+- [ ] 03-02-PLAN.md — Sources create, update, delete commands + wire into root.go
 
 ### Phase 4: AI Models & Pricing
 **Goal**: User can manage AI models and their pricing dimensions
