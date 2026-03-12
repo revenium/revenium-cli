@@ -107,6 +107,14 @@ func init() {
 	rootCmd.SetCompletionCommandGroupID("config")
 }
 
+// RegisterCommand adds a command to the root command with the given group ID.
+// This is used by main.go to register resource commands without creating
+// circular imports (since resource packages import cmd for APIClient/Output).
+func RegisterCommand(c *cobra.Command, groupID string) {
+	c.GroupID = groupID
+	rootCmd.AddCommand(c)
+}
+
 // Execute runs the root command.
 func Execute() error {
 	return rootCmd.Execute()

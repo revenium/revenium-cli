@@ -3,6 +3,7 @@ package cmd
 import (
 	"testing"
 
+	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -77,6 +78,32 @@ func TestVerboseFlagStillWorks(t *testing.T) {
 	flag := rootCmd.PersistentFlags().Lookup("verbose")
 	require.NotNil(t, flag, "--verbose flag should still be registered")
 	assert.Equal(t, "v", flag.Shorthand)
+}
+
+func TestRegisterCommand(t *testing.T) {
+	// Verify RegisterCommand adds a command with the correct group ID
+	testCmd := &cobra.Command{Use: "test-resource", Short: "Test resource"}
+	RegisterCommand(testCmd, "resources")
+
+	found := false
+	for _, c := range rootCmd.Commands() {
+		if c.Name() == "test-resource" {
+			found = true
+			assert.Equal(t, "resources", c.GroupID, "registered command should have the specified group ID")
+			break
+		}
+	}
+	assert.True(t, found, "registered command should be found on rootCmd")
+
+	// Clean up: remove the test command
+	rootCmd.RemoveCommand(testCmd)
+}
+
+func TestYesFlagRegistered(t *testing.T) {
+	flag := rootCmd.PersistentFlags().Lookup("yes")
+	require.NotNil(t, flag, "--yes persistent flag should be registered")
+	assert.Equal(t, "false", flag.DefValue)
+	assert.Equal(t, "y", flag.Shorthand, "--yes should have -y shorthand")
 }
 
 func TestJSONModeFunction(t *testing.T) {
