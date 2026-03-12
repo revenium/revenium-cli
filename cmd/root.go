@@ -9,14 +9,25 @@ import (
 	"github.com/revenium/revenium-cli/cmd/config"
 	"github.com/revenium/revenium-cli/internal/api"
 	internalconfig "github.com/revenium/revenium-cli/internal/config"
+	"github.com/revenium/revenium-cli/internal/output"
 )
 
 // APIClient is the shared API client, initialized in PersistentPreRunE
 // and accessible to all subcommands.
 var APIClient *api.Client
 
+// Output is the shared output formatter, initialized in PersistentPreRunE
+// and accessible to all subcommands.
+var Output *output.Formatter
+
 // verbose controls verbose output mode.
 var verbose bool
+
+// jsonMode controls JSON output mode.
+var jsonMode bool
+
+// quiet controls quiet output mode (suppress non-error output).
+var quiet bool
 
 // rootCmd is the base command for the Revenium CLI.
 var rootCmd = &cobra.Command{
@@ -34,6 +45,9 @@ var rootCmd = &cobra.Command{
 	SilenceErrors: true,
 	SilenceUsage:  true,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		// Always initialize the output formatter so all commands can use it
+		Output = output.New(jsonMode, quiet)
+
 		// Skip config loading for version and config commands
 		if cmd.Name() == "version" || cmd.Parent() != nil && cmd.Parent().Name() == "config" || cmd.Name() == "config" {
 			return nil
@@ -53,8 +67,16 @@ var rootCmd = &cobra.Command{
 	},
 }
 
+// JSONMode returns true if --json flag is active. Used by main.go to
+// decide error rendering format without importing the output package.
+func JSONMode() bool {
+	return jsonMode
+}
+
 func init() {
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Enable verbose output")
+	rootCmd.PersistentFlags().BoolVar(&jsonMode, "json", false, "Output as JSON")
+	rootCmd.PersistentFlags().BoolVarP(&quiet, "quiet", "q", false, "Suppress non-error output")
 
 	rootCmd.AddGroup(
 		&cobra.Group{ID: "resources", Title: "Core Resources:"},
