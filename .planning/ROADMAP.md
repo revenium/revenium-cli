@@ -36,7 +36,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Setting `REVENIUM_API_KEY` overrides the config file value for authentication
   4. API calls include `x-api-key` header, and a 401 response produces "Invalid API key" (not a raw HTTP error)
   5. All error paths exit with non-zero status codes
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 
 Plans:
 - [ ] 01-01-PLAN.md — Go module scaffold + internal packages (config, build, errors)
@@ -200,7 +200,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> ... -> 11
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Project Scaffold & Config | 0/2 | Not started | - |
+| 1. Project Scaffold & Config | 1/2 | In Progress|  |
 | 2. Output Layer | 0/2 | Not started | - |
 | 3. First Resource (Sources) | 0/2 | Not started | - |
 | 4. AI Models & Pricing | 0/2 | Not started | - |
