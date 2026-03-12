@@ -27,7 +27,7 @@ func newCompletionsCmd() *cobra.Command {
 		RunE: func(c *cobra.Command, args []string) error {
 			var metrics []map[string]interface{}
 			path := buildPath("/v2/api/sources/metrics/ai/completions")
-			if err := cmd.APIClient.Do(c.Context(), "GET", path, nil, &metrics); err != nil {
+			if err := cmd.APIClient.DoList(c.Context(), path, &metrics); err != nil {
 				return err
 			}
 			if len(metrics) == 0 {

@@ -72,7 +72,7 @@ var rootCmd = &cobra.Command{
 			return fmt.Errorf("No API key configured. Run `revenium config set key <your-key>` to fix.")
 		}
 
-		APIClient = api.NewClient(cfg.APIURL, cfg.APIKey, verbose)
+		APIClient = api.NewClient(cfg.APIURL, cfg.APIKey, cfg.TeamID, verbose)
 		return nil
 	},
 }

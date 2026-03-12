@@ -18,6 +18,7 @@ var configDirOverride string
 type Config struct {
 	APIKey string
 	APIURL string
+	TeamID string
 }
 
 // configDir returns the configuration directory path.
@@ -62,6 +63,7 @@ func Load() (*Config, error) {
 
 	_ = viper.BindEnv("api-key")
 	_ = viper.BindEnv("api-url")
+	_ = viper.BindEnv("team-id")
 
 	viper.SetDefault("api-url", "https://api.revenium.ai/profitstream")
 
@@ -78,6 +80,7 @@ func Load() (*Config, error) {
 	return &Config{
 		APIKey: viper.GetString("api-key"),
 		APIURL: viper.GetString("api-url"),
+		TeamID: viper.GetString("team-id"),
 	}, nil
 }
 

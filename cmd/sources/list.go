@@ -20,7 +20,7 @@ func newListCmd() *cobra.Command {
   revenium sources list --json`,
 		RunE: func(c *cobra.Command, args []string) error {
 			var sources []map[string]interface{}
-			if err := cmd.APIClient.Do(c.Context(), "GET", "/v2/api/sources", nil, &sources); err != nil {
+			if err := cmd.APIClient.DoList(c.Context(), "/v2/api/sources", &sources); err != nil {
 				return err
 			}
 			if len(sources) == 0 {

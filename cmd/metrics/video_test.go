@@ -25,7 +25,7 @@ func TestVideoMetrics(t *testing.T) {
 	defer srv.Close()
 
 	var buf bytes.Buffer
-	cmd.APIClient = api.NewClient(srv.URL, "test-key", false)
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", false)
 	cmd.Output = output.NewWithWriter(&buf, &buf, false, false)
 
 	fromFlag = "2024-01-01T00:00:00Z"
@@ -50,7 +50,7 @@ func TestVideoMetricsEmpty(t *testing.T) {
 	defer srv.Close()
 
 	var buf bytes.Buffer
-	cmd.APIClient = api.NewClient(srv.URL, "test-key", false)
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", false)
 	cmd.Output = output.NewWithWriter(&buf, &buf, false, false)
 
 	fromFlag = "2024-01-01T00:00:00Z"
@@ -72,7 +72,7 @@ func TestVideoMetricsJSON(t *testing.T) {
 	defer srv.Close()
 
 	var buf bytes.Buffer
-	cmd.APIClient = api.NewClient(srv.URL, "test-key", false)
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", false)
 	cmd.Output = output.NewWithWriter(&buf, &buf, true, false)
 
 	fromFlag = "2024-01-01T00:00:00Z"

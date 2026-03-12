@@ -20,7 +20,7 @@ func newBudgetListCmd() *cobra.Command {
   revenium alerts budget list --json`,
 		RunE: func(c *cobra.Command, args []string) error {
 			var budgets []map[string]interface{}
-			if err := cmd.APIClient.Do(c.Context(), "GET", "/v2/api/ai/alerts/budgets/portfolio", nil, &budgets); err != nil {
+			if err := cmd.APIClient.DoList(c.Context(), "/v2/api/ai/alerts/budgets/portfolio", &budgets); err != nil {
 				return err
 			}
 			if len(budgets) == 0 {

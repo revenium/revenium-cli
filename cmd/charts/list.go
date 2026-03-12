@@ -20,7 +20,7 @@ func newListCmd() *cobra.Command {
   revenium charts list --json`,
 		RunE: func(c *cobra.Command, args []string) error {
 			var charts []map[string]interface{}
-			if err := cmd.APIClient.Do(c.Context(), "GET", "/v2/api/reports/chart-definitions", nil, &charts); err != nil {
+			if err := cmd.APIClient.DoList(c.Context(), "/v2/api/reports/chart-definitions", &charts); err != nil {
 				return err
 			}
 			if len(charts) == 0 {

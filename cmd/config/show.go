@@ -28,8 +28,14 @@ func newShowCmd() *cobra.Command {
 				apiKey = maskKey(apiKey)
 			}
 
+			teamID := cfg.TeamID
+			if teamID == "" {
+				teamID = "(not set)"
+			}
+
 			fmt.Fprintf(cmd.OutOrStdout(), "API Key:  %s\n", apiKey)
 			fmt.Fprintf(cmd.OutOrStdout(), "API URL:  %s\n", cfg.APIURL)
+			fmt.Fprintf(cmd.OutOrStdout(), "Team ID:  %s\n", teamID)
 			return nil
 		},
 	}

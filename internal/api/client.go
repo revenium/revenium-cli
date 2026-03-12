@@ -10,6 +10,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/revenium/revenium-cli/internal/build"
@@ -20,15 +21,17 @@ import (
 type Client struct {
 	BaseURL    string
 	APIKey     string
+	TeamID     string
 	HTTPClient *http.Client
 	Verbose    bool
 }
 
-// NewClient creates a new API client with the given base URL, API key, and verbose setting.
-func NewClient(baseURL, apiKey string, verbose bool) *Client {
+// NewClient creates a new API client with the given base URL, API key, team ID, and verbose setting.
+func NewClient(baseURL, apiKey, teamID string, verbose bool) *Client {
 	return &Client{
 		BaseURL: baseURL,
 		APIKey:  apiKey,
+		TeamID:  teamID,
 		HTTPClient: &http.Client{
 			Timeout: 30 * time.Second,
 		},
@@ -50,6 +53,13 @@ func (c *Client) Do(ctx context.Context, method, path string, body, result inter
 	}
 
 	url := c.BaseURL + path
+	if c.TeamID != "" {
+		if strings.Contains(url, "?") {
+			url += "&teamId=" + c.TeamID
+		} else {
+			url += "?teamId=" + c.TeamID
+		}
+	}
 	req, err := http.NewRequestWithContext(ctx, method, url, reqBody)
 	if err != nil {
 		return fmt.Errorf("failed to create request: %w", err)
@@ -116,6 +126,51 @@ func mapHTTPError(resp *http.Response) error {
 		Message:    message,
 		Body:       bodyStr,
 	}
+}
+
+// DoList executes a GET request and unwraps the response into a slice.
+// It handles both Spring HATEOAS paginated responses
+// ({"_embedded": {"<resource>List": [...]}, "page": {...}}) and plain JSON arrays.
+func (c *Client) DoList(ctx context.Context, path string, result *[]map[string]interface{}) error {
+	var raw json.RawMessage
+	if err := c.Do(ctx, http.MethodGet, path, nil, &raw); err != nil {
+		return err
+	}
+
+	// Try decoding as a plain array first
+	var arr []map[string]interface{}
+	if err := json.Unmarshal(raw, &arr); err == nil {
+		*result = arr
+		return nil
+	}
+
+	// Try decoding as a HATEOAS wrapper object
+	var wrapper map[string]interface{}
+	if err := json.Unmarshal(raw, &wrapper); err != nil {
+		return fmt.Errorf("failed to decode list response: %w", err)
+	}
+
+	embedded, ok := wrapper["_embedded"].(map[string]interface{})
+	if !ok {
+		*result = []map[string]interface{}{}
+		return nil
+	}
+
+	for _, v := range embedded {
+		if items, ok := v.([]interface{}); ok {
+			out := make([]map[string]interface{}, 0, len(items))
+			for _, item := range items {
+				if m, ok := item.(map[string]interface{}); ok {
+					out = append(out, m)
+				}
+			}
+			*result = out
+			return nil
+		}
+	}
+
+	*result = []map[string]interface{}{}
+	return nil
 }
 
 // maskAPIKey masks all but the last 4 characters of the API key.

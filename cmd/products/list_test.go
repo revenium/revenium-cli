@@ -24,7 +24,7 @@ func TestListProducts(t *testing.T) {
 	defer srv.Close()
 
 	var buf bytes.Buffer
-	cmd.APIClient = api.NewClient(srv.URL, "test-key", false)
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", false)
 	cmd.Output = output.NewWithWriter(&buf, &buf, false, false)
 
 	c := newListCmd()
@@ -45,7 +45,7 @@ func TestListProductsEmpty(t *testing.T) {
 	defer srv.Close()
 
 	var buf bytes.Buffer
-	cmd.APIClient = api.NewClient(srv.URL, "test-key", false)
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", false)
 	cmd.Output = output.NewWithWriter(&buf, &buf, false, false)
 
 	c := newListCmd()
@@ -64,7 +64,7 @@ func TestListProductsJSON(t *testing.T) {
 	defer srv.Close()
 
 	var buf bytes.Buffer
-	cmd.APIClient = api.NewClient(srv.URL, "test-key", false)
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", false)
 	cmd.Output = output.NewWithWriter(&buf, &buf, true, false)
 
 	c := newListCmd()
@@ -87,7 +87,7 @@ func TestListProductsEmptyJSON(t *testing.T) {
 	defer srv.Close()
 
 	var buf bytes.Buffer
-	cmd.APIClient = api.NewClient(srv.URL, "test-key", false)
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", false)
 	cmd.Output = output.NewWithWriter(&buf, &buf, true, false)
 
 	c := newListCmd()

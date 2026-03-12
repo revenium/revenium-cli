@@ -23,7 +23,7 @@ func newPricingListCmd() *cobra.Command {
 			path := fmt.Sprintf("/v2/api/sources/ai/models/%s/pricing/dimensions", modelID)
 
 			var dimensions []map[string]interface{}
-			if err := cmd.APIClient.Do(c.Context(), "GET", path, nil, &dimensions); err != nil {
+			if err := cmd.APIClient.DoList(c.Context(), path, &dimensions); err != nil {
 				return err
 			}
 			if len(dimensions) == 0 {
