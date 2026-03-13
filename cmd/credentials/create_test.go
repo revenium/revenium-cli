@@ -45,30 +45,16 @@ func TestCreateCredential(t *testing.T) {
 	assert.Equal(t, "sk-abc123xyz7f3a", receivedBody["apiKey"])
 }
 
-func TestCreateCredentialMinimal(t *testing.T) {
-	var receivedBody map[string]interface{}
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		body, _ := io.ReadAll(r.Body)
-		json.Unmarshal(body, &receivedBody)
-		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `{"id": "cred-1", "label": "My Key", "provider": "openai"}`)
-	}))
-	defer srv.Close()
-
+func TestCreateCredentialMissingApiKey(t *testing.T) {
 	var buf bytes.Buffer
-	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", "", "", false)
 	cmd.Output = output.NewWithWriter(&buf, &buf, false, false)
 
 	c := newCreateCmd()
 	c.SetOut(&buf)
+	c.SetErr(&buf)
 	c.SetArgs([]string{"--label", "My Key", "--provider", "openai"})
 	err := c.Execute()
 
-	require.NoError(t, err)
-	assert.Equal(t, "My Key", receivedBody["credentialName"])
-	assert.Equal(t, "openai", receivedBody["provider"])
-	_, hasKey := receivedBody["apiKey"]
-	assert.False(t, hasKey, "apiKey should not be sent when not specified")
-	_, hasDesc := receivedBody["description"]
-	assert.False(t, hasDesc, "description should not be sent when not specified")
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "api-key")
 }

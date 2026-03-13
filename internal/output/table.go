@@ -39,10 +39,6 @@ func (f *Formatter) RenderTable(def TableDef, rows [][]string) error {
 			return cellStyle
 		})
 
-	if f.width > 0 {
-		t.Width(f.width)
-	}
-
 	_, err := fmt.Fprintln(f.writer, t.String())
 	return err
 }

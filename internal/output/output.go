@@ -17,8 +17,7 @@ type Formatter struct {
 	errWriter io.Writer // os.Stderr (always, even in quiet mode)
 	jsonMode  bool
 	quiet     bool
-	width     int  // terminal width, 0 if not a TTY
-	isTTY     bool
+	isTTY bool
 }
 
 // New creates a Formatter, detecting TTY and terminal width.
@@ -35,16 +34,6 @@ func New(jsonMode, quiet bool) *Formatter {
 
 	// Detect TTY
 	f.isTTY = term.IsTerminal(os.Stdout.Fd())
-
-	// Get terminal width
-	if f.isTTY {
-		if w, _, err := term.GetSize(os.Stdout.Fd()); err == nil {
-			f.width = w
-		}
-	}
-	if f.width == 0 {
-		f.width = 80
-	}
 
 	// Quiet mode: suppress non-error output (but not --json)
 	if quiet && !jsonMode {
@@ -66,7 +55,6 @@ func NewWithWriter(w io.Writer, errW io.Writer, jsonMode, quiet bool) *Formatter
 		errWriter: errW,
 		jsonMode:  jsonMode,
 		quiet:     quiet,
-		width:     80,
 	}
 
 	// Quiet mode: suppress non-error output (but not --json)

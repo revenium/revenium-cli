@@ -21,9 +21,7 @@ func newCreateCmd() *cobra.Command {
 			body := map[string]interface{}{
 				"credentialName": label,
 				"provider":       provider,
-			}
-			if c.Flags().Changed("api-key") {
-				body["apiKey"] = apiKey
+				"apiKey":         apiKey,
 			}
 			if c.Flags().Changed("description") {
 				body["description"] = description
@@ -43,6 +41,7 @@ func newCreateCmd() *cobra.Command {
 	c.Flags().StringVar(&description, "description", "", "Credential description")
 	_ = c.MarkFlagRequired("label")
 	_ = c.MarkFlagRequired("provider")
+	_ = c.MarkFlagRequired("api-key")
 
 	return c
 }
