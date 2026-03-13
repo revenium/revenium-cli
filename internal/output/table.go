@@ -33,8 +33,20 @@ func (f *Formatter) RenderTable(def TableDef, rows [][]string) error {
 			if row == table.HeaderRow {
 				return headerStyle
 			}
+			// Status columns use value-based dynamic coloring
 			if col == def.StatusColumn && row >= 0 && row < len(rows) {
 				return statusStyle(rows[row][col])
+			}
+			// All other columns use header-name-based semantic coloring
+			if col >= 0 && col < len(def.Headers) {
+				header := def.Headers[col]
+				// "Enabled" and "Risk" columns also get value-based status coloring
+				if header == "Enabled" || header == "Risk" {
+					if row >= 0 && row < len(rows) {
+						return statusStyle(rows[row][col])
+					}
+				}
+				return cellStyleForHeader(header)
 			}
 			return cellStyle
 		})
