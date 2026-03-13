@@ -112,6 +112,8 @@ func init() {
 
 	rootCmd.SetHelpCommandGroupID("config")
 	rootCmd.SetCompletionCommandGroupID("config")
+
+	SetupHelp(rootCmd)
 }
 
 // RegisterCommand adds a command to the root command with the given group ID.
