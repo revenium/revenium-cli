@@ -7,7 +7,7 @@ import (
 )
 
 func newCreateCmd() *cobra.Command {
-	var name, description string
+	var name, description, version, planType, currency, period string
 
 	c := &cobra.Command{
 		Use:   "create",
@@ -19,14 +19,21 @@ func newCreateCmd() *cobra.Command {
   revenium products create --name "My Product" --description "A great product"`,
 		RunE: func(c *cobra.Command, args []string) error {
 			body := map[string]interface{}{
-				"name": name,
+				"name":    name,
+				"version": version,
+				"plan": map[string]interface{}{
+					"name":     name,
+					"type":     planType,
+					"currency": currency,
+					"period":   period,
+				},
 			}
 			if c.Flags().Changed("description") {
 				body["description"] = description
 			}
 
 			var result map[string]interface{}
-			if err := cmd.APIClient.Do(c.Context(), "POST", "/v2/api/products", body, &result); err != nil {
+			if err := cmd.APIClient.DoCreateWithOwner(c.Context(), "/v2/api/products", body, &result); err != nil {
 				return err
 			}
 			return renderProduct(result)
@@ -35,6 +42,10 @@ func newCreateCmd() *cobra.Command {
 
 	c.Flags().StringVar(&name, "name", "", "Product name")
 	c.Flags().StringVar(&description, "description", "", "Product description")
+	c.Flags().StringVar(&version, "version", "1.0.0", "Product version")
+	c.Flags().StringVar(&planType, "plan-type", "SUBSCRIPTION", "Plan type (e.g., SUBSCRIPTION)")
+	c.Flags().StringVar(&currency, "currency", "USD", "Currency code (e.g., USD, EUR)")
+	c.Flags().StringVar(&period, "period", "MONTH", "Billing period (e.g., MONTH, YEAR)")
 	_ = c.MarkFlagRequired("name")
 
 	return c

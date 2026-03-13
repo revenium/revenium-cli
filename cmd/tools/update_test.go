@@ -19,8 +19,20 @@ import (
 func TestUpdateTool(t *testing.T) {
 	var receivedBody map[string]interface{}
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(t, "PUT", r.Method)
 		assert.Equal(t, "/v2/api/tools/tool-1", r.URL.Path)
+		if r.Method == "GET" {
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"id":           "tool-1",
+				"name":         "Old Tool",
+				"toolId":       "my-tool",
+				"toolType":     "MCP_SERVER",
+				"toolProvider": "acme",
+				"enabled":      true,
+			})
+			return
+		}
+		assert.Equal(t, "PUT", r.Method)
 		body, _ := io.ReadAll(r.Body)
 		json.Unmarshal(body, &receivedBody)
 		w.Header().Set("Content-Type", "application/json")
@@ -29,7 +41,7 @@ func TestUpdateTool(t *testing.T) {
 	defer srv.Close()
 
 	var buf bytes.Buffer
-	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", false)
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", "", "", false)
 	cmd.Output = output.NewWithWriter(&buf, &buf, false, false)
 
 	c := newUpdateCmd()
@@ -41,9 +53,6 @@ func TestUpdateTool(t *testing.T) {
 	out := buf.String()
 	assert.Contains(t, out, "Updated")
 	assert.Equal(t, "Updated", receivedBody["name"])
-	// Only name should be in body
-	_, hasToolId := receivedBody["toolId"]
-	assert.False(t, hasToolId, "toolId should not be sent when not changed")
 }
 
 func TestUpdateToolNoFields(t *testing.T) {

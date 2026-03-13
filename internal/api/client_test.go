@@ -17,7 +17,7 @@ import (
 )
 
 func TestNewClient(t *testing.T) {
-	c := NewClient("https://api.example.com", "test-key", "", true)
+	c := NewClient("https://api.example.com", "test-key", "", "", "", true)
 
 	assert.Equal(t, "https://api.example.com", c.BaseURL)
 	assert.Equal(t, "test-key", c.APIKey)
@@ -34,7 +34,7 @@ func TestClientSetsAuthHeader(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	c := NewClient(srv.URL, "my-secret-key", "", false)
+	c := NewClient(srv.URL, "my-secret-key", "", "", "", false)
 	err := c.Do(context.Background(), http.MethodGet, "/test", nil, nil)
 
 	require.NoError(t, err)
@@ -51,7 +51,7 @@ func TestClientSetsContentType(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	c := NewClient(srv.URL, "key", "", false)
+	c := NewClient(srv.URL, "key", "", "", "", false)
 	err := c.Do(context.Background(), http.MethodGet, "/test", nil, nil)
 
 	require.NoError(t, err)
@@ -68,7 +68,7 @@ func TestClientSetsUserAgent(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	c := NewClient(srv.URL, "key", "", false)
+	c := NewClient(srv.URL, "key", "", "", "", false)
 	err := c.Do(context.Background(), http.MethodGet, "/test", nil, nil)
 
 	require.NoError(t, err)
@@ -76,7 +76,7 @@ func TestClientSetsUserAgent(t *testing.T) {
 }
 
 func TestClientTimeout(t *testing.T) {
-	c := NewClient("https://api.example.com", "key", "", false)
+	c := NewClient("https://api.example.com", "key", "", "", "", false)
 	assert.Equal(t, 30*time.Second, c.HTTPClient.Timeout)
 }
 
@@ -87,7 +87,7 @@ func TestErrorMapping401(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	c := NewClient(srv.URL, "bad-key", "", false)
+	c := NewClient(srv.URL, "bad-key", "", "", "", false)
 	err := c.Do(context.Background(), http.MethodGet, "/test", nil, nil)
 
 	require.Error(t, err)
@@ -102,7 +102,7 @@ func TestErrorMapping403(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	c := NewClient(srv.URL, "key", "", false)
+	c := NewClient(srv.URL, "key", "", "", "", false)
 	err := c.Do(context.Background(), http.MethodGet, "/test", nil, nil)
 
 	require.Error(t, err)
@@ -116,7 +116,7 @@ func TestErrorMapping404(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	c := NewClient(srv.URL, "key", "", false)
+	c := NewClient(srv.URL, "key", "", "", "", false)
 	err := c.Do(context.Background(), http.MethodGet, "/test", nil, nil)
 
 	require.Error(t, err)
@@ -130,7 +130,7 @@ func TestErrorMapping500(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	c := NewClient(srv.URL, "key", "", false)
+	c := NewClient(srv.URL, "key", "", "", "", false)
 	err := c.Do(context.Background(), http.MethodGet, "/test", nil, nil)
 
 	require.Error(t, err)
@@ -150,7 +150,7 @@ func TestSuccessfulRequest(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	c := NewClient(srv.URL, "key", "", false)
+	c := NewClient(srv.URL, "key", "", "", "", false)
 	var got result
 	err := c.Do(context.Background(), http.MethodGet, "/sources/42", nil, &got)
 
@@ -171,7 +171,7 @@ func TestVerboseLogging(t *testing.T) {
 	r, w, _ := os.Pipe()
 	os.Stderr = w
 
-	c := NewClient(srv.URL, "my-api-key-1234", "", true)
+	c := NewClient(srv.URL, "my-api-key-1234", "", "", "", true)
 	err := c.Do(context.Background(), http.MethodGet, "/test", nil, nil)
 
 	w.Close()

@@ -26,7 +26,7 @@ func TestBudgetDeleteWithYes(t *testing.T) {
 	defer srv.Close()
 
 	var buf bytes.Buffer
-	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", false)
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", "", "", false)
 	cmd.Output = output.NewWithWriter(&buf, &buf, false, false)
 
 	c := newBudgetDeleteCmd()
@@ -51,7 +51,7 @@ func TestBudgetDeleteJSONMode(t *testing.T) {
 	defer srv.Close()
 
 	var buf bytes.Buffer
-	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", false)
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", "", "", false)
 	cmd.Output = output.NewWithWriter(&buf, &buf, true, false)
 
 	c := newBudgetDeleteCmd()

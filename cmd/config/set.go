@@ -10,9 +10,11 @@ import (
 
 // validKeys are the accepted configuration keys.
 var validKeys = map[string]string{
-	"key":     "api-key",
-	"api-url": "api-url",
-	"team-id": "team-id",
+	"key":       "api-key",
+	"api-url":   "api-url",
+	"team-id":   "team-id",
+	"tenant-id": "tenant-id",
+	"owner-id":  "owner-id",
 }
 
 // newSetCmd creates the config set subcommand.
@@ -21,7 +23,7 @@ func newSetCmd() *cobra.Command {
 		Use:       "set",
 		Short:     "Set a configuration value",
 		Args:      cobra.ExactArgs(2),
-		ValidArgs: []string{"key", "api-url", "team-id"},
+		ValidArgs: []string{"key", "api-url", "team-id", "tenant-id", "owner-id"},
 		Example: `  # Set your API key
   revenium config set key your-api-key
 
@@ -36,7 +38,7 @@ func newSetCmd() *cobra.Command {
 
 			mappedKey, ok := validKeys[key]
 			if !ok {
-				return fmt.Errorf("unknown config key %q. Valid keys: key, api-url, team-id", key)
+				return fmt.Errorf("unknown config key %q. Valid keys: key, api-url, team-id, tenant-id, owner-id", key)
 			}
 
 			if err := internalconfig.Set(mappedKey, value); err != nil {

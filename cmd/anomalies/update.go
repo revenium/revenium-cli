@@ -16,24 +16,21 @@ func newUpdateCmd() *cobra.Command {
 		Short: "Update an anomaly detection rule",
 		Args:  cobra.ExactArgs(1),
 		Example: `  # Update an anomaly rule name
-  revenium anomalies update anom-123 --name "New Name"
-
-  # Update an anomaly rule
-  revenium anomalies update anom-123 --name "Updated Rule"`,
+  revenium anomalies update anom-123 --name "New Name"`,
 		RunE: func(c *cobra.Command, args []string) error {
 			id := args[0]
-			body := make(map[string]interface{})
+			updates := make(map[string]interface{})
 
 			if c.Flags().Changed("name") {
-				body["name"] = name
+				updates["name"] = name
 			}
 
-			if len(body) == 0 {
+			if len(updates) == 0 {
 				return fmt.Errorf("no fields specified to update")
 			}
 
 			var result map[string]interface{}
-			if err := cmd.APIClient.Do(c.Context(), "PUT", "/v2/api/sources/ai/anomaly/"+id, body, &result); err != nil {
+			if err := cmd.APIClient.DoUpdate(c.Context(), "/v2/api/sources/ai/anomaly/"+id, updates, &result); err != nil {
 				return err
 			}
 			return renderAnomaly(result)

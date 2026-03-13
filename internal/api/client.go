@@ -22,16 +22,20 @@ type Client struct {
 	BaseURL    string
 	APIKey     string
 	TeamID     string
+	TenantID   string
+	OwnerID    string
 	HTTPClient *http.Client
 	Verbose    bool
 }
 
-// NewClient creates a new API client with the given base URL, API key, team ID, and verbose setting.
-func NewClient(baseURL, apiKey, teamID string, verbose bool) *Client {
+// NewClient creates a new API client.
+func NewClient(baseURL, apiKey, teamID, tenantID, ownerID string, verbose bool) *Client {
 	return &Client{
-		BaseURL: baseURL,
-		APIKey:  apiKey,
-		TeamID:  teamID,
+		BaseURL:  baseURL,
+		APIKey:   apiKey,
+		TeamID:   teamID,
+		TenantID: tenantID,
+		OwnerID:  ownerID,
 		HTTPClient: &http.Client{
 			Timeout: 30 * time.Second,
 		},
@@ -58,6 +62,13 @@ func (c *Client) Do(ctx context.Context, method, path string, body, result inter
 			url += "&teamId=" + c.TeamID
 		} else {
 			url += "?teamId=" + c.TeamID
+		}
+	}
+	if c.TenantID != "" {
+		if strings.Contains(url, "?") {
+			url += "&tenantId=" + c.TenantID
+		} else {
+			url += "?tenantId=" + c.TenantID
 		}
 	}
 	req, err := http.NewRequestWithContext(ctx, method, url, reqBody)
@@ -118,6 +129,20 @@ func mapHTTPError(resp *http.Response) error {
 	case resp.StatusCode >= 500:
 		message = "Revenium API error. Try again later or contact support."
 	default:
+		// Include API error details when available
+		if bodyStr != "" {
+			var apiErr map[string]interface{}
+			if err := json.Unmarshal(bodyBytes, &apiErr); err == nil {
+				if details, ok := apiErr["details"]; ok {
+					message = fmt.Sprintf("Request failed (HTTP %d): %v", resp.StatusCode, details)
+					break
+				}
+				if msg, ok := apiErr["message"].(string); ok {
+					message = fmt.Sprintf("Request failed (HTTP %d): %s", resp.StatusCode, msg)
+					break
+				}
+			}
+		}
 		message = fmt.Sprintf("Request failed (HTTP %d).", resp.StatusCode)
 	}
 
@@ -126,6 +151,93 @@ func mapHTTPError(resp *http.Response) error {
 		Message:    message,
 		Body:       bodyStr,
 	}
+}
+
+// DoCreate executes a POST request, automatically injecting teamId
+// into the body if the client has a TeamID set and the field is not already present.
+func (c *Client) DoCreate(ctx context.Context, path string, body map[string]interface{}, result interface{}) error {
+	if c.TeamID != "" {
+		if _, ok := body["teamId"]; !ok {
+			body["teamId"] = c.TeamID
+		}
+	}
+	return c.Do(ctx, "POST", path, body, result)
+}
+
+// DoCreateWithOwner is like DoCreate but also injects ownerId into the body.
+func (c *Client) DoCreateWithOwner(ctx context.Context, path string, body map[string]interface{}, result interface{}) error {
+	if c.OwnerID != "" {
+		if _, ok := body["ownerId"]; !ok {
+			body["ownerId"] = c.OwnerID
+		}
+	}
+	return c.DoCreate(ctx, path, body, result)
+}
+
+// DoUpdate fetches the existing resource via GET, merges the provided updates into it,
+// and sends a PUT request with the merged data. It also ensures teamId, ownerId, and
+// organizationIds are set from nested objects if not present as flat fields.
+func (c *Client) DoUpdate(ctx context.Context, path string, updates map[string]interface{}, result interface{}) error {
+	var existing map[string]interface{}
+	if err := c.Do(ctx, "GET", path, nil, &existing); err != nil {
+		return err
+	}
+
+	// Extract flat IDs from nested objects if not already present.
+	// The API returns nested objects (e.g. "team": {"id": "x"}) in GET responses
+	// but expects flat IDs (e.g. "teamId": "x") in PUT requests.
+	nestedToFlat := map[string]string{
+		"team":         "teamId",
+		"owner":        "ownerId",
+		"organization": "organizationId",
+		"product":      "productId",
+		"client":       "clientId",
+	}
+	for nested, flat := range nestedToFlat {
+		if _, ok := existing[flat]; !ok {
+			if obj, ok := existing[nested].(map[string]interface{}); ok {
+				if id, ok := obj["id"].(string); ok {
+					existing[flat] = id
+				}
+			}
+		}
+	}
+	// Extract IDs from nested array objects (e.g. "organizations" -> "organizationIds", "teams" -> "teamIds")
+	nestedArrayToFlat := map[string]string{
+		"organizations": "organizationIds",
+		"teams":         "teamIds",
+	}
+	for nested, flat := range nestedArrayToFlat {
+		if _, ok := existing[flat]; !ok {
+			if items, ok := existing[nested].([]interface{}); ok {
+				ids := make([]string, 0, len(items))
+				for _, item := range items {
+					if m, ok := item.(map[string]interface{}); ok {
+						if id, ok := m["id"].(string); ok {
+							ids = append(ids, id)
+						}
+					}
+				}
+				if len(ids) > 0 {
+					existing[flat] = ids
+				}
+			}
+		}
+	}
+	// Map label to clientEmailAddress if not present (subscriptions)
+	if _, ok := existing["clientEmailAddress"]; !ok {
+		if label, ok := existing["label"].(string); ok && label != "" {
+			if _, hasClient := existing["client"]; hasClient {
+				existing["clientEmailAddress"] = label
+			}
+		}
+	}
+
+	for k, v := range updates {
+		existing[k] = v
+	}
+
+	return c.Do(ctx, "PUT", path, existing, result)
 }
 
 // DoList executes a GET request and unwraps the response into a slice.

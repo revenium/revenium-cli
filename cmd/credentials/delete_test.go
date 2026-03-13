@@ -18,7 +18,7 @@ func TestDeleteCredentialWithYes(t *testing.T) {
 	var deleteCalled bool
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "DELETE", r.Method)
-		assert.Equal(t, "/v2/api/credentials/cred-1", r.URL.Path)
+		assert.Equal(t, "/v2/api/provider-credentials/cred-1", r.URL.Path)
 		deleteCalled = true
 		w.Header().Set("Content-Type", "application/json")
 		fmt.Fprint(w, `{"message": "Deleted", "id": "cred-1"}`)
@@ -26,7 +26,7 @@ func TestDeleteCredentialWithYes(t *testing.T) {
 	defer srv.Close()
 
 	var buf bytes.Buffer
-	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", false)
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", "", "", false)
 	cmd.Output = output.NewWithWriter(&buf, &buf, false, false)
 
 	c := newDeleteCmd()
@@ -49,7 +49,7 @@ func TestDeleteCredentialQuiet(t *testing.T) {
 	defer srv.Close()
 
 	var buf bytes.Buffer
-	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", false)
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", "", "", false)
 	cmd.Output = output.NewWithWriter(&buf, &buf, false, true)
 
 	c := newDeleteCmd()
@@ -73,7 +73,7 @@ func TestDeleteCredentialJSONMode(t *testing.T) {
 	defer srv.Close()
 
 	var buf bytes.Buffer
-	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", false)
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", "", "", false)
 	cmd.Output = output.NewWithWriter(&buf, &buf, true, false)
 
 	c := newDeleteCmd()

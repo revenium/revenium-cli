@@ -22,24 +22,24 @@ func newUpdateCmd() *cobra.Command {
   revenium subscribers update abc-123 --email new@example.com --first-name Jane --last-name Smith`,
 		RunE: func(c *cobra.Command, args []string) error {
 			id := args[0]
-			body := make(map[string]interface{})
+			updates := make(map[string]interface{})
 
 			if c.Flags().Changed("email") {
-				body["email"] = email
+				updates["email"] = email
 			}
 			if c.Flags().Changed("first-name") {
-				body["firstName"] = firstName
+				updates["firstName"] = firstName
 			}
 			if c.Flags().Changed("last-name") {
-				body["lastName"] = lastName
+				updates["lastName"] = lastName
 			}
 
-			if len(body) == 0 {
+			if len(updates) == 0 {
 				return fmt.Errorf("no fields specified to update")
 			}
 
 			var result map[string]interface{}
-			if err := cmd.APIClient.Do(c.Context(), "PUT", "/v2/api/subscribers/"+id, body, &result); err != nil {
+			if err := cmd.APIClient.DoUpdate(c.Context(), "/v2/api/subscribers/"+id, updates, &result); err != nil {
 				return err
 			}
 			return renderSubscriber(result)

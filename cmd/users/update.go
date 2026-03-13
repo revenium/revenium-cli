@@ -10,12 +10,12 @@ import (
 
 func newUpdateCmd() *cobra.Command {
 	var (
-		email            string
-		firstName        string
-		lastName         string
-		roles            []string
-		teamIDs          []string
-		phoneNumber      string
+		email             string
+		firstName         string
+		lastName          string
+		roles             []string
+		teamIDs           []string
+		phoneNumber       string
 		canViewPromptData bool
 	)
 
@@ -30,36 +30,48 @@ func newUpdateCmd() *cobra.Command {
   revenium users update user-123 --roles ROLE_ADMIN,ROLE_API_CONSUMER`,
 		RunE: func(c *cobra.Command, args []string) error {
 			id := args[0]
-			body := make(map[string]interface{})
+
+			// The API requires roles and teamIds on PUT but doesn't return them in GET.
+			// If the user doesn't specify them, we must include defaults.
+			if !c.Flags().Changed("roles") {
+				roles = []string{"ROLE_API_CONSUMER"}
+			}
+			if !c.Flags().Changed("team-ids") {
+				teamIDs = []string{cmd.APIClient.TeamID}
+			}
+
+			updates := make(map[string]interface{})
+			updates["roles"] = roles
+			updates["teamIds"] = teamIDs
 
 			if c.Flags().Changed("email") {
-				body["email"] = email
+				updates["email"] = email
 			}
 			if c.Flags().Changed("first-name") {
-				body["firstName"] = firstName
+				updates["firstName"] = firstName
 			}
 			if c.Flags().Changed("last-name") {
-				body["lastName"] = lastName
+				updates["lastName"] = lastName
 			}
 			if c.Flags().Changed("roles") {
-				body["roles"] = roles
+				updates["roles"] = roles
 			}
 			if c.Flags().Changed("team-ids") {
-				body["teamIds"] = teamIDs
+				updates["teamIds"] = teamIDs
 			}
 			if c.Flags().Changed("phone-number") {
-				body["phoneNumber"] = phoneNumber
+				updates["phoneNumber"] = phoneNumber
 			}
 			if c.Flags().Changed("can-view-prompt-data") {
-				body["canViewPromptData"] = canViewPromptData
+				updates["canViewPromptData"] = canViewPromptData
 			}
 
-			if len(body) == 0 {
+			if len(updates) == 0 {
 				return fmt.Errorf("no fields specified to update")
 			}
 
 			var result map[string]interface{}
-			if err := cmd.APIClient.Do(c.Context(), "PUT", "/v2/api/users/"+id, body, &result); err != nil {
+			if err := cmd.APIClient.DoUpdate(c.Context(), "/v2/api/users/"+id, updates, &result); err != nil {
 				return err
 			}
 			return renderUser(result)

@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/revenium/revenium-cli/cmd"
@@ -18,18 +19,28 @@ import (
 
 func TestPricingUpdate(t *testing.T) {
 	var receivedBody map[string]interface{}
-	var receivedMethod string
+	var putMethod string
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		receivedMethod = r.Method
-		body, _ := io.ReadAll(r.Body)
-		json.Unmarshal(body, &receivedBody)
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `{"id": "dim-1", "name": "Input Tokens", "dimensionType": "input", "unitPrice": "0.005"}`)
+		if r.Method == "GET" && strings.HasSuffix(r.URL.Path, "/pricing") {
+			// Return pricing wrapper with dimensions
+			fmt.Fprint(w, `{"modelId":"mdl-1","dimensions":[
+				{"id":"dim-1","billingUnit":"PER_TOKEN","modality":"TEXT","costType":"TEXT_TOKEN_INPUT","unitPrice":0.003,"isGlobal":false}
+			]}`)
+			return
+		}
+		if r.Method == "PUT" {
+			putMethod = r.Method
+			body, _ := io.ReadAll(r.Body)
+			json.Unmarshal(body, &receivedBody)
+			fmt.Fprint(w, `{"id":"dim-1","billingUnit":"PER_TOKEN","modality":"TEXT","costType":"TEXT_TOKEN_INPUT","unitPrice":0.005,"isGlobal":false}`)
+			return
+		}
 	}))
 	defer srv.Close()
 
 	var buf bytes.Buffer
-	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", false)
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", "", "", false)
 	cmd.Output = output.NewWithWriter(&buf, &buf, false, false)
 
 	c := newPricingUpdateCmd()
@@ -38,34 +49,40 @@ func TestPricingUpdate(t *testing.T) {
 	err := c.Execute()
 
 	require.NoError(t, err)
-	assert.Equal(t, "PUT", receivedMethod)
+	assert.Equal(t, "PUT", putMethod)
 	assert.Equal(t, 0.005, receivedBody["unitPrice"])
-	// Only price should be in the body, not name or type
-	_, hasName := receivedBody["name"]
-	assert.False(t, hasName, "name should not be sent when not changed")
 	assert.Contains(t, buf.String(), "dim-1")
 }
 
 func TestPricingUpdatePath(t *testing.T) {
-	var receivedPath string
+	var putPath string
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		receivedPath = r.URL.Path
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `{"id": "dim-1", "name": "Input Tokens", "dimensionType": "input", "unitPrice": "0.005"}`)
+		if r.Method == "GET" {
+			fmt.Fprint(w, `{"modelId":"my-model","dimensions":[
+				{"id":"my-dim","billingUnit":"PER_TOKEN","modality":"TEXT","costType":"TEXT_TOKEN_INPUT","unitPrice":0.003,"isGlobal":false}
+			]}`)
+			return
+		}
+		if r.Method == "PUT" {
+			putPath = r.URL.Path
+			fmt.Fprint(w, `{"id":"my-dim","billingUnit":"PER_TOKEN","modality":"TEXT","costType":"TEXT_TOKEN_INPUT","unitPrice":0.005,"isGlobal":false}`)
+			return
+		}
 	}))
 	defer srv.Close()
 
 	var buf bytes.Buffer
-	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", false)
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", "", "", false)
 	cmd.Output = output.NewWithWriter(&buf, &buf, false, false)
 
 	c := newPricingUpdateCmd()
 	c.SetOut(&buf)
-	c.SetArgs([]string{"my-model", "my-dim", "--name", "Updated Name"})
+	c.SetArgs([]string{"my-model", "my-dim", "--price", "0.005"})
 	err := c.Execute()
 
 	require.NoError(t, err)
-	assert.Equal(t, "/v2/api/sources/ai/models/my-model/pricing/dimensions/my-dim", receivedPath)
+	assert.Equal(t, "/v2/api/sources/ai/models/my-model/pricing/dimensions/my-dim", putPath)
 }
 
 func TestPricingUpdateNoFields(t *testing.T) {

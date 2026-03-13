@@ -19,8 +19,17 @@ import (
 func TestUpdateChart(t *testing.T) {
 	var receivedBody map[string]interface{}
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(t, "PUT", r.Method)
 		assert.Equal(t, "/v2/api/reports/chart-definitions/chart-1", r.URL.Path)
+		if r.Method == "GET" {
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"id":    "chart-1",
+				"label": "Old Chart",
+				"type":  "bar",
+			})
+			return
+		}
+		assert.Equal(t, "PUT", r.Method)
 		body, _ := io.ReadAll(r.Body)
 		json.Unmarshal(body, &receivedBody)
 		w.Header().Set("Content-Type", "application/json")
@@ -29,7 +38,7 @@ func TestUpdateChart(t *testing.T) {
 	defer srv.Close()
 
 	var buf bytes.Buffer
-	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", false)
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", "", "", false)
 	cmd.Output = output.NewWithWriter(&buf, &buf, false, false)
 
 	c := newUpdateCmd()
@@ -41,8 +50,6 @@ func TestUpdateChart(t *testing.T) {
 	out := buf.String()
 	assert.Contains(t, out, "Updated Chart")
 	assert.Equal(t, "Updated Chart", receivedBody["label"])
-	_, hasDescription := receivedBody["description"]
-	assert.False(t, hasDescription, "description should not be sent when not changed")
 }
 
 func TestUpdateChartNoFields(t *testing.T) {

@@ -29,18 +29,22 @@ func TestCreateAnomaly(t *testing.T) {
 	defer srv.Close()
 
 	var buf bytes.Buffer
-	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", false)
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", "", "", false)
 	cmd.Output = output.NewWithWriter(&buf, &buf, false, false)
 
 	c := newCreateCmd()
 	c.SetOut(&buf)
-	c.SetArgs([]string{"--name", "My Rule"})
+	c.SetArgs([]string{"--name", "My Rule", "--threshold", "100"})
 	err := c.Execute()
 
 	require.NoError(t, err)
 	out := buf.String()
 	assert.Contains(t, out, "anom-new")
 	assert.Equal(t, "My Rule", receivedBody["name"])
+	assert.Equal(t, "THRESHOLD", receivedBody["alertType"])
+	assert.Equal(t, "DAILY", receivedBody["periodDuration"])
+	assert.Equal(t, true, receivedBody["enabled"])
+	assert.Equal(t, false, receivedBody["firing"])
 }
 
 func TestCreateAnomalyMinimal(t *testing.T) {
@@ -54,14 +58,17 @@ func TestCreateAnomalyMinimal(t *testing.T) {
 	defer srv.Close()
 
 	var buf bytes.Buffer
-	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", false)
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", "", "", false)
 	cmd.Output = output.NewWithWriter(&buf, &buf, false, false)
 
 	c := newCreateCmd()
 	c.SetOut(&buf)
-	c.SetArgs([]string{"--name", "My Rule"})
+	c.SetArgs([]string{"--name", "My Rule", "--threshold", "100"})
 	err := c.Execute()
 
 	require.NoError(t, err)
 	assert.Equal(t, "My Rule", receivedBody["name"])
+	assert.Equal(t, "THRESHOLD", receivedBody["alertType"])
+	assert.Equal(t, "TOTAL_COST", receivedBody["metricType"])
+	assert.Equal(t, "GREATER_THAN", receivedBody["operatorType"])
 }

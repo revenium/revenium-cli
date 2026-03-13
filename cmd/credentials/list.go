@@ -20,7 +20,7 @@ func newListCmd() *cobra.Command {
   revenium credentials list --json`,
 		RunE: func(c *cobra.Command, args []string) error {
 			var credentials []map[string]interface{}
-			if err := cmd.APIClient.DoList(c.Context(), "/v2/api/credentials", &credentials); err != nil {
+			if err := cmd.APIClient.DoList(c.Context(), "/v2/api/provider-credentials", &credentials); err != nil {
 				return err
 			}
 			if len(credentials) == 0 {

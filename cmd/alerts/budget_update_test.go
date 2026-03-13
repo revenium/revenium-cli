@@ -19,8 +19,18 @@ import (
 func TestBudgetUpdate(t *testing.T) {
 	var receivedBody map[string]interface{}
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(t, "PUT", r.Method)
 		assert.Equal(t, "/v2/api/sources/ai/anomaly/anom-1", r.URL.Path)
+		if r.Method == "GET" {
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"id":              "anom-1",
+				"name":            "Old Budget",
+				"budgetThreshold": 5000,
+				"currency":        "USD",
+			})
+			return
+		}
+		assert.Equal(t, "PUT", r.Method)
 		body, _ := io.ReadAll(r.Body)
 		json.Unmarshal(body, &receivedBody)
 		w.Header().Set("Content-Type", "application/json")
@@ -29,7 +39,7 @@ func TestBudgetUpdate(t *testing.T) {
 	defer srv.Close()
 
 	var buf bytes.Buffer
-	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", false)
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", "", "", false)
 	cmd.Output = output.NewWithWriter(&buf, &buf, false, false)
 
 	c := newBudgetUpdateCmd()

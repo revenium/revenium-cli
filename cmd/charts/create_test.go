@@ -29,19 +29,23 @@ func TestCreateChart(t *testing.T) {
 	defer srv.Close()
 
 	var buf bytes.Buffer
-	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", false)
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", "", "", false)
 	cmd.Output = output.NewWithWriter(&buf, &buf, false, false)
 
 	c := newCreateCmd()
 	c.SetOut(&buf)
-	c.SetArgs([]string{"--label", "Revenue Chart", "--type", "bar", "--description", "A revenue chart"})
+	c.SetArgs([]string{"--label", "Revenue Chart", "--chart-type", "bar", "--description", "A revenue chart"})
 	err := c.Execute()
 
 	require.NoError(t, err)
 	out := buf.String()
 	assert.Contains(t, out, "chart-1")
-	assert.Equal(t, "Revenue Chart", receivedBody["label"])
-	assert.Equal(t, "bar", receivedBody["type"])
+	assert.Equal(t, "Revenue Chart", receivedBody["name"])
+	config, ok := receivedBody["configuration"].(map[string]interface{})
+	require.True(t, ok, "configuration should be a map")
+	assert.Equal(t, "bar", config["chartType"])
+	assert.Equal(t, "time", config["mode"])
+	assert.Equal(t, "30d", config["dateRange"])
 	assert.Equal(t, "A revenue chart", receivedBody["description"])
 }
 
@@ -56,7 +60,7 @@ func TestCreateChartMinimal(t *testing.T) {
 	defer srv.Close()
 
 	var buf bytes.Buffer
-	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", false)
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", "", "", false)
 	cmd.Output = output.NewWithWriter(&buf, &buf, false, false)
 
 	c := newCreateCmd()
@@ -65,9 +69,7 @@ func TestCreateChartMinimal(t *testing.T) {
 	err := c.Execute()
 
 	require.NoError(t, err)
-	assert.Equal(t, "Revenue Chart", receivedBody["label"])
-	_, hasType := receivedBody["type"]
-	assert.False(t, hasType, "type should not be sent when not specified")
+	assert.Equal(t, "Revenue Chart", receivedBody["name"])
 	_, hasDescription := receivedBody["description"]
 	assert.False(t, hasDescription, "description should not be sent when not specified")
 }

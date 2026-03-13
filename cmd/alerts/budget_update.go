@@ -26,24 +26,24 @@ func newBudgetUpdateCmd() *cobra.Command {
   revenium alerts budget update anom-123 --name "New Name" --currency EUR`,
 		RunE: func(c *cobra.Command, args []string) error {
 			id := args[0]
-			body := make(map[string]interface{})
+			updates := make(map[string]interface{})
 
 			if c.Flags().Changed("name") {
-				body["name"] = name
+				updates["name"] = name
 			}
 			if c.Flags().Changed("threshold") {
-				body["budgetThreshold"] = threshold
+				updates["budgetThreshold"] = threshold
 			}
 			if c.Flags().Changed("currency") {
-				body["currency"] = currency
+				updates["currency"] = currency
 			}
 
-			if len(body) == 0 {
+			if len(updates) == 0 {
 				return fmt.Errorf("no fields specified to update")
 			}
 
 			var result map[string]interface{}
-			if err := cmd.APIClient.Do(c.Context(), "PUT", "/v2/api/sources/ai/anomaly/"+id, body, &result); err != nil {
+			if err := cmd.APIClient.DoUpdate(c.Context(), "/v2/api/sources/ai/anomaly/"+id, updates, &result); err != nil {
 				return err
 			}
 			return renderAlert(result)

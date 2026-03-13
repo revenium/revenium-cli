@@ -30,12 +30,12 @@ func TestUpdateModel(t *testing.T) {
 	defer srv.Close()
 
 	var buf bytes.Buffer
-	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", false)
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", "", "", false)
 	cmd.Output = output.NewWithWriter(&buf, &buf, false, false)
 
 	c := newUpdateCmd()
 	c.SetOut(&buf)
-	c.SetArgs([]string{"mdl-1", "--team-id", "team-123", "--input-cost-per-token", "0.003"})
+	c.SetArgs([]string{"mdl-1", "--input-cost-per-token", "0.003"})
 	err := c.Execute()
 
 	require.NoError(t, err)
@@ -57,12 +57,12 @@ func TestUpdateModelTeamId(t *testing.T) {
 	defer srv.Close()
 
 	var buf bytes.Buffer
-	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", false)
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "team-456", "", "", false)
 	cmd.Output = output.NewWithWriter(&buf, &buf, false, false)
 
 	c := newUpdateCmd()
 	c.SetOut(&buf)
-	c.SetArgs([]string{"mdl-1", "--team-id", "team-456", "--output-cost-per-token", "0.006"})
+	c.SetArgs([]string{"mdl-1", "--output-cost-per-token", "0.006"})
 	err := c.Execute()
 
 	require.NoError(t, err)
@@ -76,7 +76,7 @@ func TestUpdateModelNoFields(t *testing.T) {
 	c := newUpdateCmd()
 	c.SetOut(&buf)
 	c.SetErr(&buf)
-	c.SetArgs([]string{"mdl-1", "--team-id", "team-123"})
+	c.SetArgs([]string{"mdl-1"})
 	err := c.Execute()
 
 	require.Error(t, err)

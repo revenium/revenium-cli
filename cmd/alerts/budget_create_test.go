@@ -29,7 +29,7 @@ func TestBudgetCreate(t *testing.T) {
 	defer srv.Close()
 
 	var buf bytes.Buffer
-	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", false)
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", "", "", false)
 	cmd.Output = output.NewWithWriter(&buf, &buf, false, false)
 
 	c := newBudgetCreateCmd()
@@ -41,7 +41,11 @@ func TestBudgetCreate(t *testing.T) {
 	out := buf.String()
 	assert.Contains(t, out, "anom-budget-1")
 	assert.Equal(t, "Monthly Budget", receivedBody["name"])
-	assert.Equal(t, "CUMULATIVE_USAGE", receivedBody["type"])
+	assert.Equal(t, "CUMULATIVE_USAGE", receivedBody["alertType"])
 	assert.Equal(t, float64(5000), receivedBody["budgetThreshold"])
+	assert.Equal(t, float64(5000), receivedBody["threshold"])
 	assert.Equal(t, "USD", receivedBody["currency"])
+	assert.Equal(t, "MONTHLY", receivedBody["periodDuration"])
+	assert.Equal(t, true, receivedBody["enabled"])
+	assert.Equal(t, false, receivedBody["firing"])
 }

@@ -19,27 +19,27 @@ func newUpdateCmd() *cobra.Command {
   revenium charts update chart-123 --label "New Label"
 
   # Update multiple fields
-  revenium charts update chart-123 --label "New Label" --type line`,
+  revenium charts update chart-123 --label "New Label" --chart-type LINE`,
 		RunE: func(c *cobra.Command, args []string) error {
 			id := args[0]
-			body := make(map[string]interface{})
+			updates := make(map[string]interface{})
 
 			if c.Flags().Changed("label") {
-				body["label"] = label
+				updates["label"] = label
 			}
-			if c.Flags().Changed("type") {
-				body["type"] = chartType
+			if c.Flags().Changed("chart-type") {
+				updates["type"] = chartType
 			}
 			if c.Flags().Changed("description") {
-				body["description"] = description
+				updates["description"] = description
 			}
 
-			if len(body) == 0 {
+			if len(updates) == 0 {
 				return fmt.Errorf("no fields specified to update")
 			}
 
 			var result map[string]interface{}
-			if err := cmd.APIClient.Do(c.Context(), "PUT", "/v2/api/reports/chart-definitions/"+id, body, &result); err != nil {
+			if err := cmd.APIClient.DoUpdate(c.Context(), "/v2/api/reports/chart-definitions/"+id, updates, &result); err != nil {
 				return err
 			}
 			return renderChart(result)
@@ -47,7 +47,7 @@ func newUpdateCmd() *cobra.Command {
 	}
 
 	c.Flags().StringVar(&label, "label", "", "Chart label")
-	c.Flags().StringVar(&chartType, "type", "", "Chart type (e.g. bar, line, pie)")
+	c.Flags().StringVar(&chartType, "chart-type", "", "Chart type (LINE, BAR, COLUMN, DUAL_AXIS, PIE)")
 	c.Flags().StringVar(&description, "description", "", "Chart description")
 
 	return c

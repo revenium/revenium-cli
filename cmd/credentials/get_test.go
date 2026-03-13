@@ -17,14 +17,14 @@ import (
 
 func TestGetCredential(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(t, "/v2/api/credentials/cred-1", r.URL.Path)
+		assert.Equal(t, "/v2/api/provider-credentials/cred-1", r.URL.Path)
 		w.Header().Set("Content-Type", "application/json")
 		fmt.Fprint(w, `{"id": "cred-1", "label": "My Key", "provider": "openai", "credentialType": "API_KEY", "apiKey": "sk-abc123xyz7f3a"}`)
 	}))
 	defer srv.Close()
 
 	var buf bytes.Buffer
-	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", false)
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", "", "", false)
 	cmd.Output = output.NewWithWriter(&buf, &buf, false, false)
 
 	c := newGetCmd()
@@ -47,7 +47,7 @@ func TestGetCredentialJSON(t *testing.T) {
 	defer srv.Close()
 
 	var buf bytes.Buffer
-	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", false)
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", "", "", false)
 	cmd.Output = output.NewWithWriter(&buf, &buf, true, false)
 
 	c := newGetCmd()

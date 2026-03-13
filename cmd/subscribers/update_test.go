@@ -19,8 +19,18 @@ import (
 func TestUpdateSubscriber(t *testing.T) {
 	var receivedBody map[string]interface{}
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(t, "PUT", r.Method)
 		assert.Equal(t, "/v2/api/subscribers/sub-1", r.URL.Path)
+		if r.Method == "GET" {
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"id":        "sub-1",
+				"email":     "old@example.com",
+				"firstName": "John",
+				"lastName":  "Doe",
+			})
+			return
+		}
+		assert.Equal(t, "PUT", r.Method)
 		body, _ := io.ReadAll(r.Body)
 		json.Unmarshal(body, &receivedBody)
 		w.Header().Set("Content-Type", "application/json")
@@ -29,7 +39,7 @@ func TestUpdateSubscriber(t *testing.T) {
 	defer srv.Close()
 
 	var buf bytes.Buffer
-	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", false)
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", "", "", false)
 	cmd.Output = output.NewWithWriter(&buf, &buf, false, false)
 
 	c := newUpdateCmd()
@@ -41,9 +51,6 @@ func TestUpdateSubscriber(t *testing.T) {
 	out := buf.String()
 	assert.Contains(t, out, "new@example.com")
 	assert.Equal(t, "new@example.com", receivedBody["email"])
-	// Only email should be in the body (partial update)
-	_, hasFirstName := receivedBody["firstName"]
-	assert.False(t, hasFirstName, "firstName should not be sent when not changed")
 }
 
 func TestUpdateSubscriberNoFields(t *testing.T) {

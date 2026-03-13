@@ -29,7 +29,7 @@ func TestPromptCaptureSet(t *testing.T) {
 	defer srv.Close()
 
 	var buf bytes.Buffer
-	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", false)
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", "", "", false)
 	cmd.Output = output.NewWithWriter(&buf, &buf, false, false)
 
 	c := newPromptCaptureSetCmd()
@@ -38,7 +38,7 @@ func TestPromptCaptureSet(t *testing.T) {
 	err := c.Execute()
 
 	require.NoError(t, err)
-	assert.Equal(t, true, receivedBody["enabled"])
+	assert.Equal(t, true, receivedBody["promptCaptureEnabled"])
 	out := buf.String()
 	assert.Contains(t, out, "enabled")
 	assert.Contains(t, out, "true")

@@ -17,17 +17,17 @@ import (
 
 func TestPricingList(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(t, "/v2/api/sources/ai/models/mdl-1/pricing/dimensions", r.URL.Path)
+		assert.Equal(t, "/v2/api/sources/ai/models/mdl-1/pricing", r.URL.Path)
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `[
-			{"id": "dim-1", "name": "Input Tokens", "dimensionType": "input", "unitPrice": "0.003"},
-			{"id": "dim-2", "name": "Output Tokens", "dimensionType": "output", "unitPrice": "0.006"}
-		]`)
+		fmt.Fprint(w, `{"modelId":"mdl-1","dimensions":[
+			{"id": "dim-1", "name": "Input Tokens", "dimensionType": "input", "unitPrice": 0.003},
+			{"id": "dim-2", "name": "Output Tokens", "dimensionType": "output", "unitPrice": 0.006}
+		]}`)
 	}))
 	defer srv.Close()
 
 	var buf bytes.Buffer
-	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", false)
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", "", "", false)
 	cmd.Output = output.NewWithWriter(&buf, &buf, false, false)
 
 	c := newPricingListCmd()
@@ -39,7 +39,6 @@ func TestPricingList(t *testing.T) {
 	out := buf.String()
 	assert.Contains(t, out, "dim-1")
 	assert.Contains(t, out, "Input Tokens")
-	assert.Contains(t, out, "input")
 	assert.Contains(t, out, "0.003")
 	assert.Contains(t, out, "dim-2")
 	assert.Contains(t, out, "Output Tokens")
@@ -48,12 +47,12 @@ func TestPricingList(t *testing.T) {
 func TestPricingListEmpty(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `[]`)
+		fmt.Fprint(w, `{"modelId":"mdl-1","dimensions":[]}`)
 	}))
 	defer srv.Close()
 
 	var buf bytes.Buffer
-	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", false)
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", "", "", false)
 	cmd.Output = output.NewWithWriter(&buf, &buf, false, false)
 
 	c := newPricingListCmd()
@@ -68,14 +67,14 @@ func TestPricingListEmpty(t *testing.T) {
 func TestPricingListJSON(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `[
-			{"id": "dim-1", "name": "Input Tokens", "dimensionType": "input", "unitPrice": "0.003"}
-		]`)
+		fmt.Fprint(w, `{"modelId":"mdl-1","dimensions":[
+			{"id": "dim-1", "name": "Input Tokens", "dimensionType": "input", "unitPrice": 0.003}
+		]}`)
 	}))
 	defer srv.Close()
 
 	var buf bytes.Buffer
-	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", false)
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", "", "", false)
 	cmd.Output = output.NewWithWriter(&buf, &buf, true, false)
 
 	c := newPricingListCmd()
@@ -94,12 +93,12 @@ func TestPricingListJSON(t *testing.T) {
 func TestPricingListEmptyJSON(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `[]`)
+		fmt.Fprint(w, `{"modelId":"mdl-1","dimensions":[]}`)
 	}))
 	defer srv.Close()
 
 	var buf bytes.Buffer
-	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", false)
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", "", "", false)
 	cmd.Output = output.NewWithWriter(&buf, &buf, true, false)
 
 	c := newPricingListCmd()
@@ -119,12 +118,12 @@ func TestPricingListVerifyPath(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		receivedPath = r.URL.Path
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `[]`)
+		fmt.Fprint(w, `{"modelId":"mdl-1","dimensions":[]}`)
 	}))
 	defer srv.Close()
 
 	var buf bytes.Buffer
-	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", false)
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", "", "", false)
 	cmd.Output = output.NewWithWriter(&buf, &buf, false, false)
 
 	c := newPricingListCmd()
@@ -134,5 +133,5 @@ func TestPricingListVerifyPath(t *testing.T) {
 
 	require.NoError(t, err)
 	assert.Contains(t, receivedPath, "my-model-id")
-	assert.Equal(t, "/v2/api/sources/ai/models/my-model-id/pricing/dimensions", receivedPath)
+	assert.Equal(t, "/v2/api/sources/ai/models/my-model-id/pricing", receivedPath)
 }

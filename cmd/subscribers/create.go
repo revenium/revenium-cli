@@ -27,9 +27,13 @@ func newCreateCmd() *cobra.Command {
 			if c.Flags().Changed("last-name") {
 				body["lastName"] = lastName
 			}
+			// The API requires organizationIds; default to the configured team ID
+			if cmd.APIClient.TeamID != "" {
+				body["organizationIds"] = []string{cmd.APIClient.TeamID}
+			}
 
 			var result map[string]interface{}
-			if err := cmd.APIClient.Do(c.Context(), "POST", "/v2/api/subscribers", body, &result); err != nil {
+			if err := cmd.APIClient.DoCreate(c.Context(), "/v2/api/subscribers", body, &result); err != nil {
 				return err
 			}
 			return renderSubscriber(result)

@@ -7,23 +7,41 @@ import (
 )
 
 func newCreateCmd() *cobra.Command {
-	var name string
+	var (
+		name           string
+		alertType      string
+		metricType     string
+		operatorType   string
+		threshold      float64
+		periodDuration string
+		notifications  []string
+	)
 
 	c := &cobra.Command{
 		Use:   "create",
 		Short: "Create an anomaly detection rule that generates AI alerts",
-		Example: `  # Create an alert rule
-  revenium alerts create --name "High Cost Alert"
+		Example: `  # Create a cost threshold alert
+  revenium alerts create --name "High Cost Alert" --threshold 100
 
-  # Create an alert rule for latency monitoring
-  revenium alerts create --name "Latency Spike"`,
+  # Create a tokens-per-minute alert
+  revenium alerts create --name "TPM Spike" --metric-type TOKENS_PER_MINUTE --threshold 5000 --period ONE_HOUR`,
 		RunE: func(c *cobra.Command, args []string) error {
 			body := map[string]interface{}{
-				"name": name,
+				"name":                  name,
+				"alertType":             alertType,
+				"metricType":            metricType,
+				"operatorType":          operatorType,
+				"threshold":             threshold,
+				"periodDuration":        periodDuration,
+				"notificationAddresses": notifications,
+				"slackConfigurations":   []interface{}{},
+				"webhookConfigurations": []interface{}{},
+				"enabled":               true,
+				"firing":                false,
 			}
 
 			var result map[string]interface{}
-			if err := cmd.APIClient.Do(c.Context(), "POST", "/v2/api/sources/ai/anomaly", body, &result); err != nil {
+			if err := cmd.APIClient.DoCreate(c.Context(), "/v2/api/sources/ai/anomaly", body, &result); err != nil {
 				return err
 			}
 			return renderAlert(result)
@@ -31,7 +49,14 @@ func newCreateCmd() *cobra.Command {
 	}
 
 	c.Flags().StringVar(&name, "name", "", "Alert rule name")
+	c.Flags().StringVar(&alertType, "alert-type", "THRESHOLD", "Alert type (THRESHOLD, RELATIVE_CHANGE, CUMULATIVE_USAGE)")
+	c.Flags().StringVar(&metricType, "metric-type", "TOTAL_COST", "Metric type (TOTAL_COST, TOKEN_COUNT, TOKENS_PER_MINUTE, etc.)")
+	c.Flags().StringVar(&operatorType, "operator-type", "GREATER_THAN", "Operator (GREATER_THAN, LESS_THAN, etc.)")
+	c.Flags().Float64Var(&threshold, "threshold", 0, "Threshold value")
+	c.Flags().StringVar(&periodDuration, "period", "DAILY", "Evaluation period (DAILY, WEEKLY, MONTHLY, QUARTERLY)")
+	c.Flags().StringSliceVar(&notifications, "notify", []string{}, "Notification email addresses")
 	_ = c.MarkFlagRequired("name")
+	_ = c.MarkFlagRequired("threshold")
 
 	return c
 }

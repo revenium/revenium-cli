@@ -16,9 +16,11 @@ var configDirOverride string
 
 // Config holds the CLI configuration values.
 type Config struct {
-	APIKey string
-	APIURL string
-	TeamID string
+	APIKey   string
+	APIURL   string
+	TeamID   string
+	TenantID string
+	OwnerID  string
 }
 
 // configDir returns the configuration directory path.
@@ -64,6 +66,8 @@ func Load() (*Config, error) {
 	_ = viper.BindEnv("api-key")
 	_ = viper.BindEnv("api-url")
 	_ = viper.BindEnv("team-id")
+	_ = viper.BindEnv("tenant-id")
+	_ = viper.BindEnv("owner-id")
 
 	viper.SetDefault("api-url", "https://api.revenium.ai/profitstream")
 
@@ -78,9 +82,11 @@ func Load() (*Config, error) {
 	}
 
 	return &Config{
-		APIKey: viper.GetString("api-key"),
-		APIURL: viper.GetString("api-url"),
-		TeamID: viper.GetString("team-id"),
+		APIKey:   viper.GetString("api-key"),
+		APIURL:   viper.GetString("api-url"),
+		TeamID:   viper.GetString("team-id"),
+		TenantID: viper.GetString("tenant-id"),
+		OwnerID:  viper.GetString("owner-id"),
 	}, nil
 }
 

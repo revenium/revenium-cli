@@ -26,7 +26,7 @@ func newToolEventsCmd() *cobra.Command {
   revenium metrics tool-events --from 2024-01-01T00:00:00Z --to 2024-01-31T23:59:59Z`,
 		RunE: func(c *cobra.Command, args []string) error {
 			var metrics []map[string]interface{}
-			path := buildPath("/v2/api/sources/metrics/tools")
+			path := buildPath("/v2/api/sources/metrics/tool/events")
 			if err := cmd.APIClient.DoList(c.Context(), path, &metrics); err != nil {
 				return err
 			}

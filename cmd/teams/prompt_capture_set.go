@@ -9,10 +9,7 @@ import (
 )
 
 func newPromptCaptureSetCmd() *cobra.Command {
-	var (
-		enabled        bool
-		maxPromptLen   int
-	)
+	var enabled bool
 
 	c := &cobra.Command{
 		Use:   "set <team-id>",
@@ -27,10 +24,7 @@ func newPromptCaptureSetCmd() *cobra.Command {
 			body := make(map[string]interface{})
 
 			if c.Flags().Changed("enabled") {
-				body["enabled"] = enabled
-			}
-			if c.Flags().Changed("max-prompt-length") {
-				body["maxPromptLength"] = maxPromptLen
+				body["promptCaptureEnabled"] = enabled
 			}
 
 			if len(body) == 0 {
@@ -48,7 +42,6 @@ func newPromptCaptureSetCmd() *cobra.Command {
 	}
 
 	c.Flags().BoolVar(&enabled, "enabled", false, "Enable or disable prompt capture")
-	c.Flags().IntVar(&maxPromptLen, "max-prompt-length", 0, "Maximum prompt length")
 
 	return c
 }

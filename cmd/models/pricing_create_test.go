@@ -24,26 +24,26 @@ func TestPricingCreate(t *testing.T) {
 		body, _ := io.ReadAll(r.Body)
 		json.Unmarshal(body, &receivedBody)
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `{"id": "dim-new", "name": "Input Tokens", "dimensionType": "input", "unitPrice": "0.003"}`)
+		fmt.Fprint(w, `{"id": "dim-new", "billingUnit": "PER_TOKEN", "modality": "TEXT", "costType": "TEXT_TOKEN_INPUT", "unitPrice": 0.003}`)
 	}))
 	defer srv.Close()
 
 	var buf bytes.Buffer
-	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", false)
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", "", "", false)
 	cmd.Output = output.NewWithWriter(&buf, &buf, false, false)
 
 	c := newPricingCreateCmd()
 	c.SetOut(&buf)
-	c.SetArgs([]string{"mdl-1", "--name", "Input Tokens", "--type", "input", "--price", "0.003"})
+	c.SetArgs([]string{"mdl-1", "--billing-unit", "PER_TOKEN", "--modality", "TEXT", "--cost-type", "TEXT_TOKEN_INPUT", "--price", "0.003"})
 	err := c.Execute()
 
 	require.NoError(t, err)
 	assert.Equal(t, "POST", receivedMethod)
-	assert.Equal(t, "Input Tokens", receivedBody["name"])
-	assert.Equal(t, "input", receivedBody["dimensionType"])
+	assert.Equal(t, "PER_TOKEN", receivedBody["billingUnit"])
+	assert.Equal(t, "TEXT", receivedBody["modality"])
+	assert.Equal(t, "TEXT_TOKEN_INPUT", receivedBody["costType"])
 	assert.Equal(t, 0.003, receivedBody["unitPrice"])
 	assert.Contains(t, buf.String(), "dim-new")
-	assert.Contains(t, buf.String(), "Input Tokens")
 }
 
 func TestPricingCreateVerifyPath(t *testing.T) {
@@ -51,17 +51,17 @@ func TestPricingCreateVerifyPath(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		receivedPath = r.URL.Path
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `{"id": "dim-new", "name": "Input Tokens", "dimensionType": "input", "unitPrice": "0.003"}`)
+		fmt.Fprint(w, `{"id": "dim-new", "billingUnit": "PER_TOKEN", "modality": "TEXT", "costType": "TEXT_TOKEN_INPUT", "unitPrice": 0.003}`)
 	}))
 	defer srv.Close()
 
 	var buf bytes.Buffer
-	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", false)
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", "", "", false)
 	cmd.Output = output.NewWithWriter(&buf, &buf, false, false)
 
 	c := newPricingCreateCmd()
 	c.SetOut(&buf)
-	c.SetArgs([]string{"my-model-id", "--name", "Test", "--price", "0.001"})
+	c.SetArgs([]string{"my-model-id", "--billing-unit", "PER_TOKEN", "--modality", "TEXT", "--cost-type", "TEXT_TOKEN_INPUT", "--price", "0.001"})
 	err := c.Execute()
 
 	require.NoError(t, err)

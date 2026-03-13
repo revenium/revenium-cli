@@ -19,8 +19,18 @@ import (
 func TestUpdateUser(t *testing.T) {
 	var receivedBody map[string]interface{}
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(t, "PUT", r.Method)
 		assert.Equal(t, "/v2/api/users/user-1", r.URL.Path)
+		if r.Method == "GET" {
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"id":        "user-1",
+				"email":     "old@example.com",
+				"firstName": "Jane",
+				"lastName":  "Doe",
+			})
+			return
+		}
+		assert.Equal(t, "PUT", r.Method)
 		body, _ := io.ReadAll(r.Body)
 		json.Unmarshal(body, &receivedBody)
 		w.Header().Set("Content-Type", "application/json")
@@ -29,7 +39,7 @@ func TestUpdateUser(t *testing.T) {
 	defer srv.Close()
 
 	var buf bytes.Buffer
-	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", false)
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", "", "", false)
 	cmd.Output = output.NewWithWriter(&buf, &buf, false, false)
 
 	c := newUpdateCmd()
@@ -43,16 +53,41 @@ func TestUpdateUser(t *testing.T) {
 	assert.Equal(t, "new@example.com", receivedBody["email"])
 }
 
-func TestUpdateUserNoFields(t *testing.T) {
+func TestUpdateUserWithDefaults(t *testing.T) {
+	var receivedBody map[string]interface{}
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "GET" {
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"id":        "user-1",
+				"email":     "test@example.com",
+				"firstName": "Jane",
+				"lastName":  "Doe",
+			})
+			return
+		}
+		body, _ := io.ReadAll(r.Body)
+		json.Unmarshal(body, &receivedBody)
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprint(w, `{"id": "user-1", "email": "test@example.com", "firstName": "Updated", "lastName": "Doe"}`)
+	}))
+	defer srv.Close()
+
 	var buf bytes.Buffer
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "team-1", "", "", false)
 	cmd.Output = output.NewWithWriter(&buf, &buf, false, false)
 
 	c := newUpdateCmd()
 	c.SetOut(&buf)
-	c.SetErr(&buf)
-	c.SetArgs([]string{"user-1"})
+	c.SetArgs([]string{"user-1", "--first-name", "Updated"})
 	err := c.Execute()
 
-	require.Error(t, err)
-	assert.Contains(t, err.Error(), "no fields specified to update")
+	require.NoError(t, err)
+	// Verify default roles and teamIds are included
+	roles, ok := receivedBody["roles"].([]interface{})
+	assert.True(t, ok)
+	assert.Contains(t, roles, "ROLE_API_CONSUMER")
+	teamIds, ok := receivedBody["teamIds"].([]interface{})
+	assert.True(t, ok)
+	assert.Contains(t, teamIds, "team-1")
 }

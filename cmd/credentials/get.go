@@ -18,7 +18,7 @@ func newGetCmd() *cobra.Command {
   revenium credentials get cred-123 --json`,
 		RunE: func(c *cobra.Command, args []string) error {
 			var credential map[string]interface{}
-			if err := cmd.APIClient.Do(c.Context(), "GET", "/v2/api/credentials/"+args[0], nil, &credential); err != nil {
+			if err := cmd.APIClient.Do(c.Context(), "GET", "/v2/api/provider-credentials/"+args[0], nil, &credential); err != nil {
 				return err
 			}
 			return renderCredential(credential)

@@ -33,9 +33,21 @@ func newShowCmd() *cobra.Command {
 				teamID = "(not set)"
 			}
 
-			fmt.Fprintf(cmd.OutOrStdout(), "API Key:  %s\n", apiKey)
-			fmt.Fprintf(cmd.OutOrStdout(), "API URL:  %s\n", cfg.APIURL)
-			fmt.Fprintf(cmd.OutOrStdout(), "Team ID:  %s\n", teamID)
+			tenantID := cfg.TenantID
+			if tenantID == "" {
+				tenantID = "(not set)"
+			}
+
+			ownerID := cfg.OwnerID
+			if ownerID == "" {
+				ownerID = "(not set)"
+			}
+
+			fmt.Fprintf(cmd.OutOrStdout(), "API Key:    %s\n", apiKey)
+			fmt.Fprintf(cmd.OutOrStdout(), "API URL:    %s\n", cfg.APIURL)
+			fmt.Fprintf(cmd.OutOrStdout(), "Team ID:    %s\n", teamID)
+			fmt.Fprintf(cmd.OutOrStdout(), "Tenant ID:  %s\n", tenantID)
+			fmt.Fprintf(cmd.OutOrStdout(), "Owner ID:   %s\n", ownerID)
 			return nil
 		},
 	}

@@ -19,8 +19,16 @@ import (
 func TestUpdateProduct(t *testing.T) {
 	var receivedBody map[string]interface{}
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(t, "PUT", r.Method)
 		assert.Equal(t, "/v2/api/products/prod-1", r.URL.Path)
+		if r.Method == "GET" {
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"id":   "prod-1",
+				"name": "Old Name",
+			})
+			return
+		}
+		assert.Equal(t, "PUT", r.Method)
 		body, _ := io.ReadAll(r.Body)
 		json.Unmarshal(body, &receivedBody)
 		w.Header().Set("Content-Type", "application/json")
@@ -29,7 +37,7 @@ func TestUpdateProduct(t *testing.T) {
 	defer srv.Close()
 
 	var buf bytes.Buffer
-	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", false)
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", "", "", false)
 	cmd.Output = output.NewWithWriter(&buf, &buf, false, false)
 
 	c := newUpdateCmd()
@@ -41,8 +49,6 @@ func TestUpdateProduct(t *testing.T) {
 	out := buf.String()
 	assert.Contains(t, out, "Updated")
 	assert.Equal(t, "Updated", receivedBody["name"])
-	_, hasDescription := receivedBody["description"]
-	assert.False(t, hasDescription, "description should not be sent when not changed")
 }
 
 func TestUpdateProductNoFields(t *testing.T) {

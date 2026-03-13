@@ -19,8 +19,17 @@ import (
 func TestUpdateSourcePartial(t *testing.T) {
 	var receivedBody map[string]interface{}
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(t, "PUT", r.Method)
 		assert.Equal(t, "/v2/api/sources/src-1", r.URL.Path)
+		if r.Method == "GET" {
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"id":   "src-1",
+				"name": "Old Name",
+				"type": "API",
+			})
+			return
+		}
+		assert.Equal(t, "PUT", r.Method)
 		body, _ := io.ReadAll(r.Body)
 		json.Unmarshal(body, &receivedBody)
 		w.Header().Set("Content-Type", "application/json")
@@ -29,7 +38,7 @@ func TestUpdateSourcePartial(t *testing.T) {
 	defer srv.Close()
 
 	var buf bytes.Buffer
-	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", false)
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", "", "", false)
 	cmd.Output = output.NewWithWriter(&buf, &buf, false, false)
 
 	c := newUpdateCmd()
@@ -40,10 +49,8 @@ func TestUpdateSourcePartial(t *testing.T) {
 	require.NoError(t, err)
 	out := buf.String()
 	assert.Contains(t, out, "Updated Name")
-	// Only name should be in the body (partial update)
+	// Name should be updated in the merged body
 	assert.Equal(t, "Updated Name", receivedBody["name"])
-	_, hasType := receivedBody["type"]
-	assert.False(t, hasType, "type should not be sent when not changed")
 }
 
 func TestUpdateSourceNoFlags(t *testing.T) {

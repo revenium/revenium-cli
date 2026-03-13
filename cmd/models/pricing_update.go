@@ -10,9 +10,7 @@ import (
 
 func newPricingUpdateCmd() *cobra.Command {
 	var (
-		name    string
-		dimType string
-		price   float64
+		price float64
 	)
 
 	c := &cobra.Command{
@@ -24,33 +22,39 @@ func newPricingUpdateCmd() *cobra.Command {
 		RunE: func(c *cobra.Command, args []string) error {
 			modelID := args[0]
 			dimID := args[1]
-			body := make(map[string]interface{})
 
-			if c.Flags().Changed("name") {
-				body["name"] = name
-			}
-			if c.Flags().Changed("type") {
-				body["dimensionType"] = dimType
-			}
-			if c.Flags().Changed("price") {
-				body["unitPrice"] = price
-			}
-
-			if len(body) == 0 {
+			if !c.Flags().Changed("price") {
 				return fmt.Errorf("no fields specified to update")
 			}
 
+			// Fetch existing dimension from the pricing list endpoint
+			dimensions, err := fetchPricingDimensions(c, modelID)
+			if err != nil {
+				return err
+			}
+
+			var existing map[string]interface{}
+			for _, d := range dimensions {
+				if id, _ := d["id"].(string); id == dimID {
+					existing = d
+					break
+				}
+			}
+			if existing == nil {
+				return fmt.Errorf("pricing dimension %s not found", dimID)
+			}
+
+			existing["unitPrice"] = price
+
 			path := fmt.Sprintf("/v2/api/sources/ai/models/%s/pricing/dimensions/%s", modelID, dimID)
 			var result map[string]interface{}
-			if err := cmd.APIClient.Do(c.Context(), "PUT", path, body, &result); err != nil {
+			if err := cmd.APIClient.Do(c.Context(), "PUT", path, existing, &result); err != nil {
 				return err
 			}
 			return renderPricingDimension(result)
 		},
 	}
 
-	c.Flags().StringVar(&name, "name", "", "Dimension name")
-	c.Flags().StringVar(&dimType, "type", "", "Dimension type (e.g., input, output)")
 	c.Flags().Float64Var(&price, "price", 0, "Unit price")
 
 	return c

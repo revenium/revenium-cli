@@ -31,7 +31,7 @@ func newDeleteCmd() *cobra.Command {
 				return nil
 			}
 
-			if err := cmd.APIClient.Do(c.Context(), "DELETE", "/v2/api/credentials/"+id, nil, nil); err != nil {
+			if err := cmd.APIClient.Do(c.Context(), "DELETE", "/v2/api/provider-credentials/"+id, nil, nil); err != nil {
 				return err
 			}
 

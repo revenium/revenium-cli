@@ -17,7 +17,7 @@ import (
 
 func TestToolEventMetrics(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(t, "/v2/api/sources/metrics/tools", r.URL.Path)
+		assert.Equal(t, "/v2/api/sources/metrics/tool/events", r.URL.Path)
 		assert.NotEmpty(t, r.URL.Query().Get("startDate"))
 		assert.NotEmpty(t, r.URL.Query().Get("endDate"))
 		w.Header().Set("Content-Type", "application/json")
@@ -26,7 +26,7 @@ func TestToolEventMetrics(t *testing.T) {
 	defer srv.Close()
 
 	var buf bytes.Buffer
-	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", false)
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", "", "", false)
 	cmd.Output = output.NewWithWriter(&buf, &buf, false, false)
 
 	fromFlag = "2024-01-01T00:00:00Z"
@@ -52,7 +52,7 @@ func TestToolEventMetricsEmpty(t *testing.T) {
 	defer srv.Close()
 
 	var buf bytes.Buffer
-	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", false)
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", "", "", false)
 	cmd.Output = output.NewWithWriter(&buf, &buf, false, false)
 
 	fromFlag = "2024-01-01T00:00:00Z"
@@ -74,7 +74,7 @@ func TestToolEventMetricsJSON(t *testing.T) {
 	defer srv.Close()
 
 	var buf bytes.Buffer
-	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", false)
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", "", "", false)
 	cmd.Output = output.NewWithWriter(&buf, &buf, true, false)
 
 	fromFlag = "2024-01-01T00:00:00Z"

@@ -23,33 +23,33 @@ func newUpdateCmd() *cobra.Command {
   revenium tools update tool-1 --tool-type MCP_SERVER --tool-provider acme`,
 		RunE: func(c *cobra.Command, args []string) error {
 			id := args[0]
-			body := make(map[string]interface{})
+			updates := make(map[string]interface{})
 
 			if c.Flags().Changed("name") {
-				body["name"] = name
+				updates["name"] = name
 			}
 			if c.Flags().Changed("tool-id") {
-				body["toolId"] = toolID
+				updates["toolId"] = toolID
 			}
 			if c.Flags().Changed("tool-type") {
-				body["toolType"] = toolType
+				updates["toolType"] = toolType
 			}
 			if c.Flags().Changed("description") {
-				body["description"] = description
+				updates["description"] = description
 			}
 			if c.Flags().Changed("tool-provider") {
-				body["toolProvider"] = toolProvider
+				updates["toolProvider"] = toolProvider
 			}
 			if c.Flags().Changed("enabled") {
-				body["enabled"] = enabled
+				updates["enabled"] = enabled
 			}
 
-			if len(body) == 0 {
+			if len(updates) == 0 {
 				return fmt.Errorf("no fields specified to update")
 			}
 
 			var result map[string]interface{}
-			if err := cmd.APIClient.Do(c.Context(), "PUT", "/v2/api/tools/"+id, body, &result); err != nil {
+			if err := cmd.APIClient.DoUpdate(c.Context(), "/v2/api/tools/"+id, updates, &result); err != nil {
 				return err
 			}
 			return renderTool(result)

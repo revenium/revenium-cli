@@ -29,12 +29,12 @@ func TestCreateSubscription(t *testing.T) {
 	defer srv.Close()
 
 	var buf bytes.Buffer
-	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", false)
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", "", "", false)
 	cmd.Output = output.NewWithWriter(&buf, &buf, false, false)
 
 	c := newCreateCmd()
 	c.SetOut(&buf)
-	c.SetArgs([]string{"--description", "New sub", "--subscriber-id", "sub-1", "--product-id", "prod-1"})
+	c.SetArgs([]string{"--name", "API Access", "--client-email", "user@example.com", "--description", "New sub", "--subscriber-id", "sub-1", "--product-id", "prod-1"})
 	err := c.Execute()
 
 	require.NoError(t, err)
@@ -56,12 +56,12 @@ func TestCreateSubscriptionMinimal(t *testing.T) {
 	defer srv.Close()
 
 	var buf bytes.Buffer
-	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", false)
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", "", "", false)
 	cmd.Output = output.NewWithWriter(&buf, &buf, false, false)
 
 	c := newCreateCmd()
 	c.SetOut(&buf)
-	c.SetArgs([]string{"--description", "Minimal"})
+	c.SetArgs([]string{"--name", "Minimal Sub", "--client-email", "user@example.com", "--description", "Minimal"})
 	err := c.Execute()
 
 	require.NoError(t, err)
