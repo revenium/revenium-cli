@@ -9,7 +9,7 @@ import (
 )
 
 func newListCmd() *cobra.Command {
-	return &cobra.Command{
+	c := &cobra.Command{
 		Use:   "list",
 		Short: "List all anomaly detection rules",
 		Args:  cobra.NoArgs,
@@ -20,7 +20,7 @@ func newListCmd() *cobra.Command {
   revenium anomalies list --json`,
 		RunE: func(c *cobra.Command, args []string) error {
 			var anomalies []map[string]interface{}
-			if err := cmd.APIClient.DoList(c.Context(), "/v2/api/sources/ai/anomaly", &anomalies); err != nil {
+			if err := cmd.APIClient.DoList(c.Context(), "/v2/api/sources/ai/anomaly", cmd.ListOptsFromFlags(c), &anomalies); err != nil {
 				return err
 			}
 			if len(anomalies) == 0 {
@@ -33,4 +33,7 @@ func newListCmd() *cobra.Command {
 			return cmd.Output.Render(tableDef, toRows(anomalies), anomalies)
 		},
 	}
+
+	cmd.AddListFlags(c)
+	return c
 }

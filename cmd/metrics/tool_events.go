@@ -15,7 +15,7 @@ var toolEventsTableDef = output.TableDef{
 }
 
 func newToolEventsCmd() *cobra.Command {
-	return &cobra.Command{
+	c := &cobra.Command{
 		Use:   "tool-events",
 		Short: "Query tool event metrics",
 		Args:  cobra.NoArgs,
@@ -27,7 +27,7 @@ func newToolEventsCmd() *cobra.Command {
 		RunE: func(c *cobra.Command, args []string) error {
 			var metrics []map[string]interface{}
 			path := buildPath("/v2/api/sources/metrics/tool/events")
-			if err := cmd.APIClient.DoList(c.Context(), path, &metrics); err != nil {
+			if err := cmd.APIClient.DoList(c.Context(), path, cmd.ListOptsFromFlags(c), &metrics); err != nil {
 				return err
 			}
 			if len(metrics) == 0 {
@@ -40,6 +40,9 @@ func newToolEventsCmd() *cobra.Command {
 			return cmd.Output.Render(toolEventsTableDef, toToolEventsRows(metrics), metrics)
 		},
 	}
+
+	cmd.AddListFlags(c)
+	return c
 }
 
 func toToolEventsRows(metrics []map[string]interface{}) [][]string {

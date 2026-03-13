@@ -15,7 +15,7 @@ var completionsTableDef = output.TableDef{
 }
 
 func newCompletionsCmd() *cobra.Command {
-	return &cobra.Command{
+	c := &cobra.Command{
 		Use:   "completions",
 		Short: "Query AI completion metrics",
 		Args:  cobra.NoArgs,
@@ -27,7 +27,7 @@ func newCompletionsCmd() *cobra.Command {
 		RunE: func(c *cobra.Command, args []string) error {
 			var metrics []map[string]interface{}
 			path := buildPath("/v2/api/sources/metrics/ai/completions")
-			if err := cmd.APIClient.DoList(c.Context(), path, &metrics); err != nil {
+			if err := cmd.APIClient.DoList(c.Context(), path, cmd.ListOptsFromFlags(c), &metrics); err != nil {
 				return err
 			}
 			if len(metrics) == 0 {
@@ -40,6 +40,9 @@ func newCompletionsCmd() *cobra.Command {
 			return cmd.Output.Render(completionsTableDef, toCompletionRows(metrics), metrics)
 		},
 	}
+
+	cmd.AddListFlags(c)
+	return c
 }
 
 func toCompletionRows(metrics []map[string]interface{}) [][]string {

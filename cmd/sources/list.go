@@ -9,7 +9,7 @@ import (
 )
 
 func newListCmd() *cobra.Command {
-	return &cobra.Command{
+	c := &cobra.Command{
 		Use:   "list",
 		Short: "List all sources",
 		Args:  cobra.NoArgs,
@@ -20,7 +20,7 @@ func newListCmd() *cobra.Command {
   revenium sources list --json`,
 		RunE: func(c *cobra.Command, args []string) error {
 			var sources []map[string]interface{}
-			if err := cmd.APIClient.DoList(c.Context(), "/v2/api/sources", &sources); err != nil {
+			if err := cmd.APIClient.DoList(c.Context(), "/v2/api/sources", cmd.ListOptsFromFlags(c), &sources); err != nil {
 				return err
 			}
 			if len(sources) == 0 {
@@ -33,4 +33,7 @@ func newListCmd() *cobra.Command {
 			return cmd.Output.Render(tableDef, toRows(sources), sources)
 		},
 	}
+
+	cmd.AddListFlags(c)
+	return c
 }

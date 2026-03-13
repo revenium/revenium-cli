@@ -15,7 +15,7 @@ var apiMetricsTableDef = output.TableDef{
 }
 
 func newAPIMetricsCmd() *cobra.Command {
-	return &cobra.Command{
+	c := &cobra.Command{
 		Use:   "api",
 		Short: "Query API metrics",
 		Args:  cobra.NoArgs,
@@ -27,7 +27,7 @@ func newAPIMetricsCmd() *cobra.Command {
 		RunE: func(c *cobra.Command, args []string) error {
 			var metrics []map[string]interface{}
 			path := buildPath("/v2/api/sources/metrics/apis")
-			if err := cmd.APIClient.DoList(c.Context(), path, &metrics); err != nil {
+			if err := cmd.APIClient.DoList(c.Context(), path, cmd.ListOptsFromFlags(c), &metrics); err != nil {
 				return err
 			}
 			if len(metrics) == 0 {
@@ -40,6 +40,9 @@ func newAPIMetricsCmd() *cobra.Command {
 			return cmd.Output.Render(apiMetricsTableDef, toAPIMetricsRows(metrics), metrics)
 		},
 	}
+
+	cmd.AddListFlags(c)
+	return c
 }
 
 func toAPIMetricsRows(metrics []map[string]interface{}) [][]string {

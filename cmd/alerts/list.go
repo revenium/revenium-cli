@@ -9,7 +9,7 @@ import (
 )
 
 func newListCmd() *cobra.Command {
-	return &cobra.Command{
+	c := &cobra.Command{
 		Use:   "list",
 		Short: "List all AI alerts",
 		Args:  cobra.NoArgs,
@@ -20,7 +20,7 @@ func newListCmd() *cobra.Command {
   revenium alerts list --json`,
 		RunE: func(c *cobra.Command, args []string) error {
 			var alerts []map[string]interface{}
-			if err := cmd.APIClient.DoList(c.Context(), "/v2/api/sources/ai/alert", &alerts); err != nil {
+			if err := cmd.APIClient.DoList(c.Context(), "/v2/api/sources/ai/alert", cmd.ListOptsFromFlags(c), &alerts); err != nil {
 				return err
 			}
 			if len(alerts) == 0 {
@@ -33,4 +33,7 @@ func newListCmd() *cobra.Command {
 			return cmd.Output.Render(alertTableDef, toAlertRows(alerts), alerts)
 		},
 	}
+
+	cmd.AddListFlags(c)
+	return c
 }

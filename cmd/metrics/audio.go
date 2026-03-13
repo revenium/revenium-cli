@@ -15,7 +15,7 @@ var audioTableDef = output.TableDef{
 }
 
 func newAudioCmd() *cobra.Command {
-	return &cobra.Command{
+	c := &cobra.Command{
 		Use:   "audio",
 		Short: "Query AI audio metrics",
 		Args:  cobra.NoArgs,
@@ -27,7 +27,7 @@ func newAudioCmd() *cobra.Command {
 		RunE: func(c *cobra.Command, args []string) error {
 			var metrics []map[string]interface{}
 			path := buildPath("/v2/api/sources/metrics/ai/audio")
-			if err := cmd.APIClient.DoList(c.Context(), path, &metrics); err != nil {
+			if err := cmd.APIClient.DoList(c.Context(), path, cmd.ListOptsFromFlags(c), &metrics); err != nil {
 				return err
 			}
 			if len(metrics) == 0 {
@@ -40,6 +40,9 @@ func newAudioCmd() *cobra.Command {
 			return cmd.Output.Render(audioTableDef, toAudioRows(metrics), metrics)
 		},
 	}
+
+	cmd.AddListFlags(c)
+	return c
 }
 
 func toAudioRows(metrics []map[string]interface{}) [][]string {

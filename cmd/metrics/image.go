@@ -15,7 +15,7 @@ var imageTableDef = output.TableDef{
 }
 
 func newImageCmd() *cobra.Command {
-	return &cobra.Command{
+	c := &cobra.Command{
 		Use:   "image",
 		Short: "Query AI image metrics",
 		Args:  cobra.NoArgs,
@@ -27,7 +27,7 @@ func newImageCmd() *cobra.Command {
 		RunE: func(c *cobra.Command, args []string) error {
 			var metrics []map[string]interface{}
 			path := buildPath("/v2/api/sources/metrics/ai/images")
-			if err := cmd.APIClient.DoList(c.Context(), path, &metrics); err != nil {
+			if err := cmd.APIClient.DoList(c.Context(), path, cmd.ListOptsFromFlags(c), &metrics); err != nil {
 				return err
 			}
 			if len(metrics) == 0 {
@@ -40,6 +40,9 @@ func newImageCmd() *cobra.Command {
 			return cmd.Output.Render(imageTableDef, toImageRows(metrics), metrics)
 		},
 	}
+
+	cmd.AddListFlags(c)
+	return c
 }
 
 func toImageRows(metrics []map[string]interface{}) [][]string {

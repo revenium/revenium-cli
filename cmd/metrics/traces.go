@@ -15,7 +15,7 @@ var tracesTableDef = output.TableDef{
 }
 
 func newTracesCmd() *cobra.Command {
-	return &cobra.Command{
+	c := &cobra.Command{
 		Use:   "traces",
 		Short: "Query AI traces",
 		Args:  cobra.NoArgs,
@@ -27,7 +27,7 @@ func newTracesCmd() *cobra.Command {
 		RunE: func(c *cobra.Command, args []string) error {
 			var metrics []map[string]interface{}
 			path := buildPath("/v2/api/sources/metrics/ai/traces")
-			if err := cmd.APIClient.DoList(c.Context(), path, &metrics); err != nil {
+			if err := cmd.APIClient.DoList(c.Context(), path, cmd.ListOptsFromFlags(c), &metrics); err != nil {
 				return err
 			}
 			if len(metrics) == 0 {
@@ -45,6 +45,9 @@ func newTracesCmd() *cobra.Command {
 			return cmd.Output.Render(tracesTableDef, toTracesRows(grouped), grouped)
 		},
 	}
+
+	cmd.AddListFlags(c)
+	return c
 }
 
 // groupByTraceId aggregates trace entries by traceId, summing tokens and cost.

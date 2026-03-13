@@ -9,7 +9,7 @@ import (
 )
 
 func newListCmd() *cobra.Command {
-	return &cobra.Command{
+	c := &cobra.Command{
 		Use:   "list",
 		Short: "List all users",
 		Args:  cobra.NoArgs,
@@ -20,7 +20,7 @@ func newListCmd() *cobra.Command {
   revenium users list --json`,
 		RunE: func(c *cobra.Command, args []string) error {
 			var users []map[string]interface{}
-			if err := cmd.APIClient.DoList(c.Context(), "/v2/api/users", &users); err != nil {
+			if err := cmd.APIClient.DoList(c.Context(), "/v2/api/users", cmd.ListOptsFromFlags(c), &users); err != nil {
 				return err
 			}
 			if len(users) == 0 {
@@ -33,4 +33,7 @@ func newListCmd() *cobra.Command {
 			return cmd.Output.Render(tableDef, toRows(users), users)
 		},
 	}
+
+	cmd.AddListFlags(c)
+	return c
 }

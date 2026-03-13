@@ -240,32 +240,122 @@ func (c *Client) DoUpdate(ctx context.Context, path string, updates map[string]i
 	return c.Do(ctx, "PUT", path, existing, result)
 }
 
+// ListOptions controls pagination behavior for list operations.
+type ListOptions struct {
+	// Page is the 0-based page number. -1 means not set (use default).
+	Page int
+	// PageSize is the number of items per page. -1 means not set (use default).
+	PageSize int
+	// FetchAll iterates through all pages and returns the aggregate result.
+	// Ignored when Page or PageSize are explicitly set.
+	FetchAll bool
+}
+
 // DoList executes a GET request and unwraps the response into a slice.
 // It handles both Spring HATEOAS paginated responses
 // ({"_embedded": {"<resource>List": [...]}, "page": {...}}) and plain JSON arrays.
-func (c *Client) DoList(ctx context.Context, path string, result *[]map[string]interface{}) error {
+// When opts.FetchAll is true and no explicit page/pageSize is set, it iterates
+// through all pages to return the complete result set.
+func (c *Client) DoList(ctx context.Context, path string, opts ListOptions, result *[]map[string]interface{}) error {
+	explicitPaging := opts.Page >= 0 || opts.PageSize >= 0
+
+	if opts.FetchAll && !explicitPaging {
+		return c.doListAll(ctx, path, result)
+	}
+
+	paginatedPath := c.buildPaginatedPath(path, opts)
+	return c.doListOnePage(ctx, paginatedPath, result)
+}
+
+// buildPaginatedPath appends page and size query parameters to the path.
+func (c *Client) buildPaginatedPath(path string, opts ListOptions) string {
+	if opts.Page < 0 && opts.PageSize < 0 {
+		return path
+	}
+	sep := "?"
+	if strings.Contains(path, "?") {
+		sep = "&"
+	}
+	result := path
+	if opts.Page >= 0 {
+		result += fmt.Sprintf("%spage=%d", sep, opts.Page)
+		sep = "&"
+	}
+	if opts.PageSize >= 0 {
+		result += fmt.Sprintf("%ssize=%d", sep, opts.PageSize)
+	}
+	return result
+}
+
+// doListAll fetches all pages from a paginated endpoint and aggregates the results.
+func (c *Client) doListAll(ctx context.Context, path string, result *[]map[string]interface{}) error {
+	var all []map[string]interface{}
+	page := 0
+	pageSize := 100 // fetch in large batches
+
+	for {
+		opts := ListOptions{Page: page, PageSize: pageSize}
+		paginatedPath := c.buildPaginatedPath(path, opts)
+
+		items, totalPages, err := c.doListOnePageWithMeta(ctx, paginatedPath)
+		if err != nil {
+			return err
+		}
+
+		all = append(all, items...)
+
+		// If response was a plain array (totalPages == -1) or last page, stop
+		if totalPages < 0 || page >= totalPages-1 || len(items) == 0 {
+			break
+		}
+		page++
+	}
+
+	*result = all
+	return nil
+}
+
+// doListOnePage fetches a single page and returns the items.
+func (c *Client) doListOnePage(ctx context.Context, path string, result *[]map[string]interface{}) error {
+	items, _, err := c.doListOnePageWithMeta(ctx, path)
+	if err != nil {
+		return err
+	}
+	*result = items
+	return nil
+}
+
+// doListOnePageWithMeta fetches a single page and returns items plus totalPages.
+// Returns totalPages=-1 if the response was a plain array (not paginated).
+func (c *Client) doListOnePageWithMeta(ctx context.Context, path string) ([]map[string]interface{}, int, error) {
 	var raw json.RawMessage
 	if err := c.Do(ctx, http.MethodGet, path, nil, &raw); err != nil {
-		return err
+		return nil, 0, err
 	}
 
 	// Try decoding as a plain array first
 	var arr []map[string]interface{}
 	if err := json.Unmarshal(raw, &arr); err == nil {
-		*result = arr
-		return nil
+		return arr, -1, nil
 	}
 
 	// Try decoding as a HATEOAS wrapper object
 	var wrapper map[string]interface{}
 	if err := json.Unmarshal(raw, &wrapper); err != nil {
-		return fmt.Errorf("failed to decode list response: %w", err)
+		return nil, 0, fmt.Errorf("failed to decode list response: %w", err)
+	}
+
+	// Extract pagination metadata
+	totalPages := -1
+	if pageInfo, ok := wrapper["page"].(map[string]interface{}); ok {
+		if tp, ok := pageInfo["totalPages"].(float64); ok {
+			totalPages = int(tp)
+		}
 	}
 
 	embedded, ok := wrapper["_embedded"].(map[string]interface{})
 	if !ok {
-		*result = []map[string]interface{}{}
-		return nil
+		return []map[string]interface{}{}, totalPages, nil
 	}
 
 	for _, v := range embedded {
@@ -276,13 +366,11 @@ func (c *Client) DoList(ctx context.Context, path string, result *[]map[string]i
 					out = append(out, m)
 				}
 			}
-			*result = out
-			return nil
+			return out, totalPages, nil
 		}
 	}
 
-	*result = []map[string]interface{}{}
-	return nil
+	return []map[string]interface{}{}, totalPages, nil
 }
 
 // maskAPIKey masks all but the last 4 characters of the API key.

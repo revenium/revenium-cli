@@ -9,7 +9,7 @@ import (
 )
 
 func newBudgetListCmd() *cobra.Command {
-	return &cobra.Command{
+	c := &cobra.Command{
 		Use:   "list",
 		Short: "List all budget alerts",
 		Args:  cobra.NoArgs,
@@ -20,7 +20,7 @@ func newBudgetListCmd() *cobra.Command {
   revenium alerts budget list --json`,
 		RunE: func(c *cobra.Command, args []string) error {
 			var budgets []map[string]interface{}
-			if err := cmd.APIClient.DoList(c.Context(), "/v2/api/ai/alerts/budgets/portfolio", &budgets); err != nil {
+			if err := cmd.APIClient.DoList(c.Context(), "/v2/api/ai/alerts/budgets/portfolio", cmd.ListOptsFromFlags(c), &budgets); err != nil {
 				return err
 			}
 			if len(budgets) == 0 {
@@ -33,4 +33,7 @@ func newBudgetListCmd() *cobra.Command {
 			return cmd.Output.Render(budgetTableDef, toBudgetRows(budgets), budgets)
 		},
 	}
+
+	cmd.AddListFlags(c)
+	return c
 }
