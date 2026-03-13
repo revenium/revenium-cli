@@ -20,7 +20,7 @@ func TestCompletionMetrics(t *testing.T) {
 		assert.Equal(t, "/v2/api/sources/metrics/ai/completions", r.URL.Path)
 		assert.NotEmpty(t, r.URL.Query().Get("startDate"))
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `[{"id": "txn-c-1", "transactionId": "txn-c-1", "model": "gpt-3.5-turbo", "totalTokenCount": 25000, "totalCost": 0.125}]`)
+		fmt.Fprint(w, `[{"id": "txn-c-1", "transactionId": "txn-c-1", "model": "gpt-3.5-turbo", "inputTokenCount": 20000, "outputTokenCount": 5000, "cacheReadTokenCount": 1000, "reasoningTokenCount": 500, "timeToFirstToken": 250, "tokensPerMinute": 3000, "requestDuration": 5000, "stopReason": "END", "totalCost": 0.125, "organization": {"id": "org-1", "label": "Acme Corp"}, "agent": "chat-bot", "subscriberCredential": {"id": "cred-1", "label": "Alice"}}]`)
 	}))
 	defer srv.Close()
 
@@ -38,8 +38,18 @@ func TestCompletionMetrics(t *testing.T) {
 	require.NoError(t, err)
 	out := buf.String()
 	assert.Contains(t, out, "gpt-3.5-turbo")
-	assert.Contains(t, out, "25,000")
+	assert.Contains(t, out, "20,000")
+	assert.Contains(t, out, "5,000")
+	assert.Contains(t, out, "1,000")
+	assert.Contains(t, out, "500")
+	assert.Contains(t, out, "250ms")
+	assert.Contains(t, out, "3,000")
+	assert.Contains(t, out, "5.00s")
+	assert.Contains(t, out, "END")
 	assert.Contains(t, out, "$0.12")
+	assert.Contains(t, out, "Acme Corp")
+	assert.Contains(t, out, "chat-bot")
+	assert.Contains(t, out, "Alice")
 }
 
 func TestCompletionMetricsEmpty(t *testing.T) {

@@ -21,7 +21,7 @@ func TestAIMetrics(t *testing.T) {
 		assert.NotEmpty(t, r.URL.Query().Get("startDate"))
 		assert.NotEmpty(t, r.URL.Query().Get("endDate"))
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `[{"id": "txn-m-1", "transactionId": "txn-m-1", "model": "gpt-4", "totalTokenCount": 1500, "totalCost": 0.05}]`)
+		fmt.Fprint(w, `[{"id": "txn-m-1", "transactionId": "txn-m-1", "model": "gpt-4", "inputTokenCount": 1000, "outputTokenCount": 500, "cacheReadTokenCount": 200, "reasoningTokenCount": 100, "timeToFirstToken": 180, "tokensPerMinute": 2500, "requestDuration": 3200, "stopReason": "END", "totalCost": 0.05, "organization": {"id": "org-1", "label": "Acme"}, "agent": "assistant", "subscriberCredential": {"id": "cred-1", "label": "Bob"}}]`)
 	}))
 	defer srv.Close()
 
@@ -39,8 +39,18 @@ func TestAIMetrics(t *testing.T) {
 	require.NoError(t, err)
 	out := buf.String()
 	assert.Contains(t, out, "gpt-4")
-	assert.Contains(t, out, "1,500")
+	assert.Contains(t, out, "1,000")
+	assert.Contains(t, out, "500")
+	assert.Contains(t, out, "200")
+	assert.Contains(t, out, "100")
+	assert.Contains(t, out, "180ms")
+	assert.Contains(t, out, "2,500")
+	assert.Contains(t, out, "3.20s")
+	assert.Contains(t, out, "END")
 	assert.Contains(t, out, "$0.05")
+	assert.Contains(t, out, "Acme")
+	assert.Contains(t, out, "assistant")
+	assert.Contains(t, out, "Bob")
 }
 
 func TestAIMetricsEmpty(t *testing.T) {

@@ -54,12 +54,14 @@ func NewClient(baseURL, apiKey, teamID, tenantID, ownerID string, verbose bool) 
 // If result is non-nil, the response body is decoded into it.
 func (c *Client) Do(ctx context.Context, method, path string, body, result interface{}) error {
 	var reqBody io.Reader
+	var reqData []byte
 	if body != nil {
-		data, err := json.Marshal(body)
+		var err error
+		reqData, err = json.Marshal(body)
 		if err != nil {
 			return fmt.Errorf("failed to marshal request body: %w", err)
 		}
-		reqBody = bytes.NewReader(data)
+		reqBody = bytes.NewReader(reqData)
 	}
 
 	url := c.BaseURL + path
@@ -91,6 +93,14 @@ func (c *Client) Do(ctx context.Context, method, path string, body, result inter
 		maskedKey := maskAPIKey(c.APIKey)
 		fmt.Fprintf(os.Stderr, "> %s %s\n", method, url)
 		fmt.Fprintf(os.Stderr, "> x-api-key: %s\n", maskedKey)
+		if len(reqData) > 0 {
+			var pretty bytes.Buffer
+			if json.Indent(&pretty, reqData, "> ", "  ") == nil {
+				fmt.Fprintf(os.Stderr, "> Body:\n> %s\n", pretty.String())
+			} else {
+				fmt.Fprintf(os.Stderr, "> Body: %s\n", reqData)
+			}
+		}
 	}
 
 	resp, err := c.HTTPClient.Do(req)

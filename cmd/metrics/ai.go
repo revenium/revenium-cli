@@ -10,7 +10,7 @@ import (
 )
 
 var aiTableDef = output.TableDef{
-	Headers:      []string{"ID", "Model", "Tokens", "Cost"},
+	Headers:      []string{"ID", "Model", "Input", "Output", "Cached", "Reasoning", "TTFT", "Tok/Min", "Duration", "Stop Reason", "Cost", "Organization", "Agent", "Subscriber"},
 	StatusColumn: -1,
 }
 
@@ -51,8 +51,18 @@ func toAIRows(metrics []map[string]interface{}) [][]string {
 		rows[i] = []string{
 			str(m, "transactionId"),
 			str(m, "model"),
-			formatNumber(floatVal(m, "totalTokenCount")),
+			formatNumber(floatVal(m, "inputTokenCount")),
+			formatNumber(floatVal(m, "outputTokenCount")),
+			formatNumber(floatVal(m, "cacheReadTokenCount")),
+			formatNumber(floatVal(m, "reasoningTokenCount")),
+			formatDuration(floatVal(m, "timeToFirstToken")),
+			formatNumber(floatVal(m, "tokensPerMinute")),
+			formatDuration(floatVal(m, "requestDuration")),
+			str(m, "stopReason"),
 			formatCost(floatVal(m, "totalCost")),
+			nestedStr(m, "organization", "label"),
+			str(m, "agent"),
+			nestedStr(m, "subscriberCredential", "label"),
 		}
 	}
 	return rows

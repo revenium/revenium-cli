@@ -145,10 +145,31 @@ func formatCost(v float64) string {
 	return s
 }
 
+// formatDuration formats a millisecond value as a human-readable duration string.
+// Values under 1000ms show as "123ms", otherwise as "1.23s".
+func formatDuration(ms float64) string {
+	if ms == 0 {
+		return ""
+	}
+	if ms < 1000 {
+		return fmt.Sprintf("%.0fms", ms)
+	}
+	return fmt.Sprintf("%.2fs", ms/1000)
+}
+
 // str safely extracts a string value from a map, returning "" for missing or nil keys.
 func str(m map[string]interface{}, key string) string {
 	if v, ok := m[key]; ok && v != nil {
 		return fmt.Sprint(v)
+	}
+	return ""
+}
+
+// nestedStr extracts a string field from a nested object.
+// For example, nestedStr(m, "organization", "label") returns m["organization"]["label"].
+func nestedStr(m map[string]interface{}, objKey, field string) string {
+	if obj, ok := m[objKey].(map[string]interface{}); ok {
+		return str(obj, field)
 	}
 	return ""
 }
