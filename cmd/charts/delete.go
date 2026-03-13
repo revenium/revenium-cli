@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/revenium/revenium-cli/cmd"
+	"github.com/revenium/revenium-cli/internal/dryrun"
 	"github.com/revenium/revenium-cli/internal/resource"
 )
 
@@ -13,7 +14,8 @@ func newDeleteCmd() *cobra.Command {
 	c := &cobra.Command{
 		Use:   "delete <id>",
 		Short: "Delete a chart definition",
-		Args:  cobra.ExactArgs(1),
+		Annotations: map[string]string{"mutating": "true"},
+		Args:  cobra.MatchAll(cobra.ExactArgs(1), cmd.ValidResourceID),
 		Example: `  # Delete a chart definition (with confirmation)
   revenium charts delete chart-123
 
@@ -21,6 +23,11 @@ func newDeleteCmd() *cobra.Command {
   revenium charts delete chart-123 --yes`,
 		RunE: func(c *cobra.Command, args []string) error {
 			id := args[0]
+
+			if cmd.DryRun() {
+				return dryrun.Render(cmd.Output, "delete", "chart", "/v2/api/reports/chart-definitions/"+id, nil)
+			}
+
 			yes, _ := c.Flags().GetBool("yes")
 
 			ok, err := resource.ConfirmDelete("chart", id, yes, cmd.Output.IsJSON())

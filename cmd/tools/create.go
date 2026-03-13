@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/revenium/revenium-cli/cmd"
+	"github.com/revenium/revenium-cli/internal/dryrun"
 )
 
 func newCreateCmd() *cobra.Command {
@@ -12,7 +13,8 @@ func newCreateCmd() *cobra.Command {
 
 	c := &cobra.Command{
 		Use:   "create",
-		Short: "Create a new tool",
+		Short:       "Create a new tool",
+		Annotations: map[string]string{"mutating": "true"},
 		Example: `  # Create a tool with required fields
   revenium tools create --name "My Tool" --tool-id my-tool --tool-type MCP_SERVER
 
@@ -32,6 +34,10 @@ func newCreateCmd() *cobra.Command {
 			}
 			if c.Flags().Changed("enabled") {
 				body["enabled"] = enabled
+			}
+
+			if cmd.DryRun() {
+				return dryrun.Render(cmd.Output, "create", "tool", "/v2/api/tools", body)
 			}
 
 			var result map[string]interface{}

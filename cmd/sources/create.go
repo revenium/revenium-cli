@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/revenium/revenium-cli/cmd"
+	"github.com/revenium/revenium-cli/internal/dryrun"
 )
 
 func newCreateCmd() *cobra.Command {
@@ -11,7 +12,8 @@ func newCreateCmd() *cobra.Command {
 
 	c := &cobra.Command{
 		Use:   "create",
-		Short: "Create a new source",
+		Short:       "Create a new source",
+		Annotations: map[string]string{"mutating": "true"},
 		Example: `  # Create a source
   revenium sources create --name "My API" --type API
 
@@ -25,6 +27,10 @@ func newCreateCmd() *cobra.Command {
 			}
 			if c.Flags().Changed("description") {
 				body["description"] = description
+			}
+
+			if cmd.DryRun() {
+				return dryrun.Render(cmd.Output, "create", "source", "/v2/api/sources", body)
 			}
 
 			var result map[string]interface{}

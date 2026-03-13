@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/revenium/revenium-cli/cmd"
+	"github.com/revenium/revenium-cli/internal/dryrun"
 )
 
 func newCreateCmd() *cobra.Command {
@@ -11,7 +12,8 @@ func newCreateCmd() *cobra.Command {
 
 	c := &cobra.Command{
 		Use:   "create",
-		Short: "Create a new product",
+		Short:       "Create a new product",
+		Annotations: map[string]string{"mutating": "true"},
 		Example: `  # Create a product with name only
   revenium products create --name "My Product"
 
@@ -30,6 +32,10 @@ func newCreateCmd() *cobra.Command {
 			}
 			if c.Flags().Changed("description") {
 				body["description"] = description
+			}
+
+			if cmd.DryRun() {
+				return dryrun.Render(cmd.Output, "create", "product", "/v2/api/products", body)
 			}
 
 			var result map[string]interface{}

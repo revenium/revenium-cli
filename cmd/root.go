@@ -3,6 +3,8 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -23,14 +25,23 @@ var Output *output.Formatter
 // verbose controls verbose output mode.
 var verbose bool
 
-// jsonMode controls JSON output mode.
+// jsonMode controls JSON output mode (legacy --json flag).
 var jsonMode bool
+
+// outputFormat controls the output format (--output flag).
+var outputFormat string
+
+// fieldsFlag controls field filtering (--fields flag).
+var fieldsFlag string
 
 // quiet controls quiet output mode (suppress non-error output).
 var quiet bool
 
 // yesMode controls whether to skip confirmation prompts.
 var yesMode bool
+
+// dryRun controls dry-run mode for mutation commands.
+var dryRun bool
 
 // rootCmd is the base command for the Revenium CLI.
 var rootCmd = &cobra.Command{
@@ -48,11 +59,28 @@ var rootCmd = &cobra.Command{
 	SilenceErrors: true,
 	SilenceUsage:  true,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-		// Always initialize the output formatter so all commands can use it
-		Output = output.New(jsonMode, quiet)
+		// Resolve effective JSON mode:
+		// --json flag > --output flag > REVENIUM_OUTPUT_FORMAT env > default table
+		effectiveJSON := jsonMode
+		if !effectiveJSON {
+			if outputFormat != "" {
+				effectiveJSON = strings.EqualFold(outputFormat, "json")
+			} else if envFormat := os.Getenv("REVENIUM_OUTPUT_FORMAT"); envFormat != "" {
+				effectiveJSON = strings.EqualFold(envFormat, "json")
+			}
+		}
 
-		// Skip config loading for version, config, and completion commands
-		if cmd.Name() == "version" || cmd.Parent() != nil && cmd.Parent().Name() == "config" || cmd.Name() == "config" {
+		// Always initialize the output formatter so all commands can use it
+		Output = output.New(effectiveJSON, quiet)
+
+		// Apply field filtering if --fields is set
+		if fieldsFlag != "" {
+			fields := strings.Split(fieldsFlag, ",")
+			Output.SetFields(fields)
+		}
+
+		// Skip config loading for version, config, schema, and completion commands
+		if cmd.Name() == "version" || cmd.Name() == "schema" || cmd.Parent() != nil && cmd.Parent().Name() == "config" || cmd.Name() == "config" {
 			return nil
 		}
 		// Completion commands (bash, zsh, fish, powershell) are children of
@@ -77,10 +105,19 @@ var rootCmd = &cobra.Command{
 	},
 }
 
-// JSONMode returns true if --json flag is active. Used by main.go to
-// decide error rendering format without importing the output package.
+// JSONMode returns true if JSON output mode is active (via --json, --output json,
+// or REVENIUM_OUTPUT_FORMAT=json). Used by main.go to decide error rendering format.
 func JSONMode() bool {
-	return jsonMode
+	if jsonMode {
+		return true
+	}
+	if strings.EqualFold(outputFormat, "json") {
+		return true
+	}
+	if envFormat := os.Getenv("REVENIUM_OUTPUT_FORMAT"); strings.EqualFold(envFormat, "json") {
+		return true
+	}
+	return false
 }
 
 // YesMode returns true if --yes flag is active. Used by subcommands
@@ -89,11 +126,22 @@ func YesMode() bool {
 	return yesMode
 }
 
+// DryRun returns true if --dry-run flag is active.
+func DryRun() bool {
+	return dryRun
+}
+
 func init() {
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Enable verbose output")
 	rootCmd.PersistentFlags().BoolVar(&jsonMode, "json", false, "Output as JSON")
+	rootCmd.PersistentFlags().StringVar(&outputFormat, "output", "", "Output format: json, table (default table)")
+	rootCmd.PersistentFlags().StringVar(&fieldsFlag, "fields", "", "Comma-separated list of fields to include in output")
 	rootCmd.PersistentFlags().BoolVarP(&quiet, "quiet", "q", false, "Suppress non-error output")
 	rootCmd.PersistentFlags().BoolVarP(&yesMode, "yes", "y", false, "Skip confirmation prompts")
+	rootCmd.PersistentFlags().BoolVar(&dryRun, "dry-run", false, "Preview the action without executing it")
+
+	// Hide --json (replaced by --output json, kept for backward compat)
+	rootCmd.PersistentFlags().MarkHidden("json")
 
 	rootCmd.AddGroup(
 		&cobra.Group{ID: "resources", Title: "Core Resources:"},
@@ -127,4 +175,10 @@ func RegisterCommand(c *cobra.Command, groupID string) {
 // Execute runs the root command.
 func Execute() error {
 	return rootCmd.Execute()
+}
+
+// Root returns the root command. Used by the schema command to walk the
+// command tree.
+func Root() *cobra.Command {
+	return rootCmd
 }

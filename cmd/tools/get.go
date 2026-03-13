@@ -10,7 +10,7 @@ func newGetCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "get <id>",
 		Short: "Get a tool by ID",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.MatchAll(cobra.ExactArgs(1), cmd.ValidResourceID),
 		Example: `  # Get a tool by ID
   revenium tools get tool-1
 

@@ -10,7 +10,7 @@ func newGetCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "get <id>",
 		Short: "Get an AI alert by ID",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.MatchAll(cobra.ExactArgs(1), cmd.ValidResourceID),
 		Example: `  # Get an AI alert by ID
   revenium alerts get alert-123
 

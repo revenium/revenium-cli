@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/revenium/revenium-cli/cmd"
+	"github.com/revenium/revenium-cli/internal/dryrun"
 )
 
 func newCreateCmd() *cobra.Command {
@@ -12,6 +13,7 @@ func newCreateCmd() *cobra.Command {
 	c := &cobra.Command{
 		Use:   "create",
 		Short: "Create a new provider credential",
+		Annotations: map[string]string{"mutating": "true"},
 		Example: `  # Create a credential with label and API key
   revenium credentials create --label "OpenAI Key" --provider openai --api-key "sk-abc123"
 
@@ -25,6 +27,10 @@ func newCreateCmd() *cobra.Command {
 			}
 			if c.Flags().Changed("description") {
 				body["description"] = description
+			}
+
+			if cmd.DryRun() {
+				return dryrun.Render(cmd.Output, "create", "credential", "/v2/api/provider-credentials", body)
 			}
 
 			var result map[string]interface{}

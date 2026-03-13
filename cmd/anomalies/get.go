@@ -10,7 +10,7 @@ func newGetCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "get <id>",
 		Short: "Get an anomaly detection rule by ID",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.MatchAll(cobra.ExactArgs(1), cmd.ValidResourceID),
 		Example: `  # Get an anomaly rule by ID
   revenium anomalies get anom-123
 

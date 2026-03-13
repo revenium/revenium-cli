@@ -45,18 +45,19 @@ func init() {
 
 func main() {
 	if err := cmd.Execute(); err != nil {
+		exitCode := apierrors.ExitCodeFor(err)
 		if cmd.JSONMode() {
 			// In JSON mode, errors go to stderr as JSON
 			f := output.New(true, false)
 			var apiErr *apierrors.APIError
 			if errors.As(err, &apiErr) {
-				f.RenderJSONError(apiErr.Message, apiErr.StatusCode)
+				f.RenderJSONError(apiErr.Message, apiErr.StatusCode, exitCode)
 			} else {
-				f.RenderJSONError(err.Error(), 0)
+				f.RenderJSONError(err.Error(), 0, exitCode)
 			}
 		} else {
 			fmt.Fprintln(os.Stderr, apierrors.RenderError(err.Error()))
 		}
-		os.Exit(1)
+		os.Exit(exitCode)
 	}
 }

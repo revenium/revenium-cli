@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/revenium/revenium-cli/cmd"
+	"github.com/revenium/revenium-cli/internal/dryrun"
 )
 
 func newPricingCreateCmd() *cobra.Command {
@@ -20,8 +21,9 @@ func newPricingCreateCmd() *cobra.Command {
 
 	c := &cobra.Command{
 		Use:   "create <model-id>",
-		Short: "Create a pricing dimension for a model",
-		Args:  cobra.ExactArgs(1),
+		Short:       "Create a pricing dimension for a model",
+		Annotations: map[string]string{"mutating": "true"},
+		Args:  cobra.MatchAll(cobra.ExactArgs(1), cmd.ValidResourceID),
 		Example: `  # Create a text input token pricing dimension
   revenium models pricing create model-123 --billing-unit PER_TOKEN --modality TEXT --cost-type TEXT_TOKEN_INPUT --direction INPUT --price 0.003
 
@@ -42,6 +44,10 @@ func newPricingCreateCmd() *cobra.Command {
 			}
 			if c.Flags().Changed("operation-subtype") {
 				body["operationSubtype"] = operationSubtype
+			}
+
+			if cmd.DryRun() {
+				return dryrun.Render(cmd.Output, "create", "pricing dimension", path, body)
 			}
 
 			var result map[string]interface{}

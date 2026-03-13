@@ -14,12 +14,13 @@ func (f *Formatter) RenderJSON(data interface{}) error {
 }
 
 // RenderJSONError writes a JSON error object to the Formatter's error writer.
-// The output shape is {"error": "msg", "status": N} with 2-space indent.
+// The output shape is {"error": "msg", "exit_code": N, "status": N} with 2-space indent.
 // Always writes to errWriter (even in quiet mode -- errors always go to stderr).
-func (f *Formatter) RenderJSONError(msg string, statusCode int) error {
+func (f *Formatter) RenderJSONError(msg string, statusCode int, exitCode int) error {
 	errObj := map[string]interface{}{
-		"error":  msg,
-		"status": statusCode,
+		"error":     msg,
+		"status":    statusCode,
+		"exit_code": exitCode,
 	}
 	enc := json.NewEncoder(f.errWriter)
 	enc.SetIndent("", "  ")
@@ -30,9 +31,12 @@ func (f *Formatter) RenderJSONError(msg string, statusCode int) error {
 // based on the Formatter's mode. Resource commands should call this method.
 // If jsonMode is active, data is rendered as JSON; otherwise, the table
 // definition and rows are rendered as a styled table.
+// When fields are set via SetFields, both JSON and table output are filtered
+// to include only the specified fields.
 func (f *Formatter) Render(def TableDef, rows [][]string, data interface{}) error {
 	if f.jsonMode {
-		return f.RenderJSON(data)
+		return f.RenderJSON(FilterFields(data, f.fields))
 	}
-	return f.RenderTable(def, rows)
+	filteredDef, filteredRows := FilterTableDef(def, rows, f.fields)
+	return f.RenderTable(filteredDef, filteredRows)
 }

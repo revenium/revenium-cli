@@ -17,7 +17,8 @@ type Formatter struct {
 	errWriter io.Writer // os.Stderr (always, even in quiet mode)
 	jsonMode  bool
 	quiet     bool
-	isTTY bool
+	isTTY     bool
+	fields    []string // field filter for --fields flag
 }
 
 // New creates a Formatter, detecting TTY and terminal width.
@@ -73,4 +74,14 @@ func (f *Formatter) IsJSON() bool {
 // IsQuiet returns true if quiet mode is active.
 func (f *Formatter) IsQuiet() bool {
 	return f.quiet
+}
+
+// Writer returns the Formatter's output writer.
+func (f *Formatter) Writer() io.Writer {
+	return f.writer
+}
+
+// SetFields sets the field filter list for --fields output filtering.
+func (f *Formatter) SetFields(fields []string) {
+	f.fields = fields
 }

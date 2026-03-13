@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/revenium/revenium-cli/cmd"
+	"github.com/revenium/revenium-cli/internal/dryrun"
 )
 
 func newCreateCmd() *cobra.Command {
@@ -17,6 +18,7 @@ func newCreateCmd() *cobra.Command {
 
   # Create a subscription with subscriber and product IDs
   revenium subscriptions create --name "API Access" --client-email user@example.com --subscriber-id sub-1 --product-id prod-1`,
+		Annotations: map[string]string{"mutating": "true"},
 		RunE: func(c *cobra.Command, args []string) error {
 			body := map[string]interface{}{
 				"name":               name,
@@ -29,6 +31,10 @@ func newCreateCmd() *cobra.Command {
 			}
 			if c.Flags().Changed("subscriber-id") {
 				body["subscriberId"] = subscriberID
+			}
+
+			if cmd.DryRun() {
+				return dryrun.Render(cmd.Output, "create", "subscription", "/v2/api/subscriptions", body)
 			}
 
 			var result map[string]interface{}

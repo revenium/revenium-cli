@@ -67,11 +67,12 @@ revenium config show
 
 Configuration can also be set via environment variables, which take precedence over the config file:
 
-| Variable            | Overrides  |
-|---------------------|------------|
-| `REVENIUM_API_KEY`  | `key`      |
-| `REVENIUM_API_URL`  | `api-url`  |
-| `REVENIUM_TEAM_ID`  | `team-id`  |
+| Variable                | Overrides      |
+|-------------------------|----------------|
+| `REVENIUM_API_KEY`      | `key`          |
+| `REVENIUM_API_URL`      | `api-url`      |
+| `REVENIUM_TEAM_ID`      | `team-id`      |
+| `REVENIUM_OUTPUT_FORMAT` | `--output` flag (set to `json` or `table`) |
 
 ## Commands
 
@@ -178,10 +179,10 @@ Human-readable tables with styled borders, automatically sized to your terminal 
 
 ### JSON
 
-Use `--json` for machine-readable output, suitable for scripting and CI/CD pipelines:
+Use `--output json` (or the legacy `--json` flag) for machine-readable output, suitable for scripting and CI/CD pipelines:
 
 ```sh
-revenium sources list --json
+revenium sources list --output json
 ```
 
 ```json
@@ -195,10 +196,31 @@ revenium sources list --json
 ]
 ```
 
+You can also set the output format via environment variable to avoid passing the flag on every call:
+
+```sh
+export REVENIUM_OUTPUT_FORMAT=json
+revenium sources list
+```
+
+**Resolution order:** `--json` flag > `--output` flag > `REVENIUM_OUTPUT_FORMAT` env > default `table`.
+
 Pipe to `jq` for further processing:
 
 ```sh
-revenium models list --json | jq '.[].name'
+revenium models list --output json | jq '.[].name'
+```
+
+### Field Filtering
+
+Use `--fields` to limit the fields included in output. Works with both JSON and table modes:
+
+```sh
+# Only return id and name in JSON output
+revenium sources list --output json --fields id,name
+
+# Filter table columns
+revenium sources list --fields id,name,status
 ```
 
 ### Quiet Mode
@@ -209,15 +231,53 @@ Suppress non-error output with `--quiet` / `-q`. Useful in scripts where you onl
 revenium sources delete src-123 --yes --quiet
 ```
 
+## Dry Run
+
+Preview any mutation (create, update, delete) without executing it using `--dry-run`. This is useful for validating commands before they make changes:
+
+```sh
+# See what would be sent to the API without creating anything
+revenium sources create --name "My API" --type API --dry-run
+
+# Combine with --output json for structured preview
+revenium sources create --name "My API" --type API --dry-run --output json
+```
+
+```json
+{
+  "dry_run": true,
+  "action": "create",
+  "resource": "source",
+  "path": "/v2/api/sources",
+  "body": {
+    "name": "My API",
+    "type": "API",
+    "version": "1.0.0"
+  }
+}
+```
+
+## Schema Introspection
+
+Dump the full CLI command tree as machine-readable JSON with `revenium schema`. This is useful for programmatic discovery by AI agents, scripts, and automation tools:
+
+```sh
+revenium schema
+```
+
+The output includes all commands with their flags (types, defaults, required markers), mutating annotations, and exit code definitions.
+
 ## Global Flags
 
-| Flag            | Short | Description                    |
-|-----------------|-------|--------------------------------|
-| `--verbose`     | `-v`  | Enable verbose output (shows HTTP requests/responses) |
-| `--json`        |       | Output as JSON                 |
-| `--quiet`       | `-q`  | Suppress non-error output      |
-| `--yes`         | `-y`  | Skip confirmation prompts      |
-| `--help`        | `-h`  | Help for any command           |
+| Flag            | Short | Description                                           |
+|-----------------|-------|-------------------------------------------------------|
+| `--output`      |       | Output format: `json` or `table` (default `table`)    |
+| `--fields`      |       | Comma-separated list of fields to include in output   |
+| `--dry-run`     |       | Preview the action without executing it                |
+| `--verbose`     | `-v`  | Enable verbose output (shows HTTP requests/responses)  |
+| `--quiet`       | `-q`  | Suppress non-error output                              |
+| `--yes`         | `-y`  | Skip confirmation prompts                              |
+| `--help`        | `-h`  | Help for any command                                   |
 
 ## Shell Completions
 
@@ -260,11 +320,37 @@ The CLI provides clear, actionable error messages:
 - **Server errors** — suggests retrying or contacting support
 - **Network errors** — prompts you to check connectivity
 
-In JSON mode, errors are written to stderr as structured JSON:
+### Exit Codes
+
+The CLI uses semantic exit codes for scripting and automation:
+
+| Code | Meaning                          |
+|------|----------------------------------|
+| 0    | Success                          |
+| 1    | General / unknown error          |
+| 2    | Authentication error (401/403)   |
+| 3    | Resource not found (404)         |
+| 4    | Validation error (400/422)       |
+| 5    | Network / connection failure     |
+
+```sh
+revenium sources get nonexistent-id; echo $?
+# 3
+```
+
+In JSON mode, errors are written to stderr as structured JSON including the exit code:
 
 ```json
-{"error": "Invalid API key. Run `revenium config set key <your-key>` to fix.", "status": 401}
+{
+  "error": "Resource not found",
+  "status": 404,
+  "exit_code": 3
+}
 ```
+
+### Input Validation
+
+Resource IDs are validated before any API call is made. IDs containing control characters, query parameters (`?`, `&`, `#`), path traversal sequences (`../`), or percent-encoded values (`%xx`) are rejected with a clear error message.
 
 ## Building from Source
 
@@ -286,6 +372,10 @@ go build -ldflags "-X github.com/revenium/revenium-cli/internal/build.Version=1.
 ```sh
 go test ./...
 ```
+
+## AI Agent Integration
+
+For AI agents and automation tools, see [CONTEXT.md](CONTEXT.md) for a machine-oriented reference covering authentication, output modes, exit codes, dry-run usage, and `revenium schema` for programmatic command discovery.
 
 ## License
 

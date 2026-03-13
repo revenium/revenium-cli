@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/revenium/revenium-cli/cmd"
+	"github.com/revenium/revenium-cli/internal/dryrun"
 )
 
 func newCreateCmd() *cobra.Command {
@@ -12,6 +13,7 @@ func newCreateCmd() *cobra.Command {
 	c := &cobra.Command{
 		Use:   "create",
 		Short: "Create a new chart definition",
+		Annotations: map[string]string{"mutating": "true"},
 		Example: `  # Create a chart definition
   revenium charts create --label "Revenue Chart" --chart-type line
 
@@ -32,6 +34,10 @@ func newCreateCmd() *cobra.Command {
 			}
 			if c.Flags().Changed("description") {
 				body["description"] = description
+			}
+
+			if cmd.DryRun() {
+				return dryrun.Render(cmd.Output, "create", "chart", "/v2/api/reports/chart-definitions", body)
 			}
 
 			var result map[string]interface{}

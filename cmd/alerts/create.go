@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/revenium/revenium-cli/cmd"
+	"github.com/revenium/revenium-cli/internal/dryrun"
 )
 
 func newCreateCmd() *cobra.Command {
@@ -20,6 +21,7 @@ func newCreateCmd() *cobra.Command {
 	c := &cobra.Command{
 		Use:   "create",
 		Short: "Create an anomaly detection rule that generates AI alerts",
+		Annotations: map[string]string{"mutating": "true"},
 		Example: `  # Create a cost threshold alert
   revenium alerts create --name "High Cost Alert" --threshold 100
 
@@ -38,6 +40,10 @@ func newCreateCmd() *cobra.Command {
 				"webhookConfigurations": []interface{}{},
 				"enabled":               true,
 				"firing":                false,
+			}
+
+			if cmd.DryRun() {
+				return dryrun.Render(cmd.Output, "create", "alert", "/v2/api/sources/ai/anomaly", body)
 			}
 
 			var result map[string]interface{}

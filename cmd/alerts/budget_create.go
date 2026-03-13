@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/revenium/revenium-cli/cmd"
+	"github.com/revenium/revenium-cli/internal/dryrun"
 )
 
 func newBudgetCreateCmd() *cobra.Command {
@@ -18,6 +19,7 @@ func newBudgetCreateCmd() *cobra.Command {
 	c := &cobra.Command{
 		Use:   "create",
 		Short: "Create a budget alert by configuring a cumulative usage anomaly rule",
+		Annotations: map[string]string{"mutating": "true"},
 		Example: `  # Create a budget alert with threshold
   revenium alerts budget create --name "Monthly Budget" --threshold 5000
 
@@ -41,6 +43,10 @@ func newBudgetCreateCmd() *cobra.Command {
 				"webhookConfigurations": []interface{}{},
 				"enabled":               true,
 				"firing":                false,
+			}
+
+			if cmd.DryRun() {
+				return dryrun.Render(cmd.Output, "create", "budget alert", "/v2/api/sources/ai/anomaly", body)
 			}
 
 			var result map[string]interface{}

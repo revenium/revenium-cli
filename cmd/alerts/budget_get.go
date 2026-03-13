@@ -12,7 +12,7 @@ func newBudgetGetCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "get <anomaly-id>",
 		Short: "Get budget progress for an anomaly",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.MatchAll(cobra.ExactArgs(1), cmd.ValidResourceID),
 		Example: `  # Get budget progress
   revenium alerts budget get anom-123
 

@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/revenium/revenium-cli/cmd"
+	"github.com/revenium/revenium-cli/internal/dryrun"
 )
 
 func newUpdateCmd() *cobra.Command {
@@ -13,8 +14,9 @@ func newUpdateCmd() *cobra.Command {
 
 	c := &cobra.Command{
 		Use:   "update <id>",
-		Short: "Update a product",
-		Args:  cobra.ExactArgs(1),
+		Short:       "Update a product",
+		Annotations: map[string]string{"mutating": "true"},
+		Args:  cobra.MatchAll(cobra.ExactArgs(1), cmd.ValidResourceID),
 		Example: `  # Update a product name
   revenium products update prod-123 --name "New Name"
 
@@ -33,6 +35,10 @@ func newUpdateCmd() *cobra.Command {
 
 			if len(updates) == 0 {
 				return fmt.Errorf("no fields specified to update")
+			}
+
+			if cmd.DryRun() {
+				return dryrun.Render(cmd.Output, "update", "product", "/v2/api/products/"+id, updates)
 			}
 
 			var result map[string]interface{}

@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/revenium/revenium-cli/cmd"
+	"github.com/revenium/revenium-cli/internal/dryrun"
 )
 
 func newUpdateCmd() *cobra.Command {
@@ -14,7 +15,8 @@ func newUpdateCmd() *cobra.Command {
 	c := &cobra.Command{
 		Use:   "update <id>",
 		Short: "Update an anomaly detection rule",
-		Args:  cobra.ExactArgs(1),
+		Annotations: map[string]string{"mutating": "true"},
+		Args:  cobra.MatchAll(cobra.ExactArgs(1), cmd.ValidResourceID),
 		Example: `  # Update an anomaly rule name
   revenium anomalies update anom-123 --name "New Name"`,
 		RunE: func(c *cobra.Command, args []string) error {
@@ -27,6 +29,10 @@ func newUpdateCmd() *cobra.Command {
 
 			if len(updates) == 0 {
 				return fmt.Errorf("no fields specified to update")
+			}
+
+			if cmd.DryRun() {
+				return dryrun.Render(cmd.Output, "update", "anomaly", "/v2/api/sources/ai/anomaly/"+id, updates)
 			}
 
 			var result map[string]interface{}

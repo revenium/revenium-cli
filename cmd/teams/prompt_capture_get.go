@@ -12,7 +12,7 @@ func newPromptCaptureGetCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "get <team-id>",
 		Short: "View prompt capture settings for a team",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.MatchAll(cobra.ExactArgs(1), cmd.ValidResourceID),
 		Example: `  # View prompt capture settings
   revenium teams prompt-capture get team-123
 

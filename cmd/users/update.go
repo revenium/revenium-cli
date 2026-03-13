@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/revenium/revenium-cli/cmd"
+	"github.com/revenium/revenium-cli/internal/dryrun"
 )
 
 func newUpdateCmd() *cobra.Command {
@@ -22,12 +23,13 @@ func newUpdateCmd() *cobra.Command {
 	c := &cobra.Command{
 		Use:   "update <id>",
 		Short: "Update a user",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.MatchAll(cobra.ExactArgs(1), cmd.ValidResourceID),
 		Example: `  # Update a user's email
   revenium users update user-123 --email new@example.com
 
   # Update a user's roles
   revenium users update user-123 --roles ROLE_ADMIN,ROLE_API_CONSUMER`,
+		Annotations: map[string]string{"mutating": "true"},
 		RunE: func(c *cobra.Command, args []string) error {
 			id := args[0]
 
@@ -68,6 +70,10 @@ func newUpdateCmd() *cobra.Command {
 
 			if len(updates) == 0 {
 				return fmt.Errorf("no fields specified to update")
+			}
+
+			if cmd.DryRun() {
+				return dryrun.Render(cmd.Output, "update", "user", "/v2/api/users/"+id, updates)
 			}
 
 			var result map[string]interface{}

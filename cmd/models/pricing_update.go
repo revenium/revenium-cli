@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/revenium/revenium-cli/cmd"
+	"github.com/revenium/revenium-cli/internal/dryrun"
 )
 
 func newPricingUpdateCmd() *cobra.Command {
@@ -15,8 +16,9 @@ func newPricingUpdateCmd() *cobra.Command {
 
 	c := &cobra.Command{
 		Use:   "update <model-id> <dimension-id>",
-		Short: "Update a pricing dimension",
-		Args:  cobra.ExactArgs(2),
+		Short:       "Update a pricing dimension",
+		Annotations: map[string]string{"mutating": "true"},
+		Args:  cobra.MatchAll(cobra.ExactArgs(2), cmd.ValidResourceID),
 		Example: `  # Update a pricing dimension price
   revenium models pricing update model-123 dim-456 --price 0.005`,
 		RunE: func(c *cobra.Command, args []string) error {
@@ -25,6 +27,11 @@ func newPricingUpdateCmd() *cobra.Command {
 
 			if !c.Flags().Changed("price") {
 				return fmt.Errorf("no fields specified to update")
+			}
+
+			if cmd.DryRun() {
+				path := fmt.Sprintf("/v2/api/sources/ai/models/%s/pricing/dimensions/%s", modelID, dimID)
+				return dryrun.Render(cmd.Output, "update", "pricing dimension", path, map[string]interface{}{"unitPrice": price})
 			}
 
 			// Fetch existing dimension from the pricing list endpoint

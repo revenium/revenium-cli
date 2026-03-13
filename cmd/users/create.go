@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/revenium/revenium-cli/cmd"
+	"github.com/revenium/revenium-cli/internal/dryrun"
 )
 
 func newCreateCmd() *cobra.Command {
@@ -25,6 +26,7 @@ func newCreateCmd() *cobra.Command {
 
   # Create a user with optional fields
   revenium users create --email jane@example.com --first-name Jane --last-name Doe --roles ROLE_API_CONSUMER --team-ids team-1 --phone-number 555-1234 --can-view-prompt-data`,
+		Annotations: map[string]string{"mutating": "true"},
 		RunE: func(c *cobra.Command, args []string) error {
 			body := map[string]interface{}{
 				"email":     email,
@@ -38,6 +40,10 @@ func newCreateCmd() *cobra.Command {
 			}
 			if c.Flags().Changed("can-view-prompt-data") {
 				body["canViewPromptData"] = canViewPromptData
+			}
+
+			if cmd.DryRun() {
+				return dryrun.Render(cmd.Output, "create", "user", "/v2/api/users", body)
 			}
 
 			var result map[string]interface{}

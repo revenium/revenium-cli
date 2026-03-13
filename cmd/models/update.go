@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/revenium/revenium-cli/cmd"
+	"github.com/revenium/revenium-cli/internal/dryrun"
 )
 
 func newUpdateCmd() *cobra.Command {
@@ -18,8 +19,9 @@ func newUpdateCmd() *cobra.Command {
 
 	c := &cobra.Command{
 		Use:   "update <id>",
-		Short: "Update AI model pricing",
-		Args:  cobra.ExactArgs(1),
+		Short:       "Update AI model pricing",
+		Annotations: map[string]string{"mutating": "true"},
+		Args:  cobra.MatchAll(cobra.ExactArgs(1), cmd.ValidResourceID),
 		Example: `  # Update input cost per token
   revenium models update mdl-123 --input-cost-per-token 0.003
 
@@ -44,6 +46,10 @@ func newUpdateCmd() *cobra.Command {
 
 			if len(body) == 0 {
 				return fmt.Errorf("no fields specified to update")
+			}
+
+			if cmd.DryRun() {
+				return dryrun.Render(cmd.Output, "update", "model", "/v2/api/sources/ai/models/"+id, body)
 			}
 
 			path := fmt.Sprintf("/v2/api/sources/ai/models/%s", id)

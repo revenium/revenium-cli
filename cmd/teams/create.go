@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/revenium/revenium-cli/cmd"
+	"github.com/revenium/revenium-cli/internal/dryrun"
 )
 
 func newCreateCmd() *cobra.Command {
@@ -17,12 +18,17 @@ func newCreateCmd() *cobra.Command {
 
   # Create a team with description
   revenium teams create --name "Engineering" --description "Engineering team"`,
+		Annotations: map[string]string{"mutating": "true"},
 		RunE: func(c *cobra.Command, args []string) error {
 			body := map[string]interface{}{
 				"name": name,
 			}
 			if c.Flags().Changed("description") {
 				body["description"] = description
+			}
+
+			if cmd.DryRun() {
+				return dryrun.Render(cmd.Output, "create", "team", "/v2/api/teams", body)
 			}
 
 			var result map[string]interface{}

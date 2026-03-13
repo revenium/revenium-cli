@@ -6,14 +6,16 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/revenium/revenium-cli/cmd"
+	"github.com/revenium/revenium-cli/internal/dryrun"
 	"github.com/revenium/revenium-cli/internal/resource"
 )
 
 func newDeleteCmd() *cobra.Command {
 	c := &cobra.Command{
 		Use:   "delete <id>",
-		Short: "Delete a source",
-		Args:  cobra.ExactArgs(1),
+		Short:       "Delete a source",
+		Annotations: map[string]string{"mutating": "true"},
+		Args:  cobra.MatchAll(cobra.ExactArgs(1), cmd.ValidResourceID),
 		Example: `  # Delete a source (with confirmation)
   revenium sources delete abc-123
 
@@ -21,6 +23,11 @@ func newDeleteCmd() *cobra.Command {
   revenium sources delete abc-123 --yes`,
 		RunE: func(c *cobra.Command, args []string) error {
 			id := args[0]
+
+			if cmd.DryRun() {
+				return dryrun.Render(cmd.Output, "delete", "source", "/v2/api/sources/"+id, nil)
+			}
+
 			yes, _ := c.Flags().GetBool("yes")
 
 			ok, err := resource.ConfirmDelete("source", id, yes, cmd.Output.IsJSON())

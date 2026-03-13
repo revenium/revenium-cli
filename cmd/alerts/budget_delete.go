@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/revenium/revenium-cli/cmd"
+	"github.com/revenium/revenium-cli/internal/dryrun"
 	"github.com/revenium/revenium-cli/internal/resource"
 )
 
@@ -13,7 +14,8 @@ func newBudgetDeleteCmd() *cobra.Command {
 	c := &cobra.Command{
 		Use:   "delete <anomaly-id>",
 		Short: "Delete a budget alert",
-		Args:  cobra.ExactArgs(1),
+		Annotations: map[string]string{"mutating": "true"},
+		Args:  cobra.MatchAll(cobra.ExactArgs(1), cmd.ValidResourceID),
 		Example: `  # Delete a budget alert (with confirmation)
   revenium alerts budget delete anom-123
 
@@ -21,6 +23,11 @@ func newBudgetDeleteCmd() *cobra.Command {
   revenium alerts budget delete anom-123 --yes`,
 		RunE: func(c *cobra.Command, args []string) error {
 			id := args[0]
+
+			if cmd.DryRun() {
+				return dryrun.Render(cmd.Output, "delete", "budget alert", "/v2/api/sources/ai/anomaly/"+id, nil)
+			}
+
 			yes, _ := c.Flags().GetBool("yes")
 
 			ok, err := resource.ConfirmDelete("budget alert", id, yes, cmd.Output.IsJSON())

@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/revenium/revenium-cli/cmd"
+	"github.com/revenium/revenium-cli/internal/dryrun"
 )
 
 func newBudgetUpdateCmd() *cobra.Command {
@@ -18,7 +19,8 @@ func newBudgetUpdateCmd() *cobra.Command {
 	c := &cobra.Command{
 		Use:   "update <anomaly-id>",
 		Short: "Update a budget alert by modifying the underlying anomaly rule",
-		Args:  cobra.ExactArgs(1),
+		Annotations: map[string]string{"mutating": "true"},
+		Args:  cobra.MatchAll(cobra.ExactArgs(1), cmd.ValidResourceID),
 		Example: `  # Update a budget alert threshold
   revenium alerts budget update anom-123 --threshold 10000
 
@@ -40,6 +42,10 @@ func newBudgetUpdateCmd() *cobra.Command {
 
 			if len(updates) == 0 {
 				return fmt.Errorf("no fields specified to update")
+			}
+
+			if cmd.DryRun() {
+				return dryrun.Render(cmd.Output, "update", "budget alert", "/v2/api/sources/ai/anomaly/"+id, updates)
 			}
 
 			var result map[string]interface{}

@@ -82,7 +82,7 @@ func TestRenderJSONError_Shape(t *testing.T) {
 	var errBuf bytes.Buffer
 	f := NewWithWriter(&bytes.Buffer{}, &errBuf, true, false)
 
-	err := f.RenderJSONError("Invalid API key", 401)
+	err := f.RenderJSONError("Invalid API key", 401, 2)
 	require.NoError(t, err)
 
 	var result map[string]interface{}
@@ -90,13 +90,14 @@ func TestRenderJSONError_Shape(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "Invalid API key", result["error"])
 	assert.Equal(t, float64(401), result["status"])
+	assert.Equal(t, float64(2), result["exit_code"])
 }
 
 func TestRenderJSONError_NoStatus(t *testing.T) {
 	var errBuf bytes.Buffer
 	f := NewWithWriter(&bytes.Buffer{}, &errBuf, true, false)
 
-	err := f.RenderJSONError("Something went wrong", 0)
+	err := f.RenderJSONError("Something went wrong", 0, 1)
 	require.NoError(t, err)
 
 	var result map[string]interface{}
@@ -104,6 +105,7 @@ func TestRenderJSONError_NoStatus(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "Something went wrong", result["error"])
 	assert.Equal(t, float64(0), result["status"])
+	assert.Equal(t, float64(1), result["exit_code"])
 }
 
 func TestRenderJSON_FormatterDecision(t *testing.T) {

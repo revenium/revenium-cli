@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/revenium/revenium-cli/cmd"
+	"github.com/revenium/revenium-cli/internal/dryrun"
 )
 
 func newCreateCmd() *cobra.Command {
@@ -17,6 +18,7 @@ func newCreateCmd() *cobra.Command {
 
   # Create a subscriber with all fields
   revenium subscribers create --email user@example.com --first-name John --last-name Doe`,
+		Annotations: map[string]string{"mutating": "true"},
 		RunE: func(c *cobra.Command, args []string) error {
 			body := map[string]interface{}{
 				"email": email,
@@ -30,6 +32,10 @@ func newCreateCmd() *cobra.Command {
 			// The API requires organizationIds; default to the configured team ID
 			if cmd.APIClient.TeamID != "" {
 				body["organizationIds"] = []string{cmd.APIClient.TeamID}
+			}
+
+			if cmd.DryRun() {
+				return dryrun.Render(cmd.Output, "create", "subscriber", "/v2/api/subscribers", body)
 			}
 
 			var result map[string]interface{}
