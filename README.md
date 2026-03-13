@@ -171,6 +171,71 @@ revenium metrics tool-events
 
 All metrics commands support `--from` and `--to` flags for filtering by time range (ISO 8601 format).
 
+### Metering
+
+Submit usage events to Revenium's metering API for tracking and billing.
+
+| Subcommand     | Description                              |
+|----------------|------------------------------------------|
+| `event`        | Meter a generic event with custom payload |
+| `api-request`  | Meter an API request                     |
+| `api-response` | Meter an API response                    |
+| `completion`   | Meter an AI completion                   |
+| `image`        | Meter an AI image operation              |
+| `audio`        | Meter an AI audio operation              |
+| `video`        | Meter an AI video operation              |
+| `tool-event`   | Meter a tool/function call               |
+
+**Examples:**
+
+```sh
+# Meter a generic usage event
+revenium meter event --transaction-id txn-123 --payload '{"apiCalls": 100, "storageGB": 15.5}'
+
+# Meter an AI completion
+revenium meter completion --model gpt-4 --provider openai \
+  --input-tokens 500 --output-tokens 200 --total-tokens 700 \
+  --stop-reason END --is-streamed \
+  --request-time 2024-01-15T10:00:00Z \
+  --completion-start-time 2024-01-15T10:00:01Z \
+  --response-time 2024-01-15T10:00:05Z \
+  --request-duration 5000
+
+# Meter an AI image generation
+revenium meter image --model dall-e-3 --provider openai \
+  --request-time 2024-01-15T10:00:00Z --response-time 2024-01-15T10:00:05Z \
+  --request-duration 5000 --actual-image-count 1 --billing-unit PER_IMAGE
+
+# Meter an API request/response pair
+revenium meter api-request --transaction-id txn-456 --method POST --resource /api/users
+revenium meter api-response --transaction-id txn-456 --response-code 200 --total-duration 150
+
+# Meter an audio transcription
+revenium meter audio --model whisper-1 --provider openai \
+  --request-time 2024-01-15T10:00:00Z --response-time 2024-01-15T10:00:10Z \
+  --request-duration 10000 --billing-unit PER_SECOND --duration-seconds 120
+
+# Meter a video generation
+revenium meter video --model veo --provider google \
+  --request-time 2024-01-15T10:00:00Z --response-time 2024-01-15T10:01:00Z \
+  --request-duration 60000 --duration-seconds 10 --billing-unit PER_SECOND
+
+# Meter a tool call
+revenium meter tool-event --tool-id search-api --duration-ms 150 --success \
+  --timestamp 2024-01-15T10:00:00Z
+
+# Preview a metering event without submitting
+revenium meter completion --model gpt-4 --provider openai \
+  --input-tokens 500 --output-tokens 200 --total-tokens 700 \
+  --stop-reason END --is-streamed \
+  --request-time 2024-01-15T10:00:00Z \
+  --completion-start-time 2024-01-15T10:00:01Z \
+  --response-time 2024-01-15T10:00:05Z \
+  --request-duration 5000 --dry-run
+```
+
+All metering commands support optional fields for cost tracking (`--total-cost`), organizational attribution (`--agent`, `--environment`, `--organization-name`, `--product-name`), and distributed tracing (`--transaction-id`, `--trace-id`). Use `revenium meter <subcommand> --help` for the full list of flags.
+
 ## Output Formats
 
 ### Table (default)

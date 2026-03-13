@@ -85,8 +85,10 @@ var rootCmd = &cobra.Command{
 		}
 		// Completion commands (bash, zsh, fish, powershell) are children of
 		// the Cobra-generated "completion" command and don't need API access.
+		// Only match when "completion" is a direct child of the root command
+		// to avoid collisions with subcommands like "meter completion".
 		for p := cmd; p != nil; p = p.Parent() {
-			if p.Name() == "completion" {
+			if p.Name() == "completion" && p.Parent() != nil && p.Parent().Parent() == nil {
 				return nil
 			}
 		}

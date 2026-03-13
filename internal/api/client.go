@@ -28,6 +28,12 @@ type Client struct {
 	Verbose    bool
 }
 
+// MeterBaseURL returns the metering API base URL derived from the management
+// API base URL by replacing the /profitstream path segment with /meter.
+func (c *Client) MeterBaseURL() string {
+	return strings.Replace(c.BaseURL, "/profitstream", "/meter", 1)
+}
+
 // NewClient creates a new API client.
 func NewClient(baseURL, apiKey, teamID, tenantID, ownerID string, verbose bool) *Client {
 	return &Client{
