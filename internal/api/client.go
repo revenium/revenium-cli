@@ -134,7 +134,7 @@ func mapHTTPError(resp *http.Response) error {
 			var apiErr map[string]interface{}
 			if err := json.Unmarshal(bodyBytes, &apiErr); err == nil {
 				if details, ok := apiErr["details"]; ok {
-					message = fmt.Sprintf("Request failed (HTTP %d): %v", resp.StatusCode, details)
+					message = formatDetails(resp.StatusCode, details)
 					break
 				}
 				if msg, ok := apiErr["message"].(string); ok {
@@ -153,12 +153,31 @@ func mapHTTPError(resp *http.Response) error {
 	}
 }
 
+// formatDetails extracts a human-readable message from the API's details field.
+func formatDetails(statusCode int, details interface{}) string {
+	switch d := details.(type) {
+	case map[string]interface{}:
+		// Extract the first value, e.g. {"error": "Expected ISO 8601 format ..."}
+		for _, v := range d {
+			return fmt.Sprintf("Request failed (HTTP %d): %v", statusCode, v)
+		}
+	case string:
+		return fmt.Sprintf("Request failed (HTTP %d): %s", statusCode, d)
+	}
+	return fmt.Sprintf("Request failed (HTTP %d): %v", statusCode, details)
+}
+
 // DoCreate executes a POST request, automatically injecting teamId
 // into the body if the client has a TeamID set and the field is not already present.
 func (c *Client) DoCreate(ctx context.Context, path string, body map[string]interface{}, result interface{}) error {
 	if c.TeamID != "" {
 		if _, ok := body["teamId"]; !ok {
 			body["teamId"] = c.TeamID
+		}
+	}
+	if c.TenantID != "" {
+		if _, ok := body["tenantId"]; !ok {
+			body["tenantId"] = c.TenantID
 		}
 	}
 	return c.Do(ctx, "POST", path, body, result)

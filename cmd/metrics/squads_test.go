@@ -21,7 +21,7 @@ func TestSquadMetrics(t *testing.T) {
 		assert.NotEmpty(t, r.URL.Query().Get("startDate"))
 		assert.NotEmpty(t, r.URL.Query().Get("endDate"))
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `[{"id": "s-1", "name": "Research Squad", "executions": 42, "status": "ACTIVE"}]`)
+		fmt.Fprint(w, `[{"id": "txn-s-1", "transactionId": "txn-s-1", "name": "Research Squad", "executions": 42, "status": "ACTIVE"}]`)
 	}))
 	defer srv.Close()
 
@@ -38,7 +38,7 @@ func TestSquadMetrics(t *testing.T) {
 
 	require.NoError(t, err)
 	out := buf.String()
-	assert.Contains(t, out, "s-1")
+	assert.Contains(t, out, "txn-s-1")
 	assert.Contains(t, out, "Research Squad")
 	assert.Contains(t, out, "42")
 	assert.Contains(t, out, "ACTIVE")
@@ -69,7 +69,7 @@ func TestSquadMetricsEmpty(t *testing.T) {
 func TestSquadMetricsJSON(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `[{"id": "s-1", "name": "Research Squad", "executions": 42, "status": "ACTIVE"}]`)
+		fmt.Fprint(w, `[{"id": "txn-s-1", "transactionId": "txn-s-1", "name": "Research Squad", "executions": 42, "status": "ACTIVE"}]`)
 	}))
 	defer srv.Close()
 
@@ -89,5 +89,5 @@ func TestSquadMetricsJSON(t *testing.T) {
 	err = json.Unmarshal(buf.Bytes(), &result)
 	require.NoError(t, err)
 	assert.Len(t, result, 1)
-	assert.Equal(t, "s-1", result[0]["id"])
+	assert.Equal(t, "txn-s-1", result[0]["id"])
 }

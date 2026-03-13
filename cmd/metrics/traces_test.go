@@ -21,7 +21,7 @@ func TestTraceMetrics(t *testing.T) {
 		assert.NotEmpty(t, r.URL.Query().Get("startDate"))
 		assert.NotEmpty(t, r.URL.Query().Get("endDate"))
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `[{"traceId": "t-1", "model": "gpt-4", "totalTokens": 500, "totalCost": 0.02}]`)
+		fmt.Fprint(w, `[{"traceId": "t-1", "model": "gpt-4", "totalTokenCount": 500, "totalCost": 0.02}]`)
 	}))
 	defer srv.Close()
 
@@ -41,7 +41,7 @@ func TestTraceMetrics(t *testing.T) {
 	assert.Contains(t, out, "t-1")
 	assert.Contains(t, out, "gpt-4")
 	assert.Contains(t, out, "500")
-	assert.Contains(t, out, "$0.0200")
+	assert.Contains(t, out, "$0.02")
 }
 
 func TestTraceMetricsEmpty(t *testing.T) {
@@ -69,7 +69,7 @@ func TestTraceMetricsEmpty(t *testing.T) {
 func TestTraceMetricsJSON(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `[{"traceId": "t-1", "model": "gpt-4", "totalTokens": 500, "totalCost": 0.02}]`)
+		fmt.Fprint(w, `[{"traceId": "t-1", "model": "gpt-4", "totalTokenCount": 500, "totalCost": 0.02}]`)
 	}))
 	defer srv.Close()
 
@@ -97,10 +97,10 @@ func TestTracesGrouping(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		fmt.Fprint(w, `[
-			{"traceId": "t-1", "model": "gpt-4", "totalTokens": 500, "totalCost": 0.02},
-			{"traceId": "t-1", "model": "gpt-4", "totalTokens": 300, "totalCost": 0.01},
-			{"traceId": "t-2", "model": "claude-3", "totalTokens": 1000, "totalCost": 0.05},
-			{"traceId": "t-2", "model": "claude-3", "totalTokens": 200, "totalCost": 0.01}
+			{"traceId": "t-1", "model": "gpt-4", "totalTokenCount": 500, "totalCost": 0.02},
+			{"traceId": "t-1", "model": "gpt-4", "totalTokenCount": 300, "totalCost": 0.01},
+			{"traceId": "t-2", "model": "claude-3", "totalTokenCount": 1000, "totalCost": 0.05},
+			{"traceId": "t-2", "model": "claude-3", "totalTokenCount": 200, "totalCost": 0.01}
 		]`)
 	}))
 	defer srv.Close()
@@ -123,10 +123,10 @@ func TestTracesGrouping(t *testing.T) {
 	assert.Contains(t, out, "t-2")
 	// t-1 group: 500+300=800 tokens, 0.02+0.01=0.03 cost, 2 entries
 	assert.Contains(t, out, "800")
-	assert.Contains(t, out, "$0.0300")
+	assert.Contains(t, out, "$0.03")
 	// t-2 group: 1000+200=1200 tokens, 0.05+0.01=0.06 cost, 2 entries
 	assert.Contains(t, out, "1,200")
-	assert.Contains(t, out, "$0.0600")
+	assert.Contains(t, out, "$0.06")
 }
 
 func TestTracesJSONRaw(t *testing.T) {
@@ -134,8 +134,8 @@ func TestTracesJSONRaw(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		fmt.Fprint(w, `[
-			{"traceId": "t-1", "model": "gpt-4", "totalTokens": 500, "totalCost": 0.02},
-			{"traceId": "t-1", "model": "gpt-4", "totalTokens": 300, "totalCost": 0.01}
+			{"traceId": "t-1", "model": "gpt-4", "totalTokenCount": 500, "totalCost": 0.02},
+			{"traceId": "t-1", "model": "gpt-4", "totalTokenCount": 300, "totalCost": 0.01}
 		]`)
 	}))
 	defer srv.Close()

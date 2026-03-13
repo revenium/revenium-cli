@@ -41,7 +41,7 @@ func newCreateCmd() *cobra.Command {
 			}
 
 			var result map[string]interface{}
-			if err := cmd.APIClient.Do(c.Context(), "POST", "/v2/api/users", body, &result); err != nil {
+			if err := cmd.APIClient.DoCreate(c.Context(), "/v2/api/users", body, &result); err != nil {
 				return err
 			}
 			return renderUser(result)

@@ -20,7 +20,7 @@ func TestCompletionMetrics(t *testing.T) {
 		assert.Equal(t, "/v2/api/sources/metrics/ai/completions", r.URL.Path)
 		assert.NotEmpty(t, r.URL.Query().Get("startDate"))
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `[{"id": "c-1", "model": "gpt-3.5-turbo", "totalTokens": 25000, "totalCost": 0.125}]`)
+		fmt.Fprint(w, `[{"id": "txn-c-1", "transactionId": "txn-c-1", "model": "gpt-3.5-turbo", "totalTokenCount": 25000, "totalCost": 0.125}]`)
 	}))
 	defer srv.Close()
 
@@ -39,7 +39,7 @@ func TestCompletionMetrics(t *testing.T) {
 	out := buf.String()
 	assert.Contains(t, out, "gpt-3.5-turbo")
 	assert.Contains(t, out, "25,000")
-	assert.Contains(t, out, "$0.1250")
+	assert.Contains(t, out, "$0.12")
 }
 
 func TestCompletionMetricsEmpty(t *testing.T) {
@@ -67,7 +67,7 @@ func TestCompletionMetricsEmpty(t *testing.T) {
 func TestCompletionMetricsJSON(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `[{"id": "c-1", "model": "gpt-3.5-turbo", "totalTokens": 25000, "totalCost": 0.125}]`)
+		fmt.Fprint(w, `[{"id": "txn-c-1", "transactionId": "txn-c-1", "model": "gpt-3.5-turbo", "totalTokenCount": 25000, "totalCost": 0.125}]`)
 	}))
 	defer srv.Close()
 
@@ -87,5 +87,5 @@ func TestCompletionMetricsJSON(t *testing.T) {
 	err = json.Unmarshal(buf.Bytes(), &result)
 	require.NoError(t, err)
 	assert.Len(t, result, 1)
-	assert.Equal(t, "c-1", result[0]["id"])
+	assert.Equal(t, "txn-c-1", result[0]["id"])
 }

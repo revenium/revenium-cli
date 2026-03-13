@@ -49,7 +49,7 @@ func toSquadsRows(metrics []map[string]interface{}) [][]string {
 	rows := make([][]string, len(metrics))
 	for i, m := range metrics {
 		rows[i] = []string{
-			str(m, "id"),
+			str(m, "transactionId"),
 			str(m, "name"),
 			formatNumber(floatVal(m, "executions")),
 			str(m, "status"),

@@ -70,7 +70,7 @@ func groupByTraceId(metrics []map[string]interface{}) []map[string]interface{} {
 		}
 		g := groups[tid]
 		g["count"] = floatVal(g, "count") + 1
-		g["totalTokens"] = floatVal(g, "totalTokens") + floatVal(m, "totalTokens")
+		g["totalTokens"] = floatVal(g, "totalTokens") + floatVal(m, "totalTokenCount")
 		g["totalCost"] = floatVal(g, "totalCost") + floatVal(m, "totalCost")
 	}
 
@@ -89,7 +89,7 @@ func toTracesRows(metrics []map[string]interface{}) [][]string {
 			formatNumber(floatVal(m, "count")),
 			str(m, "model"),
 			formatNumber(floatVal(m, "totalTokens")),
-			fmt.Sprintf("$%.4f", floatVal(m, "totalCost")),
+			formatCost(floatVal(m, "totalCost")),
 		}
 	}
 	return rows

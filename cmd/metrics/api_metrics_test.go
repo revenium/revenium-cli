@@ -21,7 +21,7 @@ func TestAPIMetrics(t *testing.T) {
 		assert.NotEmpty(t, r.URL.Query().Get("startDate"))
 		assert.NotEmpty(t, r.URL.Query().Get("endDate"))
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `[{"id": "a-1", "source": "payments-api", "requests": 15000, "errors": 12, "latency": 45.5}]`)
+		fmt.Fprint(w, `[{"id": "txn-a-1", "transactionId": "txn-a-1", "source": "payments-api", "requests": 15000, "errors": 12, "latency": 45.5}]`)
 	}))
 	defer srv.Close()
 
@@ -38,7 +38,7 @@ func TestAPIMetrics(t *testing.T) {
 
 	require.NoError(t, err)
 	out := buf.String()
-	assert.Contains(t, out, "a-1")
+	assert.Contains(t, out, "txn-a-1")
 	assert.Contains(t, out, "payments-api")
 	assert.Contains(t, out, "15,000")
 	assert.Contains(t, out, "12")
@@ -70,7 +70,7 @@ func TestAPIMetricsEmpty(t *testing.T) {
 func TestAPIMetricsJSON(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `[{"id": "a-1", "source": "payments-api", "requests": 15000, "errors": 12, "latency": 45.5}]`)
+		fmt.Fprint(w, `[{"id": "txn-a-1", "transactionId": "txn-a-1", "source": "payments-api", "requests": 15000, "errors": 12, "latency": 45.5}]`)
 	}))
 	defer srv.Close()
 
@@ -90,5 +90,5 @@ func TestAPIMetricsJSON(t *testing.T) {
 	err = json.Unmarshal(buf.Bytes(), &result)
 	require.NoError(t, err)
 	assert.Len(t, result, 1)
-	assert.Equal(t, "a-1", result[0]["id"])
+	assert.Equal(t, "txn-a-1", result[0]["id"])
 }

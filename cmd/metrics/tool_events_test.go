@@ -21,7 +21,7 @@ func TestToolEventMetrics(t *testing.T) {
 		assert.NotEmpty(t, r.URL.Query().Get("startDate"))
 		assert.NotEmpty(t, r.URL.Query().Get("endDate"))
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `[{"id": "te-1", "tool": "code-search", "invocations": 250, "totalCost": 0.125}]`)
+		fmt.Fprint(w, `[{"id": "txn-te-1", "transactionId": "txn-te-1", "tool": "code-search", "invocations": 250, "totalCost": 0.125}]`)
 	}))
 	defer srv.Close()
 
@@ -38,10 +38,10 @@ func TestToolEventMetrics(t *testing.T) {
 
 	require.NoError(t, err)
 	out := buf.String()
-	assert.Contains(t, out, "te-1")
+	assert.Contains(t, out, "txn-te-1")
 	assert.Contains(t, out, "code-search")
 	assert.Contains(t, out, "250")
-	assert.Contains(t, out, "$0.1250")
+	assert.Contains(t, out, "$0.12")
 }
 
 func TestToolEventMetricsEmpty(t *testing.T) {
@@ -69,7 +69,7 @@ func TestToolEventMetricsEmpty(t *testing.T) {
 func TestToolEventMetricsJSON(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `[{"id": "te-1", "tool": "code-search", "invocations": 250, "totalCost": 0.125}]`)
+		fmt.Fprint(w, `[{"id": "txn-te-1", "transactionId": "txn-te-1", "tool": "code-search", "invocations": 250, "totalCost": 0.125}]`)
 	}))
 	defer srv.Close()
 
@@ -89,5 +89,5 @@ func TestToolEventMetricsJSON(t *testing.T) {
 	err = json.Unmarshal(buf.Bytes(), &result)
 	require.NoError(t, err)
 	assert.Len(t, result, 1)
-	assert.Equal(t, "te-1", result[0]["id"])
+	assert.Equal(t, "txn-te-1", result[0]["id"])
 }

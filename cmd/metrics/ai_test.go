@@ -21,7 +21,7 @@ func TestAIMetrics(t *testing.T) {
 		assert.NotEmpty(t, r.URL.Query().Get("startDate"))
 		assert.NotEmpty(t, r.URL.Query().Get("endDate"))
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `[{"id": "m-1", "model": "gpt-4", "totalTokens": 1500, "totalCost": 0.05}]`)
+		fmt.Fprint(w, `[{"id": "txn-m-1", "transactionId": "txn-m-1", "model": "gpt-4", "totalTokenCount": 1500, "totalCost": 0.05}]`)
 	}))
 	defer srv.Close()
 
@@ -40,7 +40,7 @@ func TestAIMetrics(t *testing.T) {
 	out := buf.String()
 	assert.Contains(t, out, "gpt-4")
 	assert.Contains(t, out, "1,500")
-	assert.Contains(t, out, "$0.0500")
+	assert.Contains(t, out, "$0.05")
 }
 
 func TestAIMetricsEmpty(t *testing.T) {
@@ -68,7 +68,7 @@ func TestAIMetricsEmpty(t *testing.T) {
 func TestAIMetricsJSON(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `[{"id": "m-1", "model": "gpt-4", "totalTokens": 1500, "totalCost": 0.05}]`)
+		fmt.Fprint(w, `[{"id": "txn-m-1", "transactionId": "txn-m-1", "model": "gpt-4", "totalTokenCount": 1500, "totalCost": 0.05}]`)
 	}))
 	defer srv.Close()
 
@@ -88,5 +88,5 @@ func TestAIMetricsJSON(t *testing.T) {
 	err = json.Unmarshal(buf.Bytes(), &result)
 	require.NoError(t, err)
 	assert.Len(t, result, 1)
-	assert.Equal(t, "m-1", result[0]["id"])
+	assert.Equal(t, "txn-m-1", result[0]["id"])
 }

@@ -20,7 +20,7 @@ func TestImageMetrics(t *testing.T) {
 		assert.Equal(t, "/v2/api/sources/metrics/ai/images", r.URL.Path)
 		assert.NotEmpty(t, r.URL.Query().Get("startDate"))
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `[{"id": "i-1", "model": "dall-e-3", "totalCount": 150, "totalCost": 6.0}]`)
+		fmt.Fprint(w, `[{"id": "txn-i-1", "transactionId": "txn-i-1", "model": "dall-e-3", "totalCount": 150, "totalCost": 6.0}]`)
 	}))
 	defer srv.Close()
 
@@ -39,7 +39,7 @@ func TestImageMetrics(t *testing.T) {
 	out := buf.String()
 	assert.Contains(t, out, "dall-e-3")
 	assert.Contains(t, out, "150")
-	assert.Contains(t, out, "$6.0000")
+	assert.Contains(t, out, "$6.00")
 }
 
 func TestImageMetricsEmpty(t *testing.T) {
@@ -67,7 +67,7 @@ func TestImageMetricsEmpty(t *testing.T) {
 func TestImageMetricsJSON(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `[{"id": "i-1", "model": "dall-e-3", "totalCount": 150, "totalCost": 6.0}]`)
+		fmt.Fprint(w, `[{"id": "txn-i-1", "transactionId": "txn-i-1", "model": "dall-e-3", "totalCount": 150, "totalCost": 6.0}]`)
 	}))
 	defer srv.Close()
 
@@ -87,5 +87,5 @@ func TestImageMetricsJSON(t *testing.T) {
 	err = json.Unmarshal(buf.Bytes(), &result)
 	require.NoError(t, err)
 	assert.Len(t, result, 1)
-	assert.Equal(t, "i-1", result[0]["id"])
+	assert.Equal(t, "txn-i-1", result[0]["id"])
 }

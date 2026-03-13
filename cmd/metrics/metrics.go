@@ -26,6 +26,18 @@ var Cmd = &cobra.Command{
 
   # Query audio metrics as JSON
   revenium metrics audio --json`,
+	PersistentPreRunE: func(c *cobra.Command, args []string) error {
+		// Run the root PersistentPreRunE first (config/API client init).
+		if root := c.Root(); root != nil && root.PersistentPreRunE != nil {
+			if err := root.PersistentPreRunE(c, args); err != nil {
+				return err
+			}
+		}
+		if err := normalizeDateFlag("from", &fromFlag); err != nil {
+			return err
+		}
+		return normalizeDateFlag("to", &toFlag)
+	},
 }
 
 func init() {
@@ -41,6 +53,25 @@ func init() {
 	Cmd.AddCommand(newSquadsCmd())
 	Cmd.AddCommand(newAPIMetricsCmd())
 	Cmd.AddCommand(newToolEventsCmd())
+}
+
+// normalizeDateFlag parses a date string, appending "Z" if no timezone is present,
+// and stores the normalized value back into the flag variable.
+func normalizeDateFlag(name string, flag *string) error {
+	if *flag == "" {
+		return nil
+	}
+	// Already valid RFC 3339
+	if _, err := time.Parse(time.RFC3339, *flag); err == nil {
+		return nil
+	}
+	// Try appending Z for inputs like "2025-01-01T00:00:00"
+	withZ := *flag + "Z"
+	if _, err := time.Parse(time.RFC3339, withZ); err == nil {
+		*flag = withZ
+		return nil
+	}
+	return fmt.Errorf("--%s %q is not valid ISO 8601 format (expected e.g. 2025-01-01T00:00:00Z)", name, *flag)
 }
 
 // buildPath constructs the API path with time range query parameters.
@@ -89,6 +120,29 @@ func formatNumber(n float64) string {
 		result = append(result, byte(c))
 	}
 	return negative + string(result)
+}
+
+// formatCost formats a dollar amount with enough precision to show significant digits.
+// Values >= $0.01 use 2 decimals, otherwise up to 7 decimals with trailing zeros trimmed.
+func formatCost(v float64) string {
+	if v == 0 {
+		return "$0.00"
+	}
+	if v >= 0.01 || v <= -0.01 {
+		return fmt.Sprintf("$%.2f", v)
+	}
+	s := fmt.Sprintf("$%.7f", v)
+	// Trim trailing zeros but keep at least 2 decimal places
+	for len(s) > 0 && s[len(s)-1] == '0' {
+		trimmed := s[:len(s)-1]
+		// Count decimals remaining
+		dot := strings.IndexByte(trimmed, '.')
+		if dot >= 0 && len(trimmed)-dot-1 < 2 {
+			break
+		}
+		s = trimmed
+	}
+	return s
 }
 
 // str safely extracts a string value from a map, returning "" for missing or nil keys.

@@ -20,7 +20,7 @@ func TestAudioMetrics(t *testing.T) {
 		assert.Equal(t, "/v2/api/sources/metrics/ai/audio", r.URL.Path)
 		assert.NotEmpty(t, r.URL.Query().Get("startDate"))
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `[{"id": "a-1", "model": "whisper-1", "totalDuration": 3600, "totalCost": 1.25}]`)
+		fmt.Fprint(w, `[{"id": "txn-a-1", "transactionId": "txn-a-1", "model": "whisper-1", "totalDuration": 3600, "totalCost": 1.25}]`)
 	}))
 	defer srv.Close()
 
@@ -39,7 +39,7 @@ func TestAudioMetrics(t *testing.T) {
 	out := buf.String()
 	assert.Contains(t, out, "whisper-1")
 	assert.Contains(t, out, "3,600")
-	assert.Contains(t, out, "$1.2500")
+	assert.Contains(t, out, "$1.25")
 }
 
 func TestAudioMetricsEmpty(t *testing.T) {
@@ -67,7 +67,7 @@ func TestAudioMetricsEmpty(t *testing.T) {
 func TestAudioMetricsJSON(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `[{"id": "a-1", "model": "whisper-1", "totalDuration": 3600, "totalCost": 1.25}]`)
+		fmt.Fprint(w, `[{"id": "txn-a-1", "transactionId": "txn-a-1", "model": "whisper-1", "totalDuration": 3600, "totalCost": 1.25}]`)
 	}))
 	defer srv.Close()
 
@@ -87,5 +87,5 @@ func TestAudioMetricsJSON(t *testing.T) {
 	err = json.Unmarshal(buf.Bytes(), &result)
 	require.NoError(t, err)
 	assert.Len(t, result, 1)
-	assert.Equal(t, "a-1", result[0]["id"])
+	assert.Equal(t, "txn-a-1", result[0]["id"])
 }

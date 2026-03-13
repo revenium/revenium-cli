@@ -49,10 +49,10 @@ func toAudioRows(metrics []map[string]interface{}) [][]string {
 	rows := make([][]string, len(metrics))
 	for i, m := range metrics {
 		rows[i] = []string{
-			str(m, "id"),
+			str(m, "transactionId"),
 			str(m, "model"),
 			formatNumber(floatVal(m, "totalDuration")),
-			fmt.Sprintf("$%.4f", floatVal(m, "totalCost")),
+			formatCost(floatVal(m, "totalCost")),
 		}
 	}
 	return rows

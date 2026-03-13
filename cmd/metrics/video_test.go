@@ -20,7 +20,7 @@ func TestVideoMetrics(t *testing.T) {
 		assert.Equal(t, "/v2/api/sources/metrics/ai/video", r.URL.Path)
 		assert.NotEmpty(t, r.URL.Query().Get("startDate"))
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `[{"id": "v-1", "model": "sora", "totalDuration": 120, "totalCost": 2.50}]`)
+		fmt.Fprint(w, `[{"id": "txn-v-1", "transactionId": "txn-v-1", "model": "sora", "totalDuration": 120, "totalCost": 2.50}]`)
 	}))
 	defer srv.Close()
 
@@ -39,7 +39,7 @@ func TestVideoMetrics(t *testing.T) {
 	out := buf.String()
 	assert.Contains(t, out, "sora")
 	assert.Contains(t, out, "120")
-	assert.Contains(t, out, "$2.5000")
+	assert.Contains(t, out, "$2.50")
 }
 
 func TestVideoMetricsEmpty(t *testing.T) {
@@ -67,7 +67,7 @@ func TestVideoMetricsEmpty(t *testing.T) {
 func TestVideoMetricsJSON(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `[{"id": "v-1", "model": "sora", "totalDuration": 120, "totalCost": 2.50}]`)
+		fmt.Fprint(w, `[{"id": "txn-v-1", "transactionId": "txn-v-1", "model": "sora", "totalDuration": 120, "totalCost": 2.50}]`)
 	}))
 	defer srv.Close()
 
@@ -87,5 +87,5 @@ func TestVideoMetricsJSON(t *testing.T) {
 	err = json.Unmarshal(buf.Bytes(), &result)
 	require.NoError(t, err)
 	assert.Len(t, result, 1)
-	assert.Equal(t, "v-1", result[0]["id"])
+	assert.Equal(t, "txn-v-1", result[0]["id"])
 }

@@ -49,10 +49,10 @@ func toAIRows(metrics []map[string]interface{}) [][]string {
 	rows := make([][]string, len(metrics))
 	for i, m := range metrics {
 		rows[i] = []string{
-			str(m, "id"),
+			str(m, "transactionId"),
 			str(m, "model"),
-			formatNumber(floatVal(m, "totalTokens")),
-			fmt.Sprintf("$%.4f", floatVal(m, "totalCost")),
+			formatNumber(floatVal(m, "totalTokenCount")),
+			formatCost(floatVal(m, "totalCost")),
 		}
 	}
 	return rows
