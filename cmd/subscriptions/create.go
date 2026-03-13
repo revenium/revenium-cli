@@ -21,6 +21,7 @@ func newCreateCmd() *cobra.Command {
 			body := map[string]interface{}{
 				"name":               name,
 				"clientEmailAddress": clientEmail,
+				"productId":          productID,
 			}
 
 			if c.Flags().Changed("description") {
@@ -28,9 +29,6 @@ func newCreateCmd() *cobra.Command {
 			}
 			if c.Flags().Changed("subscriber-id") {
 				body["subscriberId"] = subscriberID
-			}
-			if c.Flags().Changed("product-id") {
-				body["productId"] = productID
 			}
 
 			var result map[string]interface{}
@@ -48,6 +46,7 @@ func newCreateCmd() *cobra.Command {
 	c.Flags().StringVar(&productID, "product-id", "", "Product ID")
 	_ = c.MarkFlagRequired("name")
 	_ = c.MarkFlagRequired("client-email")
+	_ = c.MarkFlagRequired("product-id")
 
 	return c
 }

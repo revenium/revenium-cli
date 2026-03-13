@@ -51,7 +51,7 @@ func TestCreateSubscriptionMinimal(t *testing.T) {
 		body, _ := io.ReadAll(r.Body)
 		json.Unmarshal(body, &receivedBody)
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `{"id": "sub-new", "label": "", "description": "Minimal"}`)
+		fmt.Fprint(w, `{"id": "sub-new", "label": "", "description": ""}`)
 	}))
 	defer srv.Close()
 
@@ -61,13 +61,13 @@ func TestCreateSubscriptionMinimal(t *testing.T) {
 
 	c := newCreateCmd()
 	c.SetOut(&buf)
-	c.SetArgs([]string{"--name", "Minimal Sub", "--client-email", "user@example.com", "--description", "Minimal"})
+	c.SetArgs([]string{"--name", "Minimal Sub", "--client-email", "user@example.com", "--product-id", "prod-1"})
 	err := c.Execute()
 
 	require.NoError(t, err)
-	assert.Equal(t, "Minimal", receivedBody["description"])
+	assert.Equal(t, "prod-1", receivedBody["productId"])
 	_, hasSubscriberID := receivedBody["subscriberId"]
 	assert.False(t, hasSubscriberID, "subscriberId should not be sent when not specified")
-	_, hasProductID := receivedBody["productId"]
-	assert.False(t, hasProductID, "productId should not be sent when not specified")
+	_, hasDescription := receivedBody["description"]
+	assert.False(t, hasDescription, "description should not be sent when not specified")
 }

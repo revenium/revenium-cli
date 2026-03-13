@@ -19,7 +19,7 @@ func TestGetSubscription(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "/v2/api/subscriptions/sub-1", r.URL.Path)
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `{"id": "sub-1", "label": "API Access", "description": "Production API"}`)
+		fmt.Fprint(w, `{"id": "sub-1", "name": "API Access", "label": "user@example.com", "product": {"id": "prod-1", "label": "Default Product"}}`)
 	}))
 	defer srv.Close()
 
@@ -36,13 +36,14 @@ func TestGetSubscription(t *testing.T) {
 	out := buf.String()
 	assert.Contains(t, out, "sub-1")
 	assert.Contains(t, out, "API Access")
-	assert.Contains(t, out, "Production API")
+	assert.Contains(t, out, "user@example.com")
+	assert.Contains(t, out, "Default Product")
 }
 
 func TestGetSubscriptionJSON(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `{"id": "sub-1", "label": "API Access", "description": "Production API"}`)
+		fmt.Fprint(w, `{"id": "sub-1", "name": "API Access", "label": "user@example.com", "product": {"id": "prod-1", "label": "Default Product"}}`)
 	}))
 	defer srv.Close()
 
@@ -60,5 +61,5 @@ func TestGetSubscriptionJSON(t *testing.T) {
 	err = json.Unmarshal(buf.Bytes(), &result)
 	require.NoError(t, err)
 	assert.Equal(t, "sub-1", result["id"])
-	assert.Equal(t, "API Access", result["label"])
+	assert.Equal(t, "API Access", result["name"])
 }

@@ -17,7 +17,7 @@ import (
 
 func TestListAlerts(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(t, "/v2/api/sources/ai/alert", r.URL.Path)
+		assert.Equal(t, "/v2/api/sources/ai/anomaly", r.URL.Path)
 		w.Header().Set("Content-Type", "application/json")
 		fmt.Fprint(w, `[{"id": "alert-1", "label": "Cost Spike", "created": "2026-01-15T10:00:00Z"}]`)
 	}))

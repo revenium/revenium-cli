@@ -18,7 +18,7 @@ func newGetCmd() *cobra.Command {
   revenium alerts get alert-123 --json`,
 		RunE: func(c *cobra.Command, args []string) error {
 			var alert map[string]interface{}
-			if err := cmd.APIClient.Do(c.Context(), "GET", "/v2/api/sources/ai/alert/"+args[0], nil, &alert); err != nil {
+			if err := cmd.APIClient.Do(c.Context(), "GET", "/v2/api/sources/ai/anomaly/"+args[0], nil, &alert); err != nil {
 				return err
 			}
 			return renderAlert(alert)

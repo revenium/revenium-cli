@@ -34,7 +34,7 @@ func init() {
 
 // tableDef defines the table layout for subscription output.
 var tableDef = output.TableDef{
-	Headers:      []string{"ID", "Label", "Description"},
+	Headers:      []string{"ID", "Name", "Email", "Product"},
 	StatusColumn: -1,
 }
 
@@ -44,11 +44,20 @@ func toRows(subs []map[string]interface{}) [][]string {
 	for i, s := range subs {
 		rows[i] = []string{
 			str(s, "id"),
+			str(s, "name"),
 			str(s, "label"),
-			str(s, "description"),
+			nestedStr(s, "product", "label"),
 		}
 	}
 	return rows
+}
+
+// nestedStr extracts a string from a nested object, e.g. m["product"]["label"].
+func nestedStr(m map[string]interface{}, outer, inner string) string {
+	if obj, ok := m[outer].(map[string]interface{}); ok {
+		return str(obj, inner)
+	}
+	return ""
 }
 
 // str safely extracts a string value from a map, returning "" for missing or nil keys.
@@ -63,8 +72,9 @@ func str(m map[string]interface{}, key string) string {
 func renderSubscription(sub map[string]interface{}) error {
 	rows := [][]string{{
 		str(sub, "id"),
+		str(sub, "name"),
 		str(sub, "label"),
-		str(sub, "description"),
+		nestedStr(sub, "product", "label"),
 	}}
 	return cmd.Output.Render(tableDef, rows, sub)
 }

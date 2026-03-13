@@ -20,7 +20,7 @@ func newListCmd() *cobra.Command {
   revenium alerts list --json`,
 		RunE: func(c *cobra.Command, args []string) error {
 			var alerts []map[string]interface{}
-			if err := cmd.APIClient.DoList(c.Context(), "/v2/api/sources/ai/alert", cmd.ListOptsFromFlags(c), &alerts); err != nil {
+			if err := cmd.APIClient.DoList(c.Context(), "/v2/api/sources/ai/anomaly", cmd.ListOptsFromFlags(c), &alerts); err != nil {
 				return err
 			}
 			if len(alerts) == 0 {

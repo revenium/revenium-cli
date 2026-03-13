@@ -20,8 +20,8 @@ func TestListSubscriptions(t *testing.T) {
 		assert.Equal(t, "/v2/api/subscriptions", r.URL.Path)
 		w.Header().Set("Content-Type", "application/json")
 		fmt.Fprint(w, `[
-			{"id": "sub-1", "label": "API Access", "description": "Production API"},
-			{"id": "sub-2", "label": "AI Access", "description": "AI service subscription"}
+			{"id": "sub-1", "name": "API Access", "label": "user@example.com", "product": {"id": "prod-1", "label": "Default Product"}},
+			{"id": "sub-2", "name": "AI Access", "label": "ai@example.com", "product": {"id": "prod-2", "label": "AI Product"}}
 		]`)
 	}))
 	defer srv.Close()
@@ -38,7 +38,8 @@ func TestListSubscriptions(t *testing.T) {
 	out := buf.String()
 	assert.Contains(t, out, "sub-1")
 	assert.Contains(t, out, "API Access")
-	assert.Contains(t, out, "Production API")
+	assert.Contains(t, out, "user@example.com")
+	assert.Contains(t, out, "Default Product")
 	assert.Contains(t, out, "sub-2")
 	assert.Contains(t, out, "AI Access")
 }
@@ -66,7 +67,7 @@ func TestListSubscriptionsJSON(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		fmt.Fprint(w, `[
-			{"id": "sub-1", "label": "API Access", "description": "Production API"}
+			{"id": "sub-1", "name": "API Access", "label": "user@example.com", "product": {"id": "prod-1", "label": "Default Product"}}
 		]`)
 	}))
 	defer srv.Close()
