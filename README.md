@@ -50,15 +50,19 @@ revenium metrics ai
 
 The CLI stores configuration in `~/.config/revenium/config.yaml`.
 
-| Key       | Description                    | Default                                      |
-|-----------|--------------------------------|----------------------------------------------|
-| `key`     | Your Revenium API key          | *(required)*                                 |
-| `api-url` | API base URL                   | `https://api.revenium.ai/profitstream`       |
-| `team-id` | Your team ID for multi-tenant access | *(optional)*                            |
+| Key         | Description                          | Default                                |
+|-------------|--------------------------------------|----------------------------------------|
+| `key`       | Your Revenium API key                | *(required)*                           |
+| `api-url`   | API base URL                         | `https://api.revenium.ai/profitstream` |
+| `team-id`   | Team ID for multi-tenant access      | *(optional)*                           |
+| `tenant-id` | Tenant ID                            | *(optional)*                           |
+| `owner-id`  | Owner ID                             | *(optional)*                           |
 
 ```sh
 revenium config set key your-api-key
 revenium config set team-id your-team-id
+revenium config set tenant-id your-tenant-id
+revenium config set owner-id your-owner-id
 revenium config set api-url https://custom.api.com/profitstream
 revenium config show
 ```
@@ -201,6 +205,18 @@ revenium meter completion --model gpt-4 --provider openai \
   --response-time 2024-01-15T10:00:05Z \
   --request-duration 5000
 
+# Meter a completion with prompt/response content
+revenium meter completion --model gpt-4 --provider openai \
+  --input-tokens 500 --output-tokens 200 --total-tokens 700 \
+  --stop-reason END --is-streamed \
+  --request-time 2024-01-15T10:00:00Z \
+  --completion-start-time 2024-01-15T10:00:01Z \
+  --response-time 2024-01-15T10:00:05Z \
+  --request-duration 5000 \
+  --system-prompt "You are a helpful assistant" \
+  --input-messages '[{"role":"user","content":"Hello"}]' \
+  --output-response "Hi there! How can I help you?"
+
 # Meter an AI image generation
 revenium meter image --model dall-e-3 --provider openai \
   --request-time 2024-01-15T10:00:00Z --response-time 2024-01-15T10:00:05Z \
@@ -234,7 +250,7 @@ revenium meter completion --model gpt-4 --provider openai \
   --request-duration 5000 --dry-run
 ```
 
-All metering commands support optional fields for cost tracking (`--total-cost`), organizational attribution (`--agent`, `--environment`, `--organization-name`, `--product-name`), and distributed tracing (`--transaction-id`, `--trace-id`). Use `revenium meter <subcommand> --help` for the full list of flags.
+All metering commands support optional fields for cost tracking (`--total-cost`), organizational attribution (`--agent`, `--environment`, `--organization-name`, `--product-name`), distributed tracing (`--transaction-id`, `--trace-id`), and conversation content (`--system-prompt`, `--input-messages`, `--output-response`). Use `revenium meter <subcommand> --help` for the full list of flags.
 
 ## Output Formats
 
