@@ -47,7 +47,48 @@ var dryRun bool
 var rootCmd = &cobra.Command{
 	Use:   "revenium",
 	Short: "Manage your Revenium account",
-	Long:  "Manage your Revenium account from the command line. Configure API access, manage resources, and monitor usage.",
+	Long: `Manage your Revenium account from the command line. Configure API access,
+manage resources, and monitor usage.
+
+Configuration:
+  Config file:  ~/.config/revenium/config.yaml
+  Valid keys:   key, api-url, team-id, tenant-id, owner-id
+
+  key           Your Revenium API key (required)
+  api-url       API base URL (default https://api.revenium.ai/profitstream)
+  team-id       Team ID for multi-tenant access
+  tenant-id     Tenant ID
+  owner-id      Owner ID
+
+Environment Variables:
+  REVENIUM_API_KEY          Overrides "key"
+  REVENIUM_API_URL          Overrides "api-url"
+  REVENIUM_TEAM_ID          Overrides "team-id"
+  REVENIUM_OUTPUT_FORMAT    Default output format ("json" or "table")
+
+  Environment variables take precedence over the config file.
+
+Output Formats:
+  table (default)   Human-readable tables with styled borders
+  json              Machine-readable JSON, suitable for scripting and piping to jq
+
+  Resolution order: --json flag > --output flag > REVENIUM_OUTPUT_FORMAT env > table
+  Use --fields to limit columns/fields in either mode.
+  Use --quiet to suppress non-error output (useful in scripts).
+
+Exit Codes:
+  0   Success
+  1   General / unknown error
+  2   Authentication error (invalid or missing API key)
+  3   Resource not found
+  4   Validation error (bad request)
+  5   Network / connection failure
+
+  In JSON mode, errors are written to stderr as structured JSON including the exit code.
+
+Programmatic Discovery:
+  Use "revenium schema" to dump the full CLI command tree as machine-readable JSON.
+  This includes all commands, flags, types, defaults, and required markers.`,
 	Example: `  # Configure your API key
   revenium config set key your-api-key
 
@@ -55,7 +96,16 @@ var rootCmd = &cobra.Command{
   revenium config show
 
   # List sources (after configuration)
-  revenium sources list`,
+  revenium sources list
+
+  # JSON output for scripting
+  revenium sources list --output json
+
+  # Filter fields
+  revenium sources list --fields id,name,status
+
+  # Preview a mutation without executing
+  revenium sources create --name "My API" --type API --dry-run`,
 	SilenceErrors: true,
 	SilenceUsage:  true,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
