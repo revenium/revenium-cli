@@ -1,6 +1,9 @@
 package meter
 
 import (
+	"encoding/json"
+	"fmt"
+
 	"github.com/spf13/cobra"
 
 	"github.com/revenium/revenium-cli/cmd"
@@ -10,7 +13,7 @@ import (
 func newCompletionCmd() *cobra.Command {
 	var model, provider, stopReason, requestTime, completionStartTime, responseTime string
 	var transactionID, traceId, modelSource, taskType, operationType, agent, environment, region string
-	var organizationName, subscriptionId, productName string
+	var organizationName, subscriptionId, productName, systemPrompt, inputMessages, outputResponse string
 	var inputTokenCount, outputTokenCount, totalTokenCount, reasoningTokenCount int
 	var cacheCreationTokenCount, cacheReadTokenCount, requestDuration, timeToFirstToken int
 	var totalCost, inputTokenCost, outputTokenCost, temperature float64
@@ -96,6 +99,19 @@ func newCompletionCmd() *cobra.Command {
 			if c.Flags().Changed("product-name") {
 				body["productName"] = productName
 			}
+			if c.Flags().Changed("system-prompt") {
+				body["systemPrompt"] = systemPrompt
+			}
+			if c.Flags().Changed("output-response") {
+				body["outputResponse"] = outputResponse
+			}
+			if c.Flags().Changed("input-messages") {
+				var msgs []interface{}
+				if err := json.Unmarshal([]byte(inputMessages), &msgs); err != nil {
+					return fmt.Errorf("--input-messages must be valid JSON array: %w", err)
+				}
+				body["inputMessages"] = inputMessages
+			}
 
 			if cmd.DryRun() {
 				return dryrun.Render(cmd.Output, "meter", "completion", "/v2/ai/completions", body)
@@ -152,6 +168,9 @@ func newCompletionCmd() *cobra.Command {
 	c.Flags().StringVar(&organizationName, "organization-name", "", "Organization name")
 	c.Flags().StringVar(&subscriptionId, "subscription-id", "", "Subscription ID")
 	c.Flags().StringVar(&productName, "product-name", "", "Product name")
+	c.Flags().StringVar(&systemPrompt, "system-prompt", "", "System prompt text sent with the completion")
+	c.Flags().StringVar(&outputResponse, "output-response", "", "Assistant output/response content")
+	c.Flags().StringVar(&inputMessages, "input-messages", "", "User input messages as JSON array")
 
 	return c
 }
