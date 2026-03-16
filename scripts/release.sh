@@ -9,7 +9,7 @@
 #   ./scripts/release.sh 1.0.0
 #
 # Prerequisites:
-#   - gh CLI installed and authenticated
+#   - GITHUB_TOKEN env var set with repo and workflow scopes
 #   - Write access to revenium/revenium-cli (public) and revenium/homebrew-tap
 #   - No uncommitted changes in the working tree
 
@@ -22,6 +22,8 @@ GH_RELEASE_REPO="revenium/revenium-cli"
 LDFLAGS_PKG="github.com/revenium/revenium-cli/internal/build"
 BINARY_NAME="revenium"
 DIST_DIR="${CLI_REPO_ROOT}/dist"
+GH_API="https://api.github.com"
+GH_UPLOAD="https://uploads.github.com"
 
 # ── Platforms to build ──────────────────────────────────────────────────────
 PLATFORMS=(
@@ -46,8 +48,9 @@ DATE="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 # ── Preflight checks ───────────────────────────────────────────────────────
 echo "==> Preflight checks"
 
-if ! command -v gh &>/dev/null; then
-  echo "Error: gh CLI is not installed. Install it with: brew install gh"
+if [[ -z "${GITHUB_TOKEN:-}" ]]; then
+  echo "Error: GITHUB_TOKEN environment variable is not set."
+  echo "Create a token at https://github.com/settings/tokens with 'repo' scope."
   exit 1
 fi
 
@@ -106,11 +109,41 @@ git -C "${CLI_REPO_ROOT}" push public "${TAG}"
 
 # ── Create GitHub release ───────────────────────────────────────────────────
 echo "==> Creating GitHub release ${TAG}"
-gh release create "${TAG}" \
-  --repo "${GH_RELEASE_REPO}" \
-  --title "${TAG}" \
-  --notes "Release ${VERSION}" \
-  "${DIST_DIR}"/*.tar.gz
+release_response=$(curl -sf \
+  -X POST \
+  -H "Authorization: token ${GITHUB_TOKEN}" \
+  -H "Accept: application/vnd.github+json" \
+  "${GH_API}/repos/${GH_RELEASE_REPO}/releases" \
+  -d "{
+    \"tag_name\": \"${TAG}\",
+    \"name\": \"${TAG}\",
+    \"body\": \"Release ${VERSION}\",
+    \"draft\": false,
+    \"prerelease\": false
+  }")
+
+release_id=$(echo "${release_response}" | python3 -c "import sys,json; print(json.load(sys.stdin)['id'])")
+echo "  Release ID: ${release_id}"
+
+# ── Upload release assets ──────────────────────────────────────────────────
+echo "==> Uploading assets"
+for platform in "${PLATFORMS[@]}"; do
+  GOOS="${platform%/*}"
+  GOARCH="${platform#*/}"
+  archive_name="${BINARY_NAME}-${GOOS}-${GOARCH}.tar.gz"
+  archive_path="${DIST_DIR}/${archive_name}"
+
+  echo "  Uploading ${archive_name}..."
+  curl -sf \
+    -X POST \
+    -H "Authorization: token ${GITHUB_TOKEN}" \
+    -H "Content-Type: application/gzip" \
+    "${GH_UPLOAD}/repos/${GH_RELEASE_REPO}/releases/${release_id}/assets?name=${archive_name}" \
+    --data-binary "@${archive_path}" \
+    -o /dev/null
+
+  echo "    done"
+done
 
 # ── Compute SHA256 hashes ───────────────────────────────────────────────────
 echo "==> Computing checksums"
