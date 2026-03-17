@@ -10,7 +10,7 @@ import (
 )
 
 func newUpdateCmd() *cobra.Command {
-	var name, description string
+	var name, description, parentID string
 
 	c := &cobra.Command{
 		Use:   "update <id>",
@@ -20,7 +20,10 @@ func newUpdateCmd() *cobra.Command {
   revenium teams update team-123 --name "New Name"
 
   # Update multiple fields
-  revenium teams update team-123 --name "New Name" --description "New description"`,
+  revenium teams update team-123 --name "New Name" --description "New description"
+
+  # Set parent team
+  revenium teams update team-123 --parent-id parent-team-456`,
 		Annotations: map[string]string{"mutating": "true"},
 		RunE: func(c *cobra.Command, args []string) error {
 			id := args[0]
@@ -31,6 +34,9 @@ func newUpdateCmd() *cobra.Command {
 			}
 			if c.Flags().Changed("description") {
 				updates["description"] = description
+			}
+			if c.Flags().Changed("parent-id") {
+				updates["parentId"] = parentID
 			}
 
 			if len(updates) == 0 {
@@ -51,6 +57,7 @@ func newUpdateCmd() *cobra.Command {
 
 	c.Flags().StringVar(&name, "name", "", "Team name")
 	c.Flags().StringVar(&description, "description", "", "Team description")
+	c.Flags().StringVar(&parentID, "parent-id", "", "Parent team ID")
 
 	return c
 }
