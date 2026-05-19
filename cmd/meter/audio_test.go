@@ -79,12 +79,16 @@ func TestMeterAudioWithOptionalFields(t *testing.T) {
 		"--billing-unit", "PER_SECOND",
 		"--duration-seconds", "120",
 		"--language", "en",
+		"--agentic-job-id", "loan-app-12345",
+		"--agentic-job-version", "2.1.0",
 	})
 	err := c.Execute()
 
 	require.NoError(t, err)
 	assert.Equal(t, float64(120), receivedBody["durationSeconds"])
 	assert.Equal(t, "en", receivedBody["language"])
+	assert.Equal(t, "loan-app-12345", receivedBody["agenticJobId"])
+	assert.Equal(t, "2.1.0", receivedBody["agenticJobVersion"])
 }
 
 func TestMeterAudioMissingRequired(t *testing.T) {

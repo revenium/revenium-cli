@@ -43,6 +43,8 @@ func TestMeterVideo(t *testing.T) {
 		"--request-duration", "60000",
 		"--duration-seconds", "10",
 		"--billing-unit", "PER_SECOND",
+		"--agentic-job-id", "loan-app-12345",
+		"--agentic-job-name", "Process Loan",
 	})
 	err := c.Execute()
 
@@ -53,6 +55,8 @@ func TestMeterVideo(t *testing.T) {
 	assert.Equal(t, "google", receivedBody["provider"])
 	assert.Equal(t, float64(10), receivedBody["durationSeconds"])
 	assert.Equal(t, "PER_SECOND", receivedBody["billingUnit"])
+	assert.Equal(t, "loan-app-12345", receivedBody["agenticJobId"])
+	assert.Equal(t, "Process Loan", receivedBody["agenticJobName"])
 }
 
 func TestMeterVideoMissingRequired(t *testing.T) {

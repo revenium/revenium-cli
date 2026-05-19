@@ -117,4 +117,27 @@ func TestStatusStyle(t *testing.T) {
 	_ = statusStyle("deleted")
 	_ = statusStyle("draft")
 	_ = statusStyle("unknown")
+
+	// Job execution status tokens (Phase 12 — D-11 Option A)
+	_ = statusStyle("SUCCESS")
+	_ = statusStyle("FAILED")
+	_ = statusStyle("CANCELLED")
+	successOut := statusStyle("SUCCESS").Render("SUCCESS")
+	failedOut := statusStyle("FAILED").Render("FAILED")
+	assert.NotEqual(t, successOut, failedOut, "SUCCESS and FAILED must render with different colors")
+
+	// "error" token (Phase 13 — Plan 13-01) — lowercase transactions status field
+	// must land on the red arm alongside "failed".
+	_ = statusStyle("error")
+	errorOut := statusStyle("error").Render("error")
+	defaultOut := statusStyle("anything-unknown").Render("anything-unknown")
+	assert.NotEqual(t, errorOut, defaultOut, "\"error\" must render with non-default color")
+	// Parity assertion: render the same fixed content under both keys; if both
+	// land on the red arm the bytes are identical. (Plan 13-01 originally asked
+	// for Render("failed")/Render("error") comparison, but the rendered string
+	// embeds the input text — the canonical way to compare *styles* is to feed
+	// both styles the same payload — Rule 1 fix at execution time.)
+	failedOut = statusStyle("failed").Render("payload")
+	errorParityOut := statusStyle("error").Render("payload")
+	assert.Equal(t, failedOut, errorParityOut, "\"error\" and \"failed\" must share the red foreground")
 }

@@ -101,16 +101,20 @@ func cellStyleForHeader(header string) lipgloss.Style {
 }
 
 // statusStyle returns a style colored by status value.
-// "active"/"enabled" -> green, "inactive"/"disabled"/"deleted" -> red,
-// "pending"/"draft" -> yellow, default -> plain.
+// "active"/"enabled"/"true"/"success" -> green,
+// "inactive"/"disabled"/"deleted"/"false"/"failed"/"error" -> red,
+// "pending"/"draft"/"cancelled" -> yellow, default -> plain.
+// Matching is case-insensitive via strings.ToLower, so API tokens
+// such as SUCCESS/FAILED/CANCELLED (executionStatus on Agentic Jobs)
+// are recognized without per-case duplication.
 func statusStyle(status string) lipgloss.Style {
 	base := lipgloss.NewStyle().Padding(0, 1)
 	switch strings.ToLower(status) {
-	case "active", "enabled", "true":
+	case "active", "enabled", "true", "success":
 		return base.Foreground(lipgloss.Color("42")) // green
-	case "inactive", "disabled", "deleted", "false":
+	case "inactive", "disabled", "deleted", "false", "failed", "error":
 		return base.Foreground(lipgloss.Color("196")) // red
-	case "pending", "draft":
+	case "pending", "draft", "cancelled":
 		return base.Foreground(lipgloss.Color("214")) // yellow
 	default:
 		return base

@@ -5,7 +5,7 @@ DATE    ?= $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 MODULE  = github.com/revenium/revenium-cli/internal/build
 LDFLAGS = -X $(MODULE).Version=$(VERSION) -X $(MODULE).Commit=$(COMMIT) -X $(MODULE).Date=$(DATE)
 
-.PHONY: build test test-race lint clean
+.PHONY: build test test-race lint clean release-dry release-check
 
 build:
 	go build -ldflags="$(LDFLAGS)" -o revenium .
@@ -21,3 +21,9 @@ lint:
 
 clean:
 	rm -f revenium
+
+release-dry:
+	goreleaser release --snapshot --clean
+
+release-check:
+	goreleaser check

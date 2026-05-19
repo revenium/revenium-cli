@@ -15,6 +15,7 @@ func newVideoCmd() *cobra.Command {
 	var requestDuration, fps int
 	var durationSeconds, totalCost, creditsConsumed, requestedDurationSeconds, creditRate float64
 	var asyncOperation bool
+	var agenticJobID, agenticJobName, agenticJobType, agenticJobVersion string
 
 	c := &cobra.Command{
 		Use:         "video",
@@ -73,6 +74,18 @@ func newVideoCmd() *cobra.Command {
 			}
 			if c.Flags().Changed("task-type") {
 				body["taskType"] = taskType
+			}
+			if c.Flags().Changed("agentic-job-id") {
+				body["agenticJobId"] = agenticJobID
+			}
+			if c.Flags().Changed("agentic-job-name") {
+				body["agenticJobName"] = agenticJobName
+			}
+			if c.Flags().Changed("agentic-job-type") {
+				body["agenticJobType"] = agenticJobType
+			}
+			if c.Flags().Changed("agentic-job-version") {
+				body["agenticJobVersion"] = agenticJobVersion
 			}
 			if c.Flags().Changed("fps") {
 				body["fps"] = fps
@@ -141,6 +154,10 @@ func newVideoCmd() *cobra.Command {
 	c.Flags().StringVar(&productName, "product-name", "", "Product name")
 	c.Flags().StringVar(&modelSource, "model-source", "", "Model source or routing info")
 	c.Flags().StringVar(&taskType, "task-type", "", "Task type classification")
+	c.Flags().StringVar(&agenticJobID, "agentic-job-id", "", "Agentic job instance identifier — correlates all AI operations within one job execution")
+	c.Flags().StringVar(&agenticJobName, "agentic-job-name", "", "Human-readable agentic job name (UI display, analytics grouping)")
+	c.Flags().StringVar(&agenticJobType, "agentic-job-type", "", "Agentic job category/type (normalized to lowercase on ingest)")
+	c.Flags().StringVar(&agenticJobVersion, "agentic-job-version", "", "Agentic job definition version")
 	c.Flags().IntVar(&fps, "fps", 0, "Video frames per second")
 	c.Flags().StringVar(&resolution, "resolution", "", "Video resolution")
 	c.Flags().Float64Var(&creditsConsumed, "credits-consumed", 0, "Credits consumed")

@@ -17,6 +17,7 @@ func newAudioCmd() *cobra.Command {
 	var inputAudioTokenCount, outputAudioTokenCount int
 	var totalCost, durationSeconds, speed float64
 	var isRealtime bool
+	var agenticJobID, agenticJobName, agenticJobType, agenticJobVersion string
 
 	c := &cobra.Command{
 		Use:         "audio",
@@ -74,6 +75,18 @@ func newAudioCmd() *cobra.Command {
 			}
 			if c.Flags().Changed("task-type") {
 				body["taskType"] = taskType
+			}
+			if c.Flags().Changed("agentic-job-id") {
+				body["agenticJobId"] = agenticJobID
+			}
+			if c.Flags().Changed("agentic-job-name") {
+				body["agenticJobName"] = agenticJobName
+			}
+			if c.Flags().Changed("agentic-job-type") {
+				body["agenticJobType"] = agenticJobType
+			}
+			if c.Flags().Changed("agentic-job-version") {
+				body["agenticJobVersion"] = agenticJobVersion
 			}
 			if c.Flags().Changed("duration-seconds") {
 				body["durationSeconds"] = durationSeconds
@@ -164,6 +177,10 @@ func newAudioCmd() *cobra.Command {
 	c.Flags().StringVar(&productName, "product-name", "", "Product name")
 	c.Flags().StringVar(&modelSource, "model-source", "", "Model source or routing info")
 	c.Flags().StringVar(&taskType, "task-type", "", "Task type classification")
+	c.Flags().StringVar(&agenticJobID, "agentic-job-id", "", "Agentic job instance identifier — correlates all AI operations within one job execution")
+	c.Flags().StringVar(&agenticJobName, "agentic-job-name", "", "Human-readable agentic job name (UI display, analytics grouping)")
+	c.Flags().StringVar(&agenticJobType, "agentic-job-type", "", "Agentic job category/type (normalized to lowercase on ingest)")
+	c.Flags().StringVar(&agenticJobVersion, "agentic-job-version", "", "Agentic job definition version")
 	c.Flags().Float64Var(&durationSeconds, "duration-seconds", 0, "Audio duration in seconds")
 	c.Flags().IntVar(&inputAudioTokenCount, "input-audio-tokens", 0, "Number of input audio tokens")
 	c.Flags().IntVar(&outputAudioTokenCount, "output-audio-tokens", 0, "Number of output audio tokens")

@@ -16,7 +16,7 @@ Or via environment variable:
 export REVENIUM_API_KEY=<your-api-key>
 ```
 
-Configuration is stored at `~/.revenium/config.json`.
+Configuration is stored at `~/.config/revenium/config.yaml`.
 
 ## Output Modes
 
@@ -114,9 +114,20 @@ revenium <resource> update <id> --name ...
 revenium <resource> delete <id> [--yes]
 ```
 
-Resources: `sources`, `models`, `subscribers`, `subscriptions`, `products`, `tools`, `teams`, `users`, `anomalies`, `alerts`, `credentials`, `charts`.
+Resources: `sources`, `models`, `subscribers`, `subscriptions`, `products`, `tools`, `teams`, `users`, `anomalies`, `alerts`, `credentials`, `charts`, `jobs`, `guardrails`, `organizations`.
 
-Sub-resources: `alerts budget`, `models pricing`, `teams prompt-capture`.
+Sub-resources:
+
+- `alerts budget` (CRUD)
+- `models pricing` (CRUD)
+- `teams prompt-capture` (get/set)
+- `jobs outcome` (immutable; second call returns 409), `jobs roi`, `jobs transactions`, `jobs types`, `jobs conversion-funnel`
+- `guardrails budget-rules` (CRUD; update is PATCH), `guardrails enforcement-rules get`, `guardrails enforcement-events list`
+- `organizations tags`, `organizations children`
+
+Lookup verbs (find-by-attribute): `subscribers lookup --email`, `users lookup --email`, `models lookup --name`.
+
+Method semantics: jobs and guardrails budget-rules use PATCH on update (only sent fields change). Organizations use PUT on update — the CLI does GET → merge → PUT for you, so you only pass the fields you want to change.
 
 ## Stderr vs Stdout
 

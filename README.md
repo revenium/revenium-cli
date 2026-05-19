@@ -1,6 +1,6 @@
 # Revenium CLI
 
-The official command-line interface for [Revenium](https://revenium.ai) — the AI Economic Control platform. Manage sources, models, subscriptions, alerts, and metrics from your terminal.
+The official command-line interface for [Revenium](https://revenium.ai) — the AI Economic Control platform. Manage sources, models, subscriptions, alerts, metrics, agentic jobs, guardrails, and organizations from your terminal.
 
 ```
 $ revenium sources list
@@ -82,22 +82,25 @@ Configuration can also be set via environment variables, which take precedence o
 
 ### Core Resources
 
-Manage the primary resources in your Revenium account. All resource commands follow a consistent CRUD pattern: `list`, `get`, `create`, `update`, `delete`.
+Manage the primary resources in your Revenium account. Most resource commands follow a consistent CRUD pattern: `list`, `get`, `create`, `update`, `delete`. Several groups also expose sub-resources (see the subsections below).
 
-| Command           | Description                              |
-|-------------------|------------------------------------------|
-| `sources`         | Manage sources (APIs, AI services)       |
-| `models`          | Manage AI models and pricing dimensions  |
-| `products`        | Manage products                          |
-| `subscribers`     | Manage subscribers                       |
-| `subscriptions`   | Manage subscriptions                     |
-| `tools`           | Manage tools                             |
-| `teams`           | Manage teams and prompt capture settings |
-| `users`           | Manage users                             |
-| `anomalies`       | Manage AI anomaly detection rules        |
-| `alerts`          | Manage AI alerts and budget thresholds   |
-| `credentials`     | Manage provider credentials              |
-| `charts`          | Manage chart definitions                 |
+| Command           | Description                                              |
+|-------------------|----------------------------------------------------------|
+| `sources`         | Manage sources (APIs, AI services)                       |
+| `models`          | Manage AI models and pricing dimensions                  |
+| `products`        | Manage products                                          |
+| `subscribers`     | Manage subscribers (incl. `lookup --email`)              |
+| `subscriptions`   | Manage subscriptions                                     |
+| `tools`           | Manage tools                                             |
+| `teams`           | Manage teams and prompt capture settings                 |
+| `users`           | Manage users (incl. `lookup --email`)                    |
+| `anomalies`       | Manage AI anomaly detection rules                        |
+| `alerts`          | Manage AI alerts and budget thresholds                   |
+| `credentials`     | Manage provider credentials                              |
+| `charts`          | Manage chart definitions                                 |
+| `jobs`            | Manage Agentic Jobs (incl. outcome, ROI, transactions)   |
+| `guardrails`      | Manage budget rules and view enforcement state           |
+| `organizations`   | Manage organizations (incl. tags, child hierarchy)       |
 
 **Examples:**
 
@@ -150,6 +153,69 @@ Configure prompt capture settings for a team:
 ```sh
 revenium teams prompt-capture get <team-id>
 revenium teams prompt-capture set <team-id> --enabled true
+```
+
+#### Agentic Jobs
+
+Manage Agentic Jobs and report their outcomes. Updates use PATCH semantics — only fields you pass are changed.
+
+```sh
+# Core CRUD
+revenium jobs list
+revenium jobs get <agenticJobId>
+revenium jobs create --type <type> --status RUNNING
+revenium jobs update <agenticJobId> --status COMPLETED
+revenium jobs delete <agenticJobId>
+
+# Sub-resources
+revenium jobs outcome <agenticJobId> --outcome SUCCESS    # immutable; second call returns 409
+revenium jobs roi <agenticJobId>                          # ROI metrics
+revenium jobs transactions <agenticJobId>                 # AI transactions for the job
+revenium jobs types                                       # available job types
+revenium jobs conversion-funnel                           # aggregate conversion funnel
+```
+
+#### Guardrails
+
+Manage cost-control budget rules and inspect runtime enforcement state.
+
+```sh
+# Budget rules (full CRUD; update uses PATCH)
+revenium guardrails budget-rules list
+revenium guardrails budget-rules get <id>
+revenium guardrails budget-rules create --name "Daily $50" --threshold 50.00
+revenium guardrails budget-rules update <id> --threshold 75.00
+revenium guardrails budget-rules delete <id>
+
+# Read-only enforcement state
+revenium guardrails enforcement-rules get <team-id>       # compiled rules per team
+revenium guardrails enforcement-events list               # audit trail of enforcement events
+```
+
+#### Organizations
+
+Manage organizations and navigate the parent/child hierarchy. Updates use PUT semantics (GET → merge → PUT) — the CLI handles the merge for you.
+
+```sh
+revenium organizations list
+revenium organizations get <id>
+revenium organizations create --name "Acme Corp"
+revenium organizations update <id> --name "Acme Corporation"
+revenium organizations delete <id>
+
+# Sub-resources
+revenium organizations tags <id>                          # view tags for an organization
+revenium organizations children <id>                      # list direct child organizations
+```
+
+#### Lookups
+
+Find resources by attribute instead of ID:
+
+```sh
+revenium subscribers lookup --email user@example.com
+revenium users lookup --email user@example.com
+revenium models lookup --name gpt-4
 ```
 
 ### Monitoring
@@ -438,15 +504,23 @@ Resource IDs are validated before any API call is made. IDs containing control c
 ```sh
 git clone https://github.com/revenium/revenium-cli.git
 cd revenium-cli
-go build -o revenium .
+make build           # injects version/commit/date metadata from git
 ./revenium version
 ```
 
-To build with version information:
+`make build` is the canonical local build path — it sets the version, commit, and date `ldflags` from `git describe`. For a quick dev rebuild without metadata:
+
+```sh
+go build -o revenium .
+```
+
+To build with explicit version metadata:
 
 ```sh
 go build -ldflags "-X github.com/revenium/revenium-cli/internal/build.Version=1.0.0" -o revenium .
 ```
+
+Other useful Makefile targets: `make test`, `make test-race`, `make lint`, `make clean`, `make release-dry` (GoReleaser snapshot), `make release-check` (GoReleaser config validation).
 
 ## Running Tests
 

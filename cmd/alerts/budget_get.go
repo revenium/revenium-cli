@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/revenium/revenium-cli/cmd"
+	"github.com/revenium/revenium-cli/internal/output"
 )
 
 func newBudgetGetCmd() *cobra.Command {
@@ -29,10 +30,10 @@ func newBudgetGetCmd() *cobra.Command {
 			rows := [][]string{{
 				alertID,
 				str(progress, "name"),
-				formatCurrency(floatVal(progress, "threshold"), currency),
-				formatCurrency(floatVal(progress, "currentValue"), currency),
-				formatCurrency(floatVal(progress, "remaining"), currency),
-				fmt.Sprintf("%.1f%%", floatVal(progress, "percentUsed")),
+				output.FormatCurrency(output.FloatVal(progress, "threshold"), currency),
+				output.FormatCurrency(output.FloatVal(progress, "currentValue"), currency),
+				output.FormatCurrency(output.FloatVal(progress, "remaining"), currency),
+				fmt.Sprintf("%.1f%%", output.FloatVal(progress, "percentUsed")),
 				str(progress, "risk"),
 			}}
 			return cmd.Output.Render(budgetTableDef, rows, progress)
