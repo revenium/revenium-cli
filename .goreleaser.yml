@@ -43,7 +43,8 @@ changelog:
       - "^chore:"
 
 brews:
-  - repository:
+  - name: revenium
+    repository:
       owner: revenium
       name: homebrew-tap
       token: "{{ .Env.TAP_GITHUB_TOKEN }}"
