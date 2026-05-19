@@ -94,6 +94,10 @@ func TestMeterCompletionWithOptionalFields(t *testing.T) {
 		"--total-cost", "0.045",
 		"--agent", "my-agent",
 		"--environment", "production",
+		"--agentic-job-id", "loan-app-12345",
+		"--agentic-job-name", "Process Loan",
+		"--agentic-job-type", "loan-processing",
+		"--agentic-job-version", "2.1.0",
 	})
 	err := c.Execute()
 
@@ -101,6 +105,10 @@ func TestMeterCompletionWithOptionalFields(t *testing.T) {
 	assert.Equal(t, 0.045, receivedBody["totalCost"])
 	assert.Equal(t, "my-agent", receivedBody["agent"])
 	assert.Equal(t, "production", receivedBody["environment"])
+	assert.Equal(t, "loan-app-12345", receivedBody["agenticJobId"])
+	assert.Equal(t, "Process Loan", receivedBody["agenticJobName"])
+	assert.Equal(t, "loan-processing", receivedBody["agenticJobType"])
+	assert.Equal(t, "2.1.0", receivedBody["agenticJobVersion"])
 }
 
 func TestMeterCompletionMissingRequired(t *testing.T) {

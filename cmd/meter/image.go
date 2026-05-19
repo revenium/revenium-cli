@@ -15,6 +15,7 @@ func newImageCmd() *cobra.Command {
 	var requestDuration, actualImageCount, requestedImageCount int
 	var totalCost float64
 	var sourceImageProvided bool
+	var agenticJobID, agenticJobName, agenticJobType, agenticJobVersion string
 
 	c := &cobra.Command{
 		Use:         "image",
@@ -73,6 +74,18 @@ func newImageCmd() *cobra.Command {
 			}
 			if c.Flags().Changed("task-type") {
 				body["taskType"] = taskType
+			}
+			if c.Flags().Changed("agentic-job-id") {
+				body["agenticJobId"] = agenticJobID
+			}
+			if c.Flags().Changed("agentic-job-name") {
+				body["agenticJobName"] = agenticJobName
+			}
+			if c.Flags().Changed("agentic-job-type") {
+				body["agenticJobType"] = agenticJobType
+			}
+			if c.Flags().Changed("agentic-job-version") {
+				body["agenticJobVersion"] = agenticJobVersion
 			}
 			if c.Flags().Changed("requested-image-count") {
 				body["requestedImageCount"] = requestedImageCount
@@ -135,6 +148,10 @@ func newImageCmd() *cobra.Command {
 	c.Flags().StringVar(&productName, "product-name", "", "Product name")
 	c.Flags().StringVar(&modelSource, "model-source", "", "Model source or routing info")
 	c.Flags().StringVar(&taskType, "task-type", "", "Task type classification")
+	c.Flags().StringVar(&agenticJobID, "agentic-job-id", "", "Agentic job instance identifier — correlates all AI operations within one job execution")
+	c.Flags().StringVar(&agenticJobName, "agentic-job-name", "", "Human-readable agentic job name (UI display, analytics grouping)")
+	c.Flags().StringVar(&agenticJobType, "agentic-job-type", "", "Agentic job category/type (normalized to lowercase on ingest)")
+	c.Flags().StringVar(&agenticJobVersion, "agentic-job-version", "", "Agentic job definition version")
 	c.Flags().IntVar(&requestedImageCount, "requested-image-count", 0, "Number of images requested")
 	c.Flags().StringVar(&resolution, "resolution", "", "Image resolution (e.g., 1024x1024)")
 	c.Flags().StringVar(&quality, "quality", "", "Image quality setting")

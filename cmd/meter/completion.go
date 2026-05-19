@@ -14,6 +14,7 @@ func newCompletionCmd() *cobra.Command {
 	var model, provider, stopReason, requestTime, completionStartTime, responseTime string
 	var transactionID, traceId, modelSource, taskType, operationType, agent, environment, region string
 	var organizationName, subscriptionId, productName, systemPrompt, inputMessages, outputResponse string
+	var agenticJobID, agenticJobName, agenticJobType, agenticJobVersion string
 	var inputTokenCount, outputTokenCount, totalTokenCount, reasoningTokenCount int
 	var cacheCreationTokenCount, cacheReadTokenCount, requestDuration, timeToFirstToken int
 	var totalCost, inputTokenCost, outputTokenCost, temperature float64
@@ -77,6 +78,18 @@ func newCompletionCmd() *cobra.Command {
 			}
 			if c.Flags().Changed("task-type") {
 				body["taskType"] = taskType
+			}
+			if c.Flags().Changed("agentic-job-id") {
+				body["agenticJobId"] = agenticJobID
+			}
+			if c.Flags().Changed("agentic-job-name") {
+				body["agenticJobName"] = agenticJobName
+			}
+			if c.Flags().Changed("agentic-job-type") {
+				body["agenticJobType"] = agenticJobType
+			}
+			if c.Flags().Changed("agentic-job-version") {
+				body["agenticJobVersion"] = agenticJobVersion
 			}
 			if c.Flags().Changed("operation-type") {
 				body["operationType"] = operationType
@@ -161,6 +174,10 @@ func newCompletionCmd() *cobra.Command {
 	c.Flags().IntVar(&timeToFirstToken, "time-to-first-token", 0, "Time to first token in milliseconds")
 	c.Flags().Float64Var(&temperature, "temperature", 0, "Model temperature setting")
 	c.Flags().StringVar(&taskType, "task-type", "", "Task type classification")
+	c.Flags().StringVar(&agenticJobID, "agentic-job-id", "", "Agentic job instance identifier — correlates all AI operations within one job execution")
+	c.Flags().StringVar(&agenticJobName, "agentic-job-name", "", "Human-readable agentic job name (UI display, analytics grouping)")
+	c.Flags().StringVar(&agenticJobType, "agentic-job-type", "", "Agentic job category/type (normalized to lowercase on ingest)")
+	c.Flags().StringVar(&agenticJobVersion, "agentic-job-version", "", "Agentic job definition version")
 	c.Flags().StringVar(&operationType, "operation-type", "", "Operation type (CHAT, GENERATE, EMBED, CLASSIFY, SUMMARIZE, TRANSLATE, OTHER)")
 	c.Flags().StringVar(&agent, "agent", "", "Agent identifier")
 	c.Flags().StringVar(&environment, "environment", "", "Environment name")

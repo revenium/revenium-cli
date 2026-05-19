@@ -11,9 +11,12 @@ import (
 	"github.com/revenium/revenium-cli/cmd/anomalies"
 	"github.com/revenium/revenium-cli/cmd/charts"
 	"github.com/revenium/revenium-cli/cmd/credentials"
+	"github.com/revenium/revenium-cli/cmd/guardrails"
+	"github.com/revenium/revenium-cli/cmd/jobs"
 	"github.com/revenium/revenium-cli/cmd/meter"
 	"github.com/revenium/revenium-cli/cmd/metrics"
 	"github.com/revenium/revenium-cli/cmd/models"
+	"github.com/revenium/revenium-cli/cmd/organizations"
 	"github.com/revenium/revenium-cli/cmd/products"
 	"github.com/revenium/revenium-cli/cmd/sources"
 	"github.com/revenium/revenium-cli/cmd/subscribers"
@@ -31,6 +34,7 @@ func init() {
 	// so cmd/root.go cannot import them directly.
 	cmd.RegisterCommand(sources.Cmd, "resources")
 	cmd.RegisterCommand(models.Cmd, "resources")
+	cmd.RegisterCommand(organizations.Cmd, "resources")
 	cmd.RegisterCommand(subscribers.Cmd, "resources")
 	cmd.RegisterCommand(subscriptions.Cmd, "resources")
 	cmd.RegisterCommand(products.Cmd, "resources")
@@ -41,6 +45,8 @@ func init() {
 	cmd.RegisterCommand(alerts.Cmd, "resources")
 	cmd.RegisterCommand(credentials.Cmd, "resources")
 	cmd.RegisterCommand(charts.Cmd, "resources")
+	cmd.RegisterCommand(jobs.Cmd, "resources")
+	cmd.RegisterCommand(guardrails.Cmd, "resources")
 	cmd.RegisterCommand(meter.Cmd, "monitoring")
 	cmd.RegisterCommand(metrics.Cmd, "monitoring")
 }

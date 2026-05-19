@@ -4,6 +4,7 @@ before:
   hooks:
     - go mod tidy
     - sh scripts/completions.sh
+    - sh scripts/extract-release-notes.sh {{ .Tag }}
 
 builds:
   - main: .
@@ -46,6 +47,7 @@ brews:
       owner: revenium
       name: homebrew-tap
       token: "{{ .Env.TAP_GITHUB_TOKEN }}"
+    skip_upload: auto
     directory: Formula
     homepage: https://github.com/revenium/revenium-cli
     description: Manage your Revenium account from the command line
@@ -57,3 +59,9 @@ brews:
       fish_completion.install "completions/revenium.fish"
     test: |
       system "#{bin}/revenium", "version"
+
+release:
+  prerelease: auto
+  draft: false
+  make_latest: true
+  mode: append

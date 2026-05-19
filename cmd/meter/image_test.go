@@ -43,6 +43,8 @@ func TestMeterImage(t *testing.T) {
 		"--request-duration", "5000",
 		"--actual-image-count", "1",
 		"--billing-unit", "PER_IMAGE",
+		"--agentic-job-id", "loan-app-12345",
+		"--agentic-job-type", "loan-processing",
 	})
 	err := c.Execute()
 
@@ -53,6 +55,8 @@ func TestMeterImage(t *testing.T) {
 	assert.Equal(t, "openai", receivedBody["provider"])
 	assert.Equal(t, float64(1), receivedBody["actualImageCount"])
 	assert.Equal(t, "PER_IMAGE", receivedBody["billingUnit"])
+	assert.Equal(t, "loan-app-12345", receivedBody["agenticJobId"])
+	assert.Equal(t, "loan-processing", receivedBody["agenticJobType"])
 }
 
 func TestMeterImageMissingRequired(t *testing.T) {

@@ -1,0 +1,14 @@
+#!/bin/sh
+# Source: free-tier substitute for GoReleaser Pro `release.header.from_file`
+set -eu
+# Strip leading 'v' from the tag passed by GoReleaser (or use $1)
+VERSION="${1:-${GORELEASER_CURRENT_TAG:-}}"
+VERSION="${VERSION#v}"
+[ -n "$VERSION" ] || { echo "extract-release-notes: VERSION empty" >&2; exit 1; }
+mkdir -p dist
+awk -v ver="$VERSION" '
+  $0 ~ "^## \\[" ver "\\]" { in_section = 1; print; next }
+  in_section && /^## \[/ { exit }
+  in_section { print }
+' CHANGELOG.md > dist/release-notes.md
+[ -s dist/release-notes.md ] || { echo "extract-release-notes: empty section for $VERSION" >&2; exit 1; }
