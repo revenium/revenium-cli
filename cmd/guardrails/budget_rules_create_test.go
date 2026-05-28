@@ -46,6 +46,13 @@ func TestBudgetRulesCreate(t *testing.T) {
 		_, hasEnabled := received["enabled"]
 		assert.False(t, hasEnabled, "enabled must not be sent when --enabled not provided")
 
+		// PLAN 260524-kvj must-have: neither --filter nor --filters-json passed →
+		// the "filters" key must not appear in the body (no empty array leak).
+		_, hasFilters := received["filters"]
+		assert.False(t, hasFilters, "filters must not be sent when no filter flag was provided")
+		_, hasChans := received["notificationChannelIds"]
+		assert.False(t, hasChans, "notificationChannelIds must not be sent when --notification-channel-id was not provided")
+
 		w.Header().Set("Content-Type", "application/json")
 		fmt.Fprint(w, `{"id":"jR2kmLs","name":"Q3 OpenAI Budget","enabled":true,"_links":{}}`)
 	}))
@@ -195,4 +202,138 @@ func TestBudgetRulesCreateOptionalFlags(t *testing.T) {
 
 	require.NoError(t, c.Execute())
 	assert.Contains(t, buf.String(), "jR2kmLs")
+}
+
+// TestBudgetRulesCreateWithFilters proves --filter dim:op:val flags compose
+// into a JSON array of {dimension,operator,value} maps on the POST body, and
+// --notification-channel-id flags compose into a JSON string array. Per
+// PLAN 260524-kvj must-haves the on-wire shape is the load-bearing contract.
+func TestBudgetRulesCreateWithFilters(t *testing.T) {
+	var received map[string]interface{}
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		bodyBytes, _ := io.ReadAll(r.Body)
+		require.NoError(t, json.Unmarshal(bodyBytes, &received))
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprint(w, `{"id":"jR2kmLs","name":"X","enabled":true}`)
+	}))
+	defer srv.Close()
+
+	var buf bytes.Buffer
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", "", "", false)
+	cmd.Output = output.NewWithWriter(&buf, &buf, false, false)
+
+	c := newBudgetRulesCreateCmd()
+	c.SetOut(&buf)
+	c.SetArgs([]string{
+		"--name", "X",
+		"--description", "Y",
+		"--metric-type", "TOTAL_COST",
+		"--window-type", "MONTHLY",
+		"--action", "BLOCK",
+		"--group-by", "MODEL",
+		"--warn-threshold", "800",
+		"--hard-limit", "1000",
+		"--filter", "MODEL:IS:gpt-4",
+		"--filter", "PROVIDER:IS:openai",
+		"--notification-channel-id", "chan-1",
+		"--notification-channel-id", "chan-2",
+	})
+
+	require.NoError(t, c.Execute())
+
+	// filters: 2-element array of {dimension, operator, value} maps.
+	rawFilters, ok := received["filters"].([]interface{})
+	require.True(t, ok, "filters must be a JSON array")
+	require.Len(t, rawFilters, 2)
+	f0 := rawFilters[0].(map[string]interface{})
+	assert.Equal(t, "MODEL", f0["dimension"])
+	assert.Equal(t, "IS", f0["operator"])
+	assert.Equal(t, "gpt-4", f0["value"])
+	f1 := rawFilters[1].(map[string]interface{})
+	assert.Equal(t, "PROVIDER", f1["dimension"])
+	assert.Equal(t, "IS", f1["operator"])
+	assert.Equal(t, "openai", f1["value"])
+
+	// notificationChannelIds: flat string array preserving input order.
+	rawChans, ok := received["notificationChannelIds"].([]interface{})
+	require.True(t, ok, "notificationChannelIds must be a JSON array")
+	require.Len(t, rawChans, 2)
+	assert.Equal(t, "chan-1", rawChans[0])
+	assert.Equal(t, "chan-2", rawChans[1])
+}
+
+// TestBudgetRulesCreateWithFiltersJSON proves --filters-json is parsed and
+// emitted verbatim, exercising the escape-hatch path for callers that need
+// shapes outside the dim:op:val convention.
+func TestBudgetRulesCreateWithFiltersJSON(t *testing.T) {
+	var received map[string]interface{}
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		bodyBytes, _ := io.ReadAll(r.Body)
+		require.NoError(t, json.Unmarshal(bodyBytes, &received))
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprint(w, `{"id":"jR2kmLs","name":"X","enabled":true}`)
+	}))
+	defer srv.Close()
+
+	var buf bytes.Buffer
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", "", "", false)
+	cmd.Output = output.NewWithWriter(&buf, &buf, false, false)
+
+	c := newBudgetRulesCreateCmd()
+	c.SetOut(&buf)
+	c.SetArgs([]string{
+		"--name", "X",
+		"--description", "Y",
+		"--metric-type", "TOTAL_COST",
+		"--window-type", "MONTHLY",
+		"--action", "BLOCK",
+		"--group-by", "MODEL",
+		"--warn-threshold", "800",
+		"--hard-limit", "1000",
+		"--filters-json", `[{"dimension":"MODEL","operator":"IS","value":"gpt-4"}]`,
+	})
+
+	require.NoError(t, c.Execute())
+
+	rawFilters, ok := received["filters"].([]interface{})
+	require.True(t, ok, "filters must be a JSON array")
+	require.Len(t, rawFilters, 1)
+	f0 := rawFilters[0].(map[string]interface{})
+	assert.Equal(t, "MODEL", f0["dimension"])
+	assert.Equal(t, "IS", f0["operator"])
+	assert.Equal(t, "gpt-4", f0["value"])
+}
+
+// TestBudgetRulesCreateFiltersConflict proves that passing BOTH --filter and
+// --filters-json in one invocation fails BEFORE any HTTP call (PLAN D-01
+// locked). Uses the unreachable-URL pattern from TestBudgetRulesCreateMissing-
+// Required — if the conflict check failed to short-circuit, the dial would
+// surface a connection-refused error instead of the conflict-rejection message.
+func TestBudgetRulesCreateFiltersConflict(t *testing.T) {
+	var buf bytes.Buffer
+	cmd.APIClient = api.NewClient("http://127.0.0.1:1", "test-key", "", "", "", false)
+	cmd.Output = output.NewWithWriter(&buf, &buf, false, false)
+
+	c := newBudgetRulesCreateCmd()
+	c.SetOut(&buf)
+	c.SetErr(&buf)
+	c.SetArgs([]string{
+		"--name", "X",
+		"--description", "Y",
+		"--metric-type", "TOTAL_COST",
+		"--window-type", "MONTHLY",
+		"--action", "BLOCK",
+		"--group-by", "MODEL",
+		"--warn-threshold", "800",
+		"--hard-limit", "1000",
+		"--filter", "MODEL:IS:gpt-4",
+		"--filters-json", `[{"dimension":"MODEL","operator":"IS","value":"gpt-4"}]`,
+	})
+
+	err := c.Execute()
+	require.Error(t, err)
+	// Both flag names must appear in the message so users know which two
+	// flags to reconcile.
+	assert.Contains(t, err.Error(), "--filter")
+	assert.Contains(t, err.Error(), "--filters-json")
 }

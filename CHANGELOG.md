@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-05-28
+
+### Added
+
+- **Guardrails filters:** `revenium guardrails budget-rules create|update` now accept `--filter dim:op:val` (repeatable) and `--filters-json '<JSON>'` (escape hatch, mutually exclusive with `--filter`) for scoping rules to specific dimensions (e.g. `--filter MODEL:IS:gpt-4`, `--filter AGENT:IS:hermes`). Known dimensions: AGENT, MODEL, PROVIDER, ORGANIZATION, CREDENTIAL, PRODUCT, SUBSCRIBER, TASK_TYPE. PATCH semantics: setting `--filter` on update replaces the entire array.
+- **Guardrails notification channels:** `revenium guardrails budget-rules create|update` now accept `--notification-channel-id` (repeatable) to attach notification channels to a rule. PATCH on update replaces the entire array.
+- **Guardrails get rendering:** `revenium guardrails budget-rules get` now surfaces `filters` and `notificationChannelIds` in both table and JSON output.
+
 ## [1.1.0] - 2026-05-19
 
 ### Added
@@ -30,6 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 (See https://github.com/revenium/revenium-cli/releases/tag/v1.0.3 — v1.0.x history is not back-filled in this CHANGELOG; only v1.1.0+ entries are curated.)
 
-[Unreleased]: https://github.com/revenium/revenium-cli/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/revenium/revenium-cli/compare/v1.1.1...HEAD
+[1.1.1]: https://github.com/revenium/revenium-cli/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/revenium/revenium-cli/compare/v1.0.3...v1.1.0
 [1.0.3]: https://github.com/revenium/revenium-cli/releases/tag/v1.0.3
