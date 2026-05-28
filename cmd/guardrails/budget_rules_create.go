@@ -19,20 +19,28 @@ import (
 // they only appear in the request body when the user explicitly passed them
 // (mirror of RESEARCH A3 gating pattern from cmd/jobs/create.go).
 //
+// PLAN 260524-kvj adds three more optional flags (also gated by Flags().Changed):
+//   - --filter dim:op:val (repeatable) — composes filters array
+//   - --filters-json '<JSON>'         — escape hatch (mutually exclusive with --filter, D-01)
+//   - --notification-channel-id <id>  (repeatable) — composes notificationChannelIds array
+//
 // teamId and tenantId are auto-injected by cmd.APIClient.DoCreate from client
 // config — NEVER exposed as CLI flags (CF-12-20).
 func newBudgetRulesCreateCmd() *cobra.Command {
 	var (
-		name          string
-		description   string
-		metricType    string
-		windowType    string
-		action        string
-		groupBy       string
-		warnThreshold float64
-		hardLimit     float64
-		shadowMode    bool
-		enabled       bool
+		name                   string
+		description            string
+		metricType             string
+		windowType             string
+		action                 string
+		groupBy                string
+		warnThreshold          float64
+		hardLimit              float64
+		shadowMode             bool
+		enabled                bool
+		filterFlags            []string
+		filtersJSON            string
+		notificationChannelIDs []string
 	)
 
 	c := &cobra.Command{
@@ -51,6 +59,19 @@ func newBudgetRulesCreateCmd() *cobra.Command {
     --warn-threshold 800 \
     --hard-limit 1000
 
+  # Same rule, scoped to a specific model with a notification channel attached
+  revenium guardrails budget-rules create \
+    --name "Q3 OpenAI Budget" \
+    --description "Caps monthly OpenAI spend" \
+    --metric-type TOTAL_COST \
+    --window-type MONTHLY \
+    --action BLOCK \
+    --group-by MODEL \
+    --warn-threshold 800 \
+    --hard-limit 1000 \
+    --filter MODEL:IS:gpt-4 \
+    --notification-channel-id chan-123
+
   # Same rule, but evaluate without blocking (shadow mode) and start disabled
   revenium guardrails budget-rules create \
     --name "Q3 OpenAI Budget (shadow)" \
@@ -64,6 +85,15 @@ func newBudgetRulesCreateCmd() *cobra.Command {
     --shadow-mode \
     --enabled=false`,
 		RunE: func(c *cobra.Command, args []string) error {
+			// PLAN D-01: resolve filters FIRST so the mutual-exclusion check
+			// between --filter and --filters-json fires before any HTTP call
+			// (and before the dry-run gate, so dry-run also surfaces the
+			// conflict instead of pretending to succeed).
+			filters, filtersChanged, err := resolveFilters(c, filterFlags, filtersJSON)
+			if err != nil {
+				return err
+			}
+
 			// 8 OAS-required fields go in unconditionally — MarkFlagRequired below
 			// ensures these variables are populated before RunE fires.
 			body := map[string]interface{}{
@@ -77,12 +107,18 @@ func newBudgetRulesCreateCmd() *cobra.Command {
 				"hardLimit":     hardLimit,
 			}
 			// Optional fields gated by Flags().Changed so unset flags never
-			// leak default values into the request body (RESEARCH D-10).
+			// leak default values into the request body (RESEARCH D-10 + PLAN A3).
 			if c.Flags().Changed("shadow-mode") {
 				body["shadowMode"] = shadowMode
 			}
 			if c.Flags().Changed("enabled") {
 				body["enabled"] = enabled
+			}
+			if filtersChanged {
+				body["filters"] = filters
+			}
+			if c.Flags().Changed("notification-channel-id") {
+				body["notificationChannelIds"] = notificationChannelIDs
 			}
 
 			if cmd.DryRun() { // CF-12-17
@@ -108,6 +144,11 @@ func newBudgetRulesCreateCmd() *cobra.Command {
 	c.Flags().Float64Var(&hardLimit, "hard-limit", 0, "Hard enforcement threshold")
 	c.Flags().BoolVar(&shadowMode, "shadow-mode", false, "Evaluate without blocking (validation mode)")
 	c.Flags().BoolVar(&enabled, "enabled", true, "Whether the rule is active")
+	// PLAN 260524-kvj D-06: help text lists known dims/ops as a hint only; values
+	// are passed through verbatim and the server validates them.
+	c.Flags().StringArrayVar(&filterFlags, "filter", nil, "Repeatable filter in dim:op:val form (e.g. --filter MODEL:IS:gpt-4). Known dimensions: AGENT, MODEL, PROVIDER, ORGANIZATION, CREDENTIAL, PRODUCT, SUBSCRIBER, TASK_TYPE. Known operators: IS, IS_NOT. Server validates values.")
+	c.Flags().StringVar(&filtersJSON, "filters-json", "", "Alternative to --filter: full filters array as JSON, e.g. '[{\"dimension\":\"MODEL\",\"operator\":\"IS\",\"value\":\"gpt-4\"}]'. Mutually exclusive with --filter.")
+	c.Flags().StringArrayVar(&notificationChannelIDs, "notification-channel-id", nil, "Repeatable notification channel ID to attach to this rule")
 
 	_ = c.MarkFlagRequired("name")
 	_ = c.MarkFlagRequired("description")
