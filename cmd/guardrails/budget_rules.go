@@ -82,12 +82,65 @@ func toRows(rules []map[string]interface{}) [][]string {
 	return rows
 }
 
-// renderRule renders a single budget rule as a single-row table or JSON.
+// renderRule renders a single budget rule as a single-row table (with optional
+// trailing filters / notification-channels blocks) OR as JSON.
+//
+// In JSON mode (`--json`), cmd.Output.Render emits the full rule map verbatim;
+// filters and notificationChannelIds round-trip "for free" through the map
+// passthrough and we MUST NOT print the secondary blocks (they would
+// contaminate the JSON output stream).
+//
+// In table mode, the 3-col ID/Name/Status table is rendered first, then
+// (only when present and non-empty) a "Filters:" block and a
+// "Notification channels:" block are appended. Absent or empty arrays stay
+// silent so rules with no scope or no channels keep their original
+// 3-col output unchanged.
 func renderRule(rule map[string]interface{}) error {
 	rows := [][]string{{
 		str(rule, "id"),
 		str(rule, "name"),
 		boolStatus(rule, "enabled"),
 	}}
-	return cmd.Output.Render(tableDef, rows, rule)
+	if err := cmd.Output.Render(tableDef, rows, rule); err != nil {
+		return err
+	}
+
+	// PLAN 260524-kvj must-have: surface filters + notificationChannelIds in
+	// non-JSON mode so users can SEE these fields. JSON mode skips this entire
+	// block — Output.Render already wrote the full rule map.
+	if cmd.Output.IsJSON() {
+		return nil
+	}
+
+	w := cmd.Output.Writer()
+
+	// Filters block — silent when absent, empty, or malformed.
+	if filtersRaw, ok := rule["filters"].([]interface{}); ok && len(filtersRaw) > 0 {
+		fmt.Fprintln(w, "Filters:")
+		for _, item := range filtersRaw {
+			fmap, ok := item.(map[string]interface{})
+			if !ok {
+				// Defensive: skip malformed server responses rather than panic.
+				continue
+			}
+			// Print as "  dimension operator value" so the three triple parts
+			// are individually visible to substring-style assertions and easy
+			// for humans to read.
+			fmt.Fprintf(w, "  %s %s %s\n",
+				str(fmap, "dimension"),
+				str(fmap, "operator"),
+				str(fmap, "value"),
+			)
+		}
+	}
+
+	// Notification channels block — silent when absent or empty.
+	if chansRaw, ok := rule["notificationChannelIds"].([]interface{}); ok && len(chansRaw) > 0 {
+		fmt.Fprintln(w, "Notification channels:")
+		for _, item := range chansRaw {
+			fmt.Fprintf(w, "  %s\n", fmt.Sprint(item))
+		}
+	}
+
+	return nil
 }
