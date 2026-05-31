@@ -55,6 +55,9 @@ func newBudgetRulesUpdateCmd() *cobra.Command {
   # Replace the filters scoping this rule (PATCH replaces the entire array — there is no per-element add/remove)
   revenium guardrails budget-rules update jR2kmLs --filter MODEL:IS:gpt-4 --filter PROVIDER:IS:openai
 
+  # Scope to agents whose name starts with "prod-" (string-match operator)
+  revenium guardrails budget-rules update jR2kmLs --filter AGENT:STARTS_WITH:prod-
+
   # Replace the notification channels (PATCH replaces the entire array)
   revenium guardrails budget-rules update jR2kmLs --notification-channel-id chan-1 --notification-channel-id chan-2`,
 		RunE: func(c *cobra.Command, args []string) error {
@@ -108,7 +111,7 @@ func newBudgetRulesUpdateCmd() *cobra.Command {
 	c.Flags().StringVar(&name, "name", "", "Budget rule display name")
 	// PLAN 260524-kvj D-04: PATCH replaces these arrays wholesale — call that
 	// out in the help text so users do not assume per-element add/remove.
-	c.Flags().StringArrayVar(&filterFlags, "filter", nil, "Repeatable filter in dim:op:val form (e.g. --filter MODEL:IS:gpt-4). Known dimensions: AGENT, MODEL, PROVIDER, ORGANIZATION, CREDENTIAL, PRODUCT, SUBSCRIBER, TASK_TYPE. Known operators: IS, IS_NOT. Server validates values. (PATCH replaces the entire array — there is no per-element add/remove)")
+	c.Flags().StringArrayVar(&filterFlags, "filter", nil, "Repeatable filter in dim:op:val form (e.g. --filter MODEL:IS:gpt-4). Known dimensions: AGENT, MODEL, PROVIDER, ORGANIZATION, CREDENTIAL, PRODUCT, SUBSCRIBER, TASK_TYPE. Known operators: IS, IS_NOT, CONTAINS, STARTS_WITH, ENDS_WITH. Server validates values. (PATCH replaces the entire array — there is no per-element add/remove)")
 	c.Flags().StringVar(&filtersJSON, "filters-json", "", "Alternative to --filter: full filters array as JSON, e.g. '[{\"dimension\":\"MODEL\",\"operator\":\"IS\",\"value\":\"gpt-4\"}]'. Mutually exclusive with --filter. (PATCH replaces the entire array)")
 	c.Flags().StringArrayVar(&notificationChannelIDs, "notification-channel-id", nil, "Repeatable notification channel ID to attach to this rule (PATCH replaces the entire array — there is no per-element add/remove)")
 
