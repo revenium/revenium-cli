@@ -72,6 +72,18 @@ func newBudgetRulesCreateCmd() *cobra.Command {
     --filter MODEL:IS:gpt-4 \
     --notification-channel-id chan-123
 
+  # Scope to models whose name contains "gpt" (string match)
+  revenium guardrails budget-rules create \
+    --name "GPT models budget" \
+    --description "Caps spend on GPT family models" \
+    --metric-type TOTAL_COST \
+    --window-type MONTHLY \
+    --action BLOCK \
+    --group-by MODEL \
+    --warn-threshold 800 \
+    --hard-limit 1000 \
+    --filter MODEL:CONTAINS:gpt
+
   # Same rule, but evaluate without blocking (shadow mode) and start disabled
   revenium guardrails budget-rules create \
     --name "Q3 OpenAI Budget (shadow)" \
@@ -146,7 +158,7 @@ func newBudgetRulesCreateCmd() *cobra.Command {
 	c.Flags().BoolVar(&enabled, "enabled", true, "Whether the rule is active")
 	// PLAN 260524-kvj D-06: help text lists known dims/ops as a hint only; values
 	// are passed through verbatim and the server validates them.
-	c.Flags().StringArrayVar(&filterFlags, "filter", nil, "Repeatable filter in dim:op:val form (e.g. --filter MODEL:IS:gpt-4). Known dimensions: AGENT, MODEL, PROVIDER, ORGANIZATION, CREDENTIAL, PRODUCT, SUBSCRIBER, TASK_TYPE. Known operators: IS, IS_NOT. Server validates values.")
+	c.Flags().StringArrayVar(&filterFlags, "filter", nil, "Repeatable filter in dim:op:val form (e.g. --filter MODEL:IS:gpt-4). Known dimensions: AGENT, MODEL, PROVIDER, ORGANIZATION, CREDENTIAL, PRODUCT, SUBSCRIBER, TASK_TYPE. Known operators: IS, IS_NOT, CONTAINS, STARTS_WITH, ENDS_WITH. Server validates values.")
 	c.Flags().StringVar(&filtersJSON, "filters-json", "", "Alternative to --filter: full filters array as JSON, e.g. '[{\"dimension\":\"MODEL\",\"operator\":\"IS\",\"value\":\"gpt-4\"}]'. Mutually exclusive with --filter.")
 	c.Flags().StringArrayVar(&notificationChannelIDs, "notification-channel-id", nil, "Repeatable notification channel ID to attach to this rule")
 

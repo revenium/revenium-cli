@@ -62,6 +62,28 @@ func TestParseFilterTriple(t *testing.T) {
 		_, err := parseFilterTriple("MODEL:IS:")
 		require.Error(t, err)
 	})
+
+	t.Run("CONTAINS operator round-trips", func(t *testing.T) {
+		// PLAN 260530-ne3: string-match operators pass through verbatim (D-06).
+		got, err := parseFilterTriple("MODEL:CONTAINS:gpt")
+		require.NoError(t, err)
+		assert.Equal(t, "CONTAINS", got["operator"])
+		assert.Equal(t, "gpt", got["value"])
+	})
+
+	t.Run("STARTS_WITH operator round-trips", func(t *testing.T) {
+		got, err := parseFilterTriple("AGENT:STARTS_WITH:my-prefix")
+		require.NoError(t, err)
+		assert.Equal(t, "STARTS_WITH", got["operator"])
+		assert.Equal(t, "my-prefix", got["value"])
+	})
+
+	t.Run("ENDS_WITH operator round-trips", func(t *testing.T) {
+		got, err := parseFilterTriple("PROVIDER:ENDS_WITH:ai")
+		require.NoError(t, err)
+		assert.Equal(t, "ENDS_WITH", got["operator"])
+		assert.Equal(t, "ai", got["value"])
+	})
 }
 
 // TestParseFiltersJSON covers the --filters-json escape hatch.

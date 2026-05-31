@@ -11,9 +11,17 @@
 //     they are passed through verbatim and the server is the source of truth.
 //     Help text lists the known dimensions/operators as a hint only.
 //
+// Known operators (hint only — server is authoritative per D-06):
+//   - IS, IS_NOT          — exact-match operators
+//   - CONTAINS            — value substring match
+//   - STARTS_WITH         — value prefix match
+//   - ENDS_WITH           — value suffix match
+//
 // On-wire shape (each filter object):
 //
 //	{"dimension": "MODEL", "operator": "IS", "value": "gpt-4"}
+//	{"dimension": "MODEL", "operator": "CONTAINS", "value": "gpt"}
+//	{"dimension": "AGENT", "operator": "STARTS_WITH", "value": "prod-"}
 package guardrails
 
 import (
@@ -40,6 +48,7 @@ func parseFilterTriple(s string) (map[string]interface{}, error) {
 		return nil, fmt.Errorf("invalid --filter value %q: dimension, operator, and value must all be non-empty", s)
 	}
 	// PLAN D-06: pass dim/op through verbatim — server validates the enum.
+	// Known operators: IS, IS_NOT, CONTAINS, STARTS_WITH, ENDS_WITH.
 	return map[string]interface{}{
 		"dimension": dim,
 		"operator":  op,
