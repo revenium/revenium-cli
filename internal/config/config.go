@@ -106,12 +106,20 @@ func Set(key, value string) error {
 		return err
 	}
 
-	viper.SetConfigFile(path)
+	// Use an isolated Viper instance so the global pflag bindings registered in
+	// cmd/root.go init() (the five --api-key/--api-url/--team-id/--tenant-id/
+	// --owner-id override flags) are NOT serialized into the file. WriteConfigAs
+	// marshals AllSettings(), which would otherwise include every bound pflag —
+	// persisting one-shot override flags (e.g. --api-key) and injecting empty
+	// override keys. This instance only ever sees the file's existing keys plus
+	// the target key. (CR-01)
+	v := viper.New()
+	v.SetConfigFile(path)
 
 	// Read existing config, ignore if file doesn't exist
-	_ = viper.ReadInConfig()
+	_ = v.ReadInConfig()
 
-	viper.Set(key, value)
+	v.Set(key, value)
 
-	return viper.WriteConfigAs(path)
+	return v.WriteConfigAs(path)
 }

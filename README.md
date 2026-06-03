@@ -67,15 +67,39 @@ revenium config set api-url https://custom.api.com/profitstream
 revenium config show
 ```
 
+### Global Override Flags
+
+Five persistent flags are available on every subcommand and override the corresponding config value for a single invocation:
+
+| Flag          | Overrides config key |
+|---------------|----------------------|
+| `--api-key`   | `key`                |
+| `--api-url`   | `api-url`            |
+| `--team-id`   | `team-id`            |
+| `--tenant-id` | `tenant-id`          |
+| `--owner-id`  | `owner-id`           |
+
+```sh
+# Run a single command against a different team
+revenium sources list --team-id X
+
+# Point one invocation at a dev environment
+revenium sources list --api-url https://dev.api.example
+```
+
+> **Security note:** Passing `--api-key` on the command line exposes the key in your shell history and in process listings (e.g. `ps`). For sensitive use, prefer the `REVENIUM_API_KEY` environment variable or the config file (`revenium config set key`) instead.
+
 ### Environment Variables
 
-Configuration can also be set via environment variables, which take precedence over the config file:
+Configuration can also be set via environment variables. The full resolution order is `flag > env var > config file > default`:
 
 | Variable                | Overrides      |
 |-------------------------|----------------|
 | `REVENIUM_API_KEY`      | `key`          |
 | `REVENIUM_API_URL`      | `api-url`      |
 | `REVENIUM_TEAM_ID`      | `team-id`      |
+| `REVENIUM_TENANT_ID`    | `tenant-id`    |
+| `REVENIUM_OWNER_ID`     | `owner-id`     |
 | `REVENIUM_OUTPUT_FORMAT` | `--output` flag (set to `json` or `table`) |
 
 ## Commands
