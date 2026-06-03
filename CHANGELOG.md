@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-06-03
+
+### Added
+
+- **Global config-override flags:** five persistent root flags — `--api-key`, `--api-url`, `--team-id`, `--tenant-id`, `--owner-id` — override the corresponding config value for a single invocation, available on every subcommand, without editing the config file or exporting an environment variable. Precedence is `flag > env var > config file > default` (CFGO-01..07).
+- Documented the previously-undocumented `REVENIUM_TENANT_ID` and `REVENIUM_OWNER_ID` environment variables in `revenium --help` and the README.
+
+### Security
+
+- One-shot override-flag values are never persisted to `config.yaml` by `revenium config set` — the config write path is isolated from the global flag bindings, so passing `--api-key` alongside a `config set` cannot write the secret to disk. The README notes that `--api-key` on the command line is still exposed to shell history and process listings; prefer the `REVENIUM_API_KEY` env var or the config file for sensitive use.
+
 ## [1.1.2] - 2026-05-30
 
 ### Added
@@ -44,7 +55,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 (See https://github.com/revenium/revenium-cli/releases/tag/v1.0.3 — v1.0.x history is not back-filled in this CHANGELOG; only v1.1.0+ entries are curated.)
 
-[Unreleased]: https://github.com/revenium/revenium-cli/compare/v1.1.1...HEAD
+[Unreleased]: https://github.com/revenium/revenium-cli/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/revenium/revenium-cli/compare/v1.1.2...v1.2.0
+[1.1.2]: https://github.com/revenium/revenium-cli/compare/v1.1.1...v1.1.2
 [1.1.1]: https://github.com/revenium/revenium-cli/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/revenium/revenium-cli/compare/v1.0.3...v1.1.0
 [1.0.3]: https://github.com/revenium/revenium-cli/releases/tag/v1.0.3

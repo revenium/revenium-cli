@@ -106,6 +106,38 @@ func TestYesFlagRegistered(t *testing.T) {
 	assert.Equal(t, "y", flag.Shorthand, "--yes should have -y shorthand")
 }
 
+func TestOverrideFlagsRegistered(t *testing.T) {
+	for _, name := range []string{"api-key", "api-url", "team-id", "tenant-id", "owner-id"} {
+		flag := rootCmd.PersistentFlags().Lookup(name)
+		require.NotNil(t, flag, "--%s persistent override flag should be registered", name)
+		assert.Equal(t, "", flag.DefValue, "--%s should default to empty string", name)
+	}
+}
+
+// TestRootHelpDocumentsOverrideFlags asserts that the root command Long help text
+// documents the five global override flags section, the four-level precedence
+// chain, and the two previously-undocumented env vars — satisfying CFGO-07 and D-05.
+// Strings are asserted against the ACTUAL Long content of rootCmd (cmd/root.go).
+func TestRootHelpDocumentsOverrideFlags(t *testing.T) {
+	long := rootCmd.Long
+
+	// The Global Override Flags section must be present.
+	assert.Contains(t, long, "Global Override Flags", "Long help must contain a Global Override Flags section")
+
+	// All five flag names must appear in the Long help.
+	for _, flag := range []string{"--api-key", "--api-url", "--team-id", "--tenant-id", "--owner-id"} {
+		assert.Contains(t, long, flag, "Long help must document override flag %s", flag)
+	}
+
+	// The four-level precedence statement must appear verbatim.
+	assert.Contains(t, long, "flag > env var > config file > default",
+		"Long help must state the four-level precedence chain")
+
+	// The previously-undocumented tenant-id and owner-id env vars must be present.
+	assert.Contains(t, long, "REVENIUM_TENANT_ID", "Long help must document REVENIUM_TENANT_ID env var")
+	assert.Contains(t, long, "REVENIUM_OWNER_ID", "Long help must document REVENIUM_OWNER_ID env var")
+}
+
 func TestJSONModeFunction(t *testing.T) {
 	// JSONMode should return the current state of the jsonMode var
 	oldVal := jsonMode

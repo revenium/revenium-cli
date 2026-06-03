@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 
 	"github.com/revenium/revenium-cli/cmd/config"
 	"github.com/revenium/revenium-cli/internal/api"
@@ -43,6 +44,17 @@ var yesMode bool
 // dryRun controls dry-run mode for mutation commands.
 var dryRun bool
 
+// Global config-override flags. Each backs a persistent --<name> flag that is
+// bound to Viper in init(), letting it override env/config for a single
+// invocation via Viper's precedence chain (flag > env > file > default).
+var (
+	apiKeyFlag   string
+	apiURLFlag   string
+	teamIDFlag   string
+	tenantIDFlag string
+	ownerIDFlag  string
+)
+
 // rootCmd is the base command for the Revenium CLI.
 var rootCmd = &cobra.Command{
 	Use:   "revenium",
@@ -60,13 +72,25 @@ Configuration:
   tenant-id     Tenant ID
   owner-id      Owner ID
 
+Global Override Flags:
+  --api-key     Override the configured API key for this invocation
+  --api-url     Override the configured API base URL for this invocation
+  --team-id     Override the configured team ID for this invocation
+  --tenant-id   Override the configured tenant ID for this invocation
+  --owner-id    Override the configured owner ID for this invocation
+
+  Each flag overrides the corresponding config value for a single invocation
+  and is available on every subcommand.
+
 Environment Variables:
   REVENIUM_API_KEY          Overrides "key"
   REVENIUM_API_URL          Overrides "api-url"
   REVENIUM_TEAM_ID          Overrides "team-id"
+  REVENIUM_TENANT_ID        Overrides "tenant-id"
+  REVENIUM_OWNER_ID         Overrides "owner-id"
   REVENIUM_OUTPUT_FORMAT    Default output format ("json" or "table")
 
-  Environment variables take precedence over the config file.
+  Precedence (highest to lowest): flag > env var > config file > default.
 
 Output Formats:
   table (default)   Human-readable tables with styled borders
@@ -191,6 +215,25 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&quiet, "quiet", "q", false, "Suppress non-error output")
 	rootCmd.PersistentFlags().BoolVarP(&yesMode, "yes", "y", false, "Skip confirmation prompts")
 	rootCmd.PersistentFlags().BoolVar(&dryRun, "dry-run", false, "Preview the action without executing it")
+
+	// Global config-override flags: each overrides the configured value for a
+	// single invocation. Default "" so an unset flag falls through to env/file
+	// via Viper's precedence chain.
+	rootCmd.PersistentFlags().StringVar(&apiKeyFlag, "api-key", "", "Override the configured API key for this invocation")
+	rootCmd.PersistentFlags().StringVar(&apiURLFlag, "api-url", "", "Override the configured API base URL for this invocation")
+	rootCmd.PersistentFlags().StringVar(&teamIDFlag, "team-id", "", "Override the configured team ID for this invocation")
+	rootCmd.PersistentFlags().StringVar(&tenantIDFlag, "tenant-id", "", "Override the configured tenant ID for this invocation")
+	rootCmd.PersistentFlags().StringVar(&ownerIDFlag, "owner-id", "", "Override the configured owner ID for this invocation")
+
+	// Bind the override flags to the global Viper instance so the existing
+	// config.Load() resolution picks them up transparently. Binding lives in
+	// init() (not PersistentPreRunE, which skips config subcommands) so the
+	// independent Load() call in cmd/config/show.go also honors the flags.
+	_ = viper.BindPFlag("api-key", rootCmd.PersistentFlags().Lookup("api-key"))
+	_ = viper.BindPFlag("api-url", rootCmd.PersistentFlags().Lookup("api-url"))
+	_ = viper.BindPFlag("team-id", rootCmd.PersistentFlags().Lookup("team-id"))
+	_ = viper.BindPFlag("tenant-id", rootCmd.PersistentFlags().Lookup("tenant-id"))
+	_ = viper.BindPFlag("owner-id", rootCmd.PersistentFlags().Lookup("owner-id"))
 
 	// Hide --json (replaced by --output json, kept for backward compat)
 	rootCmd.PersistentFlags().MarkHidden("json")
