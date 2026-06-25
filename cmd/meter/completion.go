@@ -12,7 +12,7 @@ import (
 
 func newCompletionCmd() *cobra.Command {
 	var model, provider, stopReason, requestTime, completionStartTime, responseTime string
-	var transactionID, traceId, modelSource, taskType, operationType, agent, environment, region string
+	var transactionID, traceId, traceType, modelSource, taskType, operationType, agent, environment, region string
 	var organizationName, subscriptionId, productName, systemPrompt, inputMessages, outputResponse string
 	var agenticJobID, agenticJobName, agenticJobType, agenticJobVersion string
 	var inputTokenCount, outputTokenCount, totalTokenCount, reasoningTokenCount int
@@ -48,6 +48,9 @@ func newCompletionCmd() *cobra.Command {
 			}
 			if c.Flags().Changed("trace-id") {
 				body["traceId"] = traceId
+			}
+			if c.Flags().Changed("trace-type") {
+				body["traceType"] = traceType
 			}
 			if c.Flags().Changed("model-source") {
 				body["modelSource"] = modelSource
@@ -164,6 +167,7 @@ func newCompletionCmd() *cobra.Command {
 	// Optional flags
 	c.Flags().StringVar(&transactionID, "transaction-id", "", "Unique transaction identifier")
 	c.Flags().StringVar(&traceId, "trace-id", "", "Trace identifier for distributed tracing")
+	c.Flags().StringVar(&traceType, "trace-type", "", "Trace type classification for distributed tracing")
 	c.Flags().StringVar(&modelSource, "model-source", "", "Model source or routing info")
 	c.Flags().IntVar(&reasoningTokenCount, "reasoning-tokens", 0, "Number of reasoning tokens")
 	c.Flags().IntVar(&cacheCreationTokenCount, "cache-creation-tokens", 0, "Number of cache creation tokens")

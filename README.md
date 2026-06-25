@@ -340,7 +340,7 @@ revenium meter completion --model gpt-4 --provider openai \
   --request-duration 5000 --dry-run
 ```
 
-All metering commands support optional fields for cost tracking (`--total-cost`), organizational attribution (`--agent`, `--environment`, `--organization-name`, `--product-name`), distributed tracing (`--transaction-id`, `--trace-id`), and conversation content (`--system-prompt`, `--input-messages`, `--output-response`). Use `revenium meter <subcommand> --help` for the full list of flags.
+All metering commands support optional fields for cost tracking (`--total-cost`), organizational attribution (`--agent`, `--environment`, `--organization-name`, `--product-name`), distributed tracing (`--transaction-id`, `--trace-id`, `--trace-type`), and conversation content (`--system-prompt`, `--input-messages`, `--output-response`). Use `revenium meter <subcommand> --help` for the full list of flags.
 
 ## Output Formats
 

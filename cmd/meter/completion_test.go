@@ -92,6 +92,7 @@ func TestMeterCompletionWithOptionalFields(t *testing.T) {
 		"--request-duration", "10000",
 		"--is-streamed",
 		"--total-cost", "0.045",
+		"--trace-type", "agentic",
 		"--agent", "my-agent",
 		"--environment", "production",
 		"--agentic-job-id", "loan-app-12345",
@@ -103,6 +104,7 @@ func TestMeterCompletionWithOptionalFields(t *testing.T) {
 
 	require.NoError(t, err)
 	assert.Equal(t, 0.045, receivedBody["totalCost"])
+	assert.Equal(t, "agentic", receivedBody["traceType"])
 	assert.Equal(t, "my-agent", receivedBody["agent"])
 	assert.Equal(t, "production", receivedBody["environment"])
 	assert.Equal(t, "loan-app-12345", receivedBody["agenticJobId"])
