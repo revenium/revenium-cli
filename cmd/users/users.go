@@ -22,7 +22,10 @@ var Cmd = &cobra.Command{
   revenium users get user-123
 
   # Create a user
-  revenium users create --email jane@example.com --first-name Jane --last-name Doe --roles ROLE_API_CONSUMER --team-ids team-1`,
+  revenium users create --email jane@example.com --first-name Jane --last-name Doe --roles ROLE_API_CONSUMER --team-ids team-1
+
+  # Show the current authenticated user
+  revenium users me`,
 }
 
 func init() {
@@ -32,6 +35,10 @@ func init() {
 	Cmd.AddCommand(newCreateCmd())
 	Cmd.AddCommand(newUpdateCmd())
 	Cmd.AddCommand(newDeleteCmd())
+	// RES-05 / D-06: meCmd's four sub-lists (credentials/invoices/subscriptions/
+	// period-charges) register themselves onto meCmd from their own init() in
+	// me_credentials.go/me_invoices.go/me_subscriptions.go/me_period_charges.go.
+	Cmd.AddCommand(meCmd)
 }
 
 // tableDef defines the table layout for user output.

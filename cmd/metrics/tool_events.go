@@ -50,9 +50,9 @@ func toToolEventsRows(metrics []map[string]interface{}) [][]string {
 	for i, m := range metrics {
 		rows[i] = []string{
 			str(m, "transactionId"),
-			str(m, "tool"),
-			formatNumber(floatVal(m, "invocations")),
-			formatCost(floatVal(m, "totalCost")),
+			str(m, "toolName"),
+			formatNumber(floatVal(m, "callCount")),
+			formatCost(floatVal(m, "costUsd")),
 		}
 	}
 	return rows

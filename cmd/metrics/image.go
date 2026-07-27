@@ -51,7 +51,7 @@ func toImageRows(metrics []map[string]interface{}) [][]string {
 		rows[i] = []string{
 			str(m, "transactionId"),
 			str(m, "model"),
-			formatNumber(floatVal(m, "totalCount")),
+			formatNumber(floatVal(m, "actualImageCount")),
 			formatCost(floatVal(m, "totalCost")),
 		}
 	}

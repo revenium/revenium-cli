@@ -20,7 +20,7 @@ func TestImageMetrics(t *testing.T) {
 		assert.Equal(t, "/v2/api/sources/metrics/ai/images", r.URL.Path)
 		assert.NotEmpty(t, r.URL.Query().Get("startDate"))
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `[{"id": "txn-i-1", "transactionId": "txn-i-1", "model": "dall-e-3", "totalCount": 150, "totalCost": 6.0}]`)
+		fmt.Fprint(w, `[{"id": "txn-i-1", "transactionId": "txn-i-1", "model": "dall-e-3", "actualImageCount": 150, "totalCost": 6.0}]`)
 	}))
 	defer srv.Close()
 
@@ -67,7 +67,7 @@ func TestImageMetricsEmpty(t *testing.T) {
 func TestImageMetricsJSON(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `[{"id": "txn-i-1", "transactionId": "txn-i-1", "model": "dall-e-3", "totalCount": 150, "totalCost": 6.0}]`)
+		fmt.Fprint(w, `[{"id": "txn-i-1", "transactionId": "txn-i-1", "model": "dall-e-3", "actualImageCount": 150, "totalCost": 6.0}]`)
 	}))
 	defer srv.Close()
 

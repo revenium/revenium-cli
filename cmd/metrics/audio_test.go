@@ -20,7 +20,7 @@ func TestAudioMetrics(t *testing.T) {
 		assert.Equal(t, "/v2/api/sources/metrics/ai/audio", r.URL.Path)
 		assert.NotEmpty(t, r.URL.Query().Get("startDate"))
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `[{"id": "txn-a-1", "transactionId": "txn-a-1", "model": "whisper-1", "totalDuration": 3600, "totalCost": 1.25}]`)
+		fmt.Fprint(w, `[{"id": "txn-a-1", "transactionId": "txn-a-1", "model": "whisper-1", "durationSeconds": 3600, "totalCost": 1.25, "squadId": "sq-audio-1"}]`)
 	}))
 	defer srv.Close()
 
@@ -40,6 +40,12 @@ func TestAudioMetrics(t *testing.T) {
 	assert.Contains(t, out, "whisper-1")
 	assert.Contains(t, out, "3,600")
 	assert.Contains(t, out, "$1.25")
+	assert.Contains(t, out, "Squad")
+	assert.Contains(t, out, "sq-audio-1")
+}
+
+func TestAudioMetricsHeadersEndWithSquad(t *testing.T) {
+	assert.Equal(t, "Squad", audioTableDef.Headers[len(audioTableDef.Headers)-1])
 }
 
 func TestAudioMetricsEmpty(t *testing.T) {
@@ -67,7 +73,7 @@ func TestAudioMetricsEmpty(t *testing.T) {
 func TestAudioMetricsJSON(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `[{"id": "txn-a-1", "transactionId": "txn-a-1", "model": "whisper-1", "totalDuration": 3600, "totalCost": 1.25}]`)
+		fmt.Fprint(w, `[{"id": "txn-a-1", "transactionId": "txn-a-1", "model": "whisper-1", "durationSeconds": 3600, "totalCost": 1.25}]`)
 	}))
 	defer srv.Close()
 

@@ -30,6 +30,7 @@ func init() {
 	Cmd.AddCommand(newCreateCmd())
 	Cmd.AddCommand(newUpdateCmd())
 	Cmd.AddCommand(newDeleteCmd())
+	Cmd.AddCommand(newLookupCmd())
 }
 
 // tableDef defines the table layout for tool output.

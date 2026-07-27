@@ -53,6 +53,7 @@ func init() {
 	Cmd.AddCommand(newSquadsCmd())
 	Cmd.AddCommand(newAPIMetricsCmd())
 	Cmd.AddCommand(newToolEventsCmd())
+	Cmd.AddCommand(newDimensionsCmd())
 }
 
 // normalizeDateFlag parses a date string, appending "Z" if no timezone is present,
@@ -186,4 +187,29 @@ func floatVal(m map[string]interface{}, key string) float64 {
 		}
 	}
 	return 0
+}
+
+// squadCell renders the Squad column: squadName if present, else squadId,
+// else blank (D-06/D-07). Safe to call even on schemas (ai/audio/video/traces)
+// that never populate squadName — str() returns "" for a missing key, so the
+// fallback to squadId still fires correctly.
+func squadCell(m map[string]interface{}) string {
+	if name := str(m, "squadName"); name != "" {
+		return name
+	}
+	return str(m, "squadId")
+}
+
+// filterBySquadID returns only the rows whose squadId field exactly matches id.
+// Client-side filter (D-09) — no server-side squadId query param exists on any
+// of the five general metrics endpoints. Zero matches is a normal empty result,
+// not an error (D-10).
+func filterBySquadID(metrics []map[string]interface{}, id string) []map[string]interface{} {
+	filtered := make([]map[string]interface{}, 0, len(metrics))
+	for _, m := range metrics {
+		if str(m, "squadId") == id {
+			filtered = append(filtered, m)
+		}
+	}
+	return filtered
 }

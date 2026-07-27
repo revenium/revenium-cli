@@ -1,6 +1,9 @@
 package meter
 
 import (
+	"encoding/json"
+	"fmt"
+
 	"github.com/spf13/cobra"
 
 	"github.com/revenium/revenium-cli/cmd"
@@ -16,6 +19,20 @@ func newImageCmd() *cobra.Command {
 	var totalCost float64
 	var sourceImageProvided bool
 	var agenticJobID, agenticJobName, agenticJobType, agenticJobVersion string
+	var squadFlags cmd.SquadFlags
+
+	// New optional fields (METER-03 field parity)
+	var costType, parentTransactionId, transactionName, traceType, traceName string
+	var errorReason, middlewareSource, sourceTransactionId, skipReason string
+	var pricingTier, requestedServiceTier, actualServiceTier, priorityTier string
+	var outputResponse, inputMessages string
+	var retryNumber, errorCode int
+	var revisedPromptProvided, promptsTruncated, billingSkipped bool
+	// Nested subscriber (D-08): only --subscriber-id/--subscriber-email are exposed.
+	// subscriber.credential (name/value) is deliberately excluded — it could carry a
+	// secret-like value into shell history/process listings for a rarely-used
+	// metering-test-data field. See 03-03-SUMMARY.md.
+	var subscriberID, subscriberEmail string
 
 	c := &cobra.Command{
 		Use:         "image",
@@ -105,6 +122,81 @@ func newImageCmd() *cobra.Command {
 			if c.Flags().Changed("source-image-provided") {
 				body["sourceImageProvided"] = sourceImageProvided
 			}
+			if c.Flags().Changed("cost-type") {
+				body["costType"] = costType
+			}
+			if c.Flags().Changed("parent-transaction-id") {
+				body["parentTransactionId"] = parentTransactionId
+			}
+			if c.Flags().Changed("transaction-name") {
+				body["transactionName"] = transactionName
+			}
+			if c.Flags().Changed("trace-type") {
+				body["traceType"] = traceType
+			}
+			if c.Flags().Changed("trace-name") {
+				body["traceName"] = traceName
+			}
+			if c.Flags().Changed("error-reason") {
+				body["errorReason"] = errorReason
+			}
+			if c.Flags().Changed("error-code") {
+				body["errorCode"] = errorCode
+			}
+			if c.Flags().Changed("retry-number") {
+				body["retryNumber"] = retryNumber
+			}
+			if c.Flags().Changed("middleware-source") {
+				body["middlewareSource"] = middlewareSource
+			}
+			if c.Flags().Changed("source-transaction-id") {
+				body["sourceTransactionId"] = sourceTransactionId
+			}
+			if c.Flags().Changed("skip-reason") {
+				body["skipReason"] = skipReason
+			}
+			if c.Flags().Changed("pricing-tier") {
+				body["pricingTier"] = pricingTier
+			}
+			if c.Flags().Changed("requested-service-tier") {
+				body["requestedServiceTier"] = requestedServiceTier
+			}
+			if c.Flags().Changed("actual-service-tier") {
+				body["actualServiceTier"] = actualServiceTier
+			}
+			if c.Flags().Changed("priority-tier") {
+				body["priorityTier"] = priorityTier
+			}
+			if c.Flags().Changed("revised-prompt-provided") {
+				body["revisedPromptProvided"] = revisedPromptProvided
+			}
+			if c.Flags().Changed("prompts-truncated") {
+				body["promptsTruncated"] = promptsTruncated
+			}
+			if c.Flags().Changed("billing-skipped") {
+				body["billingSkipped"] = billingSkipped
+			}
+			if c.Flags().Changed("output-response") {
+				body["outputResponse"] = outputResponse
+			}
+			if c.Flags().Changed("input-messages") {
+				var msgs []interface{}
+				if err := json.Unmarshal([]byte(inputMessages), &msgs); err != nil {
+					return fmt.Errorf("--input-messages must be valid JSON array: %w", err)
+				}
+				body["inputMessages"] = inputMessages
+			}
+			if c.Flags().Changed("subscriber-id") || c.Flags().Changed("subscriber-email") {
+				subscriber := map[string]interface{}{}
+				if c.Flags().Changed("subscriber-id") {
+					subscriber["id"] = subscriberID
+				}
+				if c.Flags().Changed("subscriber-email") {
+					subscriber["email"] = subscriberEmail
+				}
+				body["subscriber"] = subscriber
+			}
+			cmd.ApplySquadFlags(c, body, squadFlags)
 
 			if cmd.DryRun() {
 				return dryrun.Render(cmd.Output, "meter", "image", "/v2/ai/images", body)
@@ -137,7 +229,7 @@ func newImageCmd() *cobra.Command {
 	// Optional flags
 	c.Flags().StringVar(&transactionID, "transaction-id", "", "Unique transaction identifier")
 	c.Flags().StringVar(&traceId, "trace-id", "", "Trace identifier for distributed tracing")
-	c.Flags().StringVar(&operationType, "operation-type", "", "Operation type (IMAGE, GENERATE, VISION, etc.)")
+	c.Flags().StringVar(&operationType, "operation-type", "", "Operation type (CHAT, GENERATE, EMBED, CLASSIFY, SUMMARIZE, TRANSLATE, OTHER, TOOL_CALL, RERANK, SEARCH, MODERATION, VISION, TRANSFORM, GUARDRAIL, AUDIO, VIDEO, IMAGE)")
 	c.Flags().StringVar(&operationSubtype, "operation-subtype", "", "Operation subtype")
 	c.Flags().Float64Var(&totalCost, "total-cost", 0, "Total cost in USD")
 	c.Flags().StringVar(&agent, "agent", "", "Agent identifier")
@@ -158,6 +250,29 @@ func newImageCmd() *cobra.Command {
 	c.Flags().StringVar(&style, "style", "", "Image style setting")
 	c.Flags().StringVar(&format, "format", "", "Image format")
 	c.Flags().BoolVar(&sourceImageProvided, "source-image-provided", false, "Whether a source image was provided")
+	c.Flags().StringVar(&costType, "cost-type", "", "Cost type (AI)")
+	c.Flags().StringVar(&parentTransactionId, "parent-transaction-id", "", "Parent transaction identifier")
+	c.Flags().StringVar(&transactionName, "transaction-name", "", "Transaction name")
+	c.Flags().StringVar(&traceType, "trace-type", "", "Trace type classification for distributed tracing")
+	c.Flags().StringVar(&traceName, "trace-name", "", "Trace name for distributed tracing")
+	c.Flags().StringVar(&errorReason, "error-reason", "", "Error reason description")
+	c.Flags().IntVar(&errorCode, "error-code", 0, "Error code")
+	c.Flags().IntVar(&retryNumber, "retry-number", 0, "Retry attempt number")
+	c.Flags().StringVar(&middlewareSource, "middleware-source", "", "Middleware source identifier")
+	c.Flags().StringVar(&sourceTransactionId, "source-transaction-id", "", "Source transaction identifier")
+	c.Flags().StringVar(&skipReason, "skip-reason", "", "Skip reason (FREE_TIER, RATE_LIMITED, QUOTA_EXCEEDED, CONTENT_POLICY_VIOLATION, CAPACITY_UNAVAILABLE, SERVICE_UNAVAILABLE)")
+	c.Flags().StringVar(&pricingTier, "pricing-tier", "", "Pricing tier (STANDARD, BATCH)")
+	c.Flags().StringVar(&requestedServiceTier, "requested-service-tier", "", "Requested service tier (e.g. priority, default, flex)")
+	c.Flags().StringVar(&actualServiceTier, "actual-service-tier", "", "Actual service tier used (e.g. priority, default, flex)")
+	c.Flags().StringVar(&priorityTier, "priority-tier", "", "Priority tier (e.g. best_effort, on_demand, committed)")
+	c.Flags().BoolVar(&revisedPromptProvided, "revised-prompt-provided", false, "Whether a revised prompt was provided")
+	c.Flags().BoolVar(&promptsTruncated, "prompts-truncated", false, "Whether prompts were truncated")
+	c.Flags().BoolVar(&billingSkipped, "billing-skipped", false, "Whether billing was skipped for this event")
+	c.Flags().StringVar(&outputResponse, "output-response", "", "Model output/response content")
+	c.Flags().StringVar(&inputMessages, "input-messages", "", "Input messages as JSON array")
+	c.Flags().StringVar(&subscriberID, "subscriber-id", "", "Subscriber identifier")
+	c.Flags().StringVar(&subscriberEmail, "subscriber-email", "", "Subscriber email")
+	cmd.AddSquadFlags(c, &squadFlags)
 
 	return c
 }

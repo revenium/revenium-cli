@@ -64,13 +64,14 @@ manage resources, and monitor usage.
 
 Configuration:
   Config file:  ~/.config/revenium/config.yaml
-  Valid keys:   key, api-url, team-id, tenant-id, owner-id
+  Valid keys:   key, api-url, team-id, tenant-id, owner-id, analytics-api-url
 
-  key           Your Revenium API key (required)
-  api-url       API base URL (default https://api.revenium.ai/profitstream)
-  team-id       Team ID for multi-tenant access
-  tenant-id     Tenant ID
-  owner-id      Owner ID
+  key                 Your Revenium API key (required)
+  api-url             API base URL (default https://api.revenium.ai/profitstream)
+  team-id             Team ID for multi-tenant access
+  tenant-id           Tenant ID
+  owner-id            Owner ID
+  analytics-api-url   Analytics API base URL (default https://app.revenium.ai)
 
 Global Override Flags:
   --api-key     Override the configured API key for this invocation
@@ -83,12 +84,13 @@ Global Override Flags:
   and is available on every subcommand.
 
 Environment Variables:
-  REVENIUM_API_KEY          Overrides "key"
-  REVENIUM_API_URL          Overrides "api-url"
-  REVENIUM_TEAM_ID          Overrides "team-id"
-  REVENIUM_TENANT_ID        Overrides "tenant-id"
-  REVENIUM_OWNER_ID         Overrides "owner-id"
-  REVENIUM_OUTPUT_FORMAT    Default output format ("json" or "table")
+  REVENIUM_API_KEY              Overrides "key"
+  REVENIUM_API_URL              Overrides "api-url"
+  REVENIUM_TEAM_ID              Overrides "team-id"
+  REVENIUM_TENANT_ID            Overrides "tenant-id"
+  REVENIUM_OWNER_ID             Overrides "owner-id"
+  REVENIUM_ANALYTICS_API_URL    Overrides "analytics-api-url"
+  REVENIUM_OUTPUT_FORMAT        Default output format ("json" or "table")
 
   Precedence (highest to lowest): flag > env var > config file > default.
 
@@ -177,6 +179,8 @@ Programmatic Discovery:
 		}
 
 		APIClient = api.NewClient(cfg.APIURL, cfg.APIKey, cfg.TeamID, cfg.TenantID, cfg.OwnerID, verbose)
+		APIClient.AnalyticsBaseURL = cfg.AnalyticsAPIURL
+		APIClient.Quiet = quiet
 		return nil
 	},
 }

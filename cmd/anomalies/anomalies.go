@@ -30,6 +30,8 @@ func init() {
 	Cmd.AddCommand(newCreateCmd())
 	Cmd.AddCommand(newUpdateCmd())
 	Cmd.AddCommand(newDeleteCmd())
+	Cmd.AddCommand(newClearCmd())
+	Cmd.AddCommand(newDimensionsCmd())
 }
 
 // tableDef defines the table layout for anomaly output.

@@ -39,6 +39,46 @@ func TestBuildPath_OnlyFrom(t *testing.T) {
 	assert.False(t, strings.Contains(path, "endDate="))
 }
 
+func TestSquadCell(t *testing.T) {
+	tests := []struct {
+		name     string
+		row      map[string]interface{}
+		expected string
+	}{
+		{"squadName present", map[string]interface{}{"squadName": "Loan Processing", "squadId": "sq-1"}, "Loan Processing"},
+		{"squadId only", map[string]interface{}{"squadId": "sq-1"}, "sq-1"},
+		{"neither present", map[string]interface{}{}, ""},
+		{"squadName empty string falls back to squadId", map[string]interface{}{"squadName": "", "squadId": "sq-2"}, "sq-2"},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.Equal(t, tc.expected, squadCell(tc.row))
+		})
+	}
+}
+
+func TestFilterBySquadID(t *testing.T) {
+	metrics := []map[string]interface{}{
+		{"id": "1", "squadId": "sq-a"},
+		{"id": "2", "squadId": "sq-b"},
+		{"id": "3", "squadId": "sq-a"},
+		{"id": "4"},
+	}
+
+	filtered := filterBySquadID(metrics, "sq-a")
+	assert.Len(t, filtered, 2)
+	assert.Equal(t, "1", filtered[0]["id"])
+	assert.Equal(t, "3", filtered[1]["id"])
+}
+
+func TestFilterBySquadID_NoMatch(t *testing.T) {
+	metrics := []map[string]interface{}{
+		{"id": "1", "squadId": "sq-a"},
+	}
+	filtered := filterBySquadID(metrics, "sq-does-not-exist")
+	assert.Empty(t, filtered)
+}
+
 func TestFormatNumber(t *testing.T) {
 	tests := []struct {
 		input    float64

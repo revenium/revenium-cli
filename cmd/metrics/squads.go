@@ -6,28 +6,43 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/revenium/revenium-cli/cmd"
-	"github.com/revenium/revenium-cli/internal/output"
 )
 
-var squadsTableDef = output.TableDef{
-	Headers:      []string{"ID", "Name", "Executions", "Status"},
-	StatusColumn: 3,
-}
+// squadsPeriodFlag holds the --period value for this command. Empty means
+// the flag was not passed — the query param is omitted entirely and the
+// server applies its documented THIRTY_DAYS default (do not hardcode that
+// default client-side).
+var squadsPeriodFlag string
 
+// newSquadsCmd returns the deprecated `revenium metrics squads` command
+// (D-04/D-05). It is kept (not deleted, per Out-of-Scope) but now delegates
+// entirely to the shared cmd.FetchSquadExecutions/cmd.ToSquadExecutionRows
+// helper (from Plan 01) instead of calling the fictional startDate/endDate
+// path and reading fictional transactionId/name/executions fields. New
+// usage should prefer `revenium squads executions`.
 func newSquadsCmd() *cobra.Command {
 	c := &cobra.Command{
 		Use:   "squads",
-		Short: "Query squad metrics",
-		Args:  cobra.NoArgs,
-		Example: `  # Query squad metrics for last 24 hours
+		Short: "Query squad metrics (DEPRECATED: use `revenium squads executions`)",
+		Long: `DEPRECATED: this command is superseded by "revenium squads executions", which
+provides the same flat squad-execution data under the dedicated squads command
+group. It is kept here for backward compatibility only.
+
+Query squad execution metrics from the Squads API.`,
+		Args: cobra.NoArgs,
+		Example: `  # Query squad execution metrics
   revenium metrics squads
 
-  # Query squad metrics with time range
-  revenium metrics squads --from 2024-01-01T00:00:00Z --to 2024-01-31T23:59:59Z`,
+  # Query squad execution metrics for the last 7 days
+  revenium metrics squads --period SEVEN_DAYS`,
 		RunE: func(c *cobra.Command, args []string) error {
-			var metrics []map[string]interface{}
-			path := buildPath("/v2/api/squads")
-			if err := cmd.APIClient.DoList(c.Context(), path, cmd.ListOptsFromFlags(c), &metrics); err != nil {
+			// T-2-02 mitigation: reject unknown --period values before they
+			// ever reach the URL.
+			if err := cmd.ValidatePeriod(squadsPeriodFlag); err != nil {
+				return err
+			}
+			metrics, err := cmd.FetchSquadExecutions(c.Context(), squadsPeriodFlag)
+			if err != nil {
 				return err
 			}
 			if len(metrics) == 0 {
@@ -37,23 +52,12 @@ func newSquadsCmd() *cobra.Command {
 				fmt.Fprintln(c.OutOrStdout(), "No squad metrics found.")
 				return nil
 			}
-			return cmd.Output.Render(squadsTableDef, toSquadsRows(metrics), metrics)
+			return cmd.Output.Render(cmd.SquadExecutionsTableDef, cmd.ToSquadExecutionRows(metrics), metrics)
 		},
 	}
 
-	cmd.AddListFlags(c)
+	c.Flags().StringVar(&squadsPeriodFlag, "period", "",
+		"Time period: HOUR, EIGHT_HOURS, TWENTY_FOUR_HOURS, SEVEN_DAYS, "+
+			"THIRTY_DAYS, NINETY_DAYS, SIX_MONTHS, TWELVE_MONTHS (default THIRTY_DAYS server-side)")
 	return c
-}
-
-func toSquadsRows(metrics []map[string]interface{}) [][]string {
-	rows := make([][]string, len(metrics))
-	for i, m := range metrics {
-		rows[i] = []string{
-			str(m, "transactionId"),
-			str(m, "name"),
-			formatNumber(floatVal(m, "executions")),
-			str(m, "status"),
-		}
-	}
-	return rows
 }

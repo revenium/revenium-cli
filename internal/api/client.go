@@ -8,7 +8,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"mime/multipart"
 	"net/http"
+	"net/textproto"
 	"os"
 	"strings"
 	"time"
@@ -19,13 +21,27 @@ import (
 
 // Client is an HTTP client configured for the Revenium API.
 type Client struct {
-	BaseURL    string
-	APIKey     string
-	TeamID     string
-	TenantID   string
-	OwnerID    string
-	HTTPClient *http.Client
-	Verbose    bool
+	BaseURL string
+	// AnalyticsBaseURL is the distinct, independently configured base URL for
+	// the analytics API host (e.g. https://app.revenium.ai). It is populated
+	// externally from config (cfg.AnalyticsAPIURL) and never derived from
+	// BaseURL by string-rewriting (see MeterBaseURL, which is the opposite,
+	// rejected pattern for this field).
+	AnalyticsBaseURL string
+	APIKey           string
+	TeamID           string
+	TenantID         string
+	OwnerID          string
+	HTTPClient       *http.Client
+	Verbose          bool
+	// UseBearerAuth switches Do() to send Authorization: Bearer <key> instead
+	// of x-api-key, and suppresses teamId/tenantId query-param injection.
+	// Toggled by analytics-backed commands' PersistentPreRunE, never by NewClient.
+	UseBearerAuth bool
+	// Quiet suppresses advisory notices written to stderr (never errors).
+	// Set post-construction from the root --quiet flag, matching the
+	// AnalyticsBaseURL convention, so NewClient's signature stays stable.
+	Quiet bool
 }
 
 // MeterBaseURL returns the metering API base URL derived from the management
@@ -49,6 +65,52 @@ func NewClient(baseURL, apiKey, teamID, tenantID, ownerID string, verbose bool) 
 	}
 }
 
+// resolveURL builds the full request URL for path, appending teamId/tenantId
+// query parameters when the client is not using bearer auth. Extracted from
+// Do() so DoDownload (and any future binary method) reuses the same URL
+// construction instead of duplicating it (D-03).
+func (c *Client) resolveURL(path string) string {
+	url := c.BaseURL + path
+	if !c.UseBearerAuth {
+		if c.TeamID != "" {
+			if strings.Contains(url, "?") {
+				url += "&teamId=" + c.TeamID
+			} else {
+				url += "?teamId=" + c.TeamID
+			}
+		}
+		if c.TenantID != "" {
+			if strings.Contains(url, "?") {
+				url += "&tenantId=" + c.TenantID
+			} else {
+				url += "?tenantId=" + c.TenantID
+			}
+		}
+	}
+	return url
+}
+
+// networkError wraps a transport-level failure (HTTPClient.Do returning a
+// non-nil error) in a message that names the client's actual configured
+// BaseURL, rather than a hardcoded default host (WR-03). Shared by Do,
+// DoDownload, and DoUploadBinary so the message only needs to be correct in
+// one place.
+func (c *Client) networkError(err error) error {
+	return fmt.Errorf("Could not connect to %s. Check your network connection.", c.BaseURL)
+}
+
+// setCommonHeaders sets the auth header (Bearer vs x-api-key) and User-Agent
+// on req. It does not set Content-Type or Accept, since those differ between
+// JSON methods (Do) and binary methods (DoDownload).
+func (c *Client) setCommonHeaders(req *http.Request) {
+	if c.UseBearerAuth {
+		req.Header.Set("Authorization", "Bearer "+c.APIKey)
+	} else {
+		req.Header.Set("x-api-key", c.APIKey)
+	}
+	req.Header.Set("User-Agent", "revenium-cli/"+build.Version)
+}
+
 // Do executes an HTTP request against the Revenium API.
 // If body is non-nil, it is marshaled to JSON and sent as the request body.
 // If result is non-nil, the response body is decoded into it.
@@ -64,35 +126,24 @@ func (c *Client) Do(ctx context.Context, method, path string, body, result inter
 		reqBody = bytes.NewReader(reqData)
 	}
 
-	url := c.BaseURL + path
-	if c.TeamID != "" {
-		if strings.Contains(url, "?") {
-			url += "&teamId=" + c.TeamID
-		} else {
-			url += "?teamId=" + c.TeamID
-		}
-	}
-	if c.TenantID != "" {
-		if strings.Contains(url, "?") {
-			url += "&tenantId=" + c.TenantID
-		} else {
-			url += "?tenantId=" + c.TenantID
-		}
-	}
+	url := c.resolveURL(path)
 	req, err := http.NewRequestWithContext(ctx, method, url, reqBody)
 	if err != nil {
 		return fmt.Errorf("failed to create request: %w", err)
 	}
 
-	req.Header.Set("x-api-key", c.APIKey)
+	c.setCommonHeaders(req)
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
-	req.Header.Set("User-Agent", "revenium-cli/"+build.Version)
 
 	if c.Verbose {
 		maskedKey := maskAPIKey(c.APIKey)
 		fmt.Fprintf(os.Stderr, "> %s %s\n", method, url)
-		fmt.Fprintf(os.Stderr, "> x-api-key: %s\n", maskedKey)
+		if c.UseBearerAuth {
+			fmt.Fprintf(os.Stderr, "> Authorization: Bearer %s\n", maskedKey)
+		} else {
+			fmt.Fprintf(os.Stderr, "> x-api-key: %s\n", maskedKey)
+		}
 		if len(reqData) > 0 {
 			var pretty bytes.Buffer
 			if json.Indent(&pretty, reqData, "> ", "  ") == nil {
@@ -105,7 +156,7 @@ func (c *Client) Do(ctx context.Context, method, path string, body, result inter
 
 	resp, err := c.HTTPClient.Do(req)
 	if err != nil {
-		return fmt.Errorf("Could not connect to api.revenium.ai. Check your network connection.")
+		return c.networkError(err)
 	}
 	defer func() {
 		io.Copy(io.Discard, resp.Body)
@@ -128,6 +179,147 @@ func (c *Client) Do(ctx context.Context, method, path string, body, result inter
 
 	return nil
 }
+
+// DoDownload executes a GET request and returns the raw response body bytes,
+// with no JSON decoding. Used for binary responses (e.g. invoice PDFs) where
+// the body is not JSON. It reuses resolveURL and setCommonHeaders so no
+// transport setup is duplicated (D-01, D-03). It mutates no *Client field, so
+// concurrent calls on a shared client are data-race free.
+func (c *Client) DoDownload(ctx context.Context, path string) ([]byte, error) {
+	url := c.resolveURL(path)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	c.setCommonHeaders(req)
+	// The payload is binary, never JSON — do not send Content-Type or an
+	// application/json Accept header.
+	req.Header.Set("Accept", "*/*")
+
+	if c.Verbose {
+		fmt.Fprintf(os.Stderr, "> %s %s\n", http.MethodGet, url)
+	}
+
+	resp, err := c.HTTPClient.Do(req)
+	if err != nil {
+		return nil, c.networkError(err)
+	}
+	defer func() {
+		io.Copy(io.Discard, resp.Body)
+		resp.Body.Close()
+	}()
+
+	if resp.StatusCode >= 400 {
+		if c.Verbose {
+			fmt.Fprintf(os.Stderr, "< %d %s\n", resp.StatusCode, http.StatusText(resp.StatusCode))
+		}
+		return nil, mapHTTPError(resp)
+	}
+
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response body: %w", err)
+	}
+
+	if c.Verbose {
+		fmt.Fprintf(os.Stderr, "< %d %s (%d bytes)\n", resp.StatusCode, http.StatusText(resp.StatusCode), len(data))
+	}
+
+	return data, nil
+}
+
+// DoUploadBinary executes a PATCH request whose body is a multipart/form-data
+// payload carrying data under a single "file" form field, with the part's
+// own Content-Type set to contentType — the bytes are never handed to
+// json.Marshal. Used for logo upload endpoints (D-02, corrected: `PATCH
+// /v2/api/products/{id}/logo` and its sources/teams equivalents). The
+// multipart/form-data shape — not a raw octet-stream body — was confirmed
+// against the live dev API during the 07-03 checkpoint: FEATURES.md:348
+// documents the request body as `{"file": binary}`, and a raw-body PATCH was
+// rejected with 400 while a multipart "file" field succeeded with 200. It
+// reuses resolveURL and setCommonHeaders so no transport setup is duplicated
+// (D-03). It mutates no *Client field, so concurrent calls on a shared client
+// are data-race free.
+func (c *Client) DoUploadBinary(ctx context.Context, path, filename string, data []byte, contentType string) error {
+	var body bytes.Buffer
+	writer := multipart.NewWriter(&body)
+
+	partHeader := make(textproto.MIMEHeader)
+	partHeader.Set("Content-Disposition", fmt.Sprintf(
+		`form-data; name="file"; filename="%s"`,
+		quoteEscaper.Replace(filename),
+	))
+	partHeader.Set("Content-Type", contentType)
+	part, err := writer.CreatePart(partHeader)
+	if err != nil {
+		return fmt.Errorf("failed to create multipart form part: %w", err)
+	}
+	if _, err := part.Write(data); err != nil {
+		return fmt.Errorf("failed to write multipart form data: %w", err)
+	}
+	if err := writer.Close(); err != nil {
+		return fmt.Errorf("failed to close multipart writer: %w", err)
+	}
+
+	url := c.resolveURL(path)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPatch, url, &body)
+	if err != nil {
+		return fmt.Errorf("failed to create request: %w", err)
+	}
+
+	c.setCommonHeaders(req)
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+	// Error bodies come back as JSON even though the request payload is
+	// binary, so Accept stays application/json (unlike DoDownload).
+	req.Header.Set("Accept", "application/json")
+
+	if c.Verbose {
+		fmt.Fprintf(os.Stderr, "> %s %s\n", http.MethodPatch, url)
+		fmt.Fprintf(os.Stderr, "> Content-Type: %s\n", writer.FormDataContentType())
+		fmt.Fprintf(os.Stderr, "> Body: %d bytes (file field content-type %s)\n", len(data), contentType)
+	}
+
+	resp, err := c.HTTPClient.Do(req)
+	if err != nil {
+		return c.networkError(err)
+	}
+	defer func() {
+		io.Copy(io.Discard, resp.Body)
+		resp.Body.Close()
+	}()
+
+	if c.Verbose {
+		fmt.Fprintf(os.Stderr, "< %d %s\n", resp.StatusCode, http.StatusText(resp.StatusCode))
+	}
+
+	if resp.StatusCode >= 400 {
+		return mapHTTPError(resp)
+	}
+
+	// WR-02: DoUploadBinary has no result parameter, so a successful response
+	// body is otherwise silently discarded by the deferred io.Copy above with
+	// no way for any caller to inspect it. None of the three logo-upload
+	// commands (products/sources/teams) currently need server-returned data —
+	// their output is built entirely from locally-known values — so surface
+	// the raw body in verbose mode only, for debugging.
+	if c.Verbose {
+		if respBody, readErr := io.ReadAll(resp.Body); readErr == nil && len(respBody) > 0 {
+			fmt.Fprintf(os.Stderr, "< Body: %s\n", respBody)
+		}
+	}
+
+	return nil
+}
+
+// quoteEscaper escapes backslashes and double quotes in a filename before it
+// is embedded in a multipart Content-Disposition header's filename="..."
+// attribute, mirroring the unexported escapeQuotes helper that Go's own
+// mime/multipart.Writer.CreateFormFile uses internally (WR-01). Without this,
+// a filename containing a `"` or `\` (both legal on macOS/Linux) would
+// produce a malformed header — an unescaped quote prematurely closes the
+// attribute value.
+var quoteEscaper = strings.NewReplacer("\\", "\\\\", `"`, "\\\"")
 
 // mapHTTPError reads the response body and returns an appropriate APIError.
 func mapHTTPError(resp *http.Response) error {
@@ -259,15 +451,6 @@ func (c *Client) DoUpdate(ctx context.Context, path string, updates map[string]i
 			}
 		}
 	}
-	// Map label to clientEmailAddress if not present (subscriptions)
-	if _, ok := existing["clientEmailAddress"]; !ok {
-		if label, ok := existing["label"].(string); ok && label != "" {
-			if _, hasClient := existing["client"]; hasClient {
-				existing["clientEmailAddress"] = label
-			}
-		}
-	}
-
 	for k, v := range updates {
 		existing[k] = v
 	}
@@ -280,22 +463,24 @@ type ListOptions struct {
 	// Page is the 0-based page number. -1 means not set (use default).
 	Page int
 	// PageSize is the number of items per page. -1 means not set (use default).
+	// When FetchAll is set, this selects the per-request batch size rather than
+	// capping the total number of results returned.
 	PageSize int
 	// FetchAll iterates through all pages and returns the aggregate result.
-	// Ignored when Page or PageSize are explicitly set.
+	// Ignored when Page is explicitly set (an explicit page means the caller
+	// wants exactly that page). PageSize does NOT disable it.
 	FetchAll bool
 }
 
 // DoList executes a GET request and unwraps the response into a slice.
 // It handles both Spring HATEOAS paginated responses
 // ({"_embedded": {"<resource>List": [...]}, "page": {...}}) and plain JSON arrays.
-// When opts.FetchAll is true and no explicit page/pageSize is set, it iterates
-// through all pages to return the complete result set.
+// When opts.FetchAll is true and no explicit page is set, it iterates through
+// all pages to return the complete result set, using opts.PageSize as the batch
+// size when provided.
 func (c *Client) DoList(ctx context.Context, path string, opts ListOptions, result *[]map[string]interface{}) error {
-	explicitPaging := opts.Page >= 0 || opts.PageSize >= 0
-
-	if opts.FetchAll && !explicitPaging {
-		return c.doListAll(ctx, path, result)
+	if opts.FetchAll && opts.Page < 0 {
+		return c.doListAll(ctx, path, opts, result)
 	}
 
 	paginatedPath := c.buildPaginatedPath(path, opts)
@@ -322,11 +507,21 @@ func (c *Client) buildPaginatedPath(path string, opts ListOptions) string {
 	return result
 }
 
+// defaultFetchAllPageSize is the per-request batch size used when aggregating
+// all pages and the caller did not specify one.
+const defaultFetchAllPageSize = 100
+
 // doListAll fetches all pages from a paginated endpoint and aggregates the results.
-func (c *Client) doListAll(ctx context.Context, path string, result *[]map[string]interface{}) error {
+// opts.PageSize, when set, selects the per-request batch size; the server remains
+// free to return fewer items per page than requested, which is why iteration is
+// driven by the response's own totalPages rather than by the requested size.
+func (c *Client) doListAll(ctx context.Context, path string, opts ListOptions, result *[]map[string]interface{}) error {
 	var all []map[string]interface{}
 	page := 0
-	pageSize := 100 // fetch in large batches
+	pageSize := defaultFetchAllPageSize
+	if opts.PageSize > 0 {
+		pageSize = opts.PageSize
+	}
 
 	for {
 		opts := ListOptions{Page: page, PageSize: pageSize}
@@ -351,10 +546,20 @@ func (c *Client) doListAll(ctx context.Context, path string, result *[]map[strin
 }
 
 // doListOnePage fetches a single page and returns the items.
+//
+// When the response reports more pages than the one fetched, a note is written
+// to stderr. The server's own totalPages is the only way a caller can discover
+// that its result set is partial: the CLI unwraps the HATEOAS envelope and
+// returns a bare array, so the "page" metadata never reaches stdout. Reporting
+// it on stderr keeps stdout a clean JSON array for piping while making silent
+// truncation visible.
 func (c *Client) doListOnePage(ctx context.Context, path string, result *[]map[string]interface{}) error {
-	items, _, err := c.doListOnePageWithMeta(ctx, path)
+	items, totalPages, err := c.doListOnePageWithMeta(ctx, path)
 	if err != nil {
 		return err
+	}
+	if totalPages > 1 && !c.Quiet {
+		fmt.Fprintf(os.Stderr, "Note: showing 1 of %d pages. Omit --page to fetch all pages.\n", totalPages)
 	}
 	*result = items
 	return nil

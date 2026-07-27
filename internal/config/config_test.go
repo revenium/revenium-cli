@@ -246,3 +246,37 @@ func TestEnvOverrideAPIURL(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "https://env.api.com", cfg.APIURL)
 }
+
+func TestLoadConfigDefaultAnalyticsAPIURL(t *testing.T) {
+	setupTest(t)
+
+	cfg, err := Load()
+	require.NoError(t, err)
+	require.Equal(t, "https://app.revenium.ai", cfg.AnalyticsAPIURL)
+}
+
+func TestLoadConfigFileOverrideAnalyticsAPIURL(t *testing.T) {
+	tmpDir := setupTest(t)
+
+	configContent := "analytics-api-url: https://file.host\n"
+	err := os.WriteFile(filepath.Join(tmpDir, "config.yaml"), []byte(configContent), 0o600)
+	require.NoError(t, err)
+
+	cfg, err := Load()
+	require.NoError(t, err)
+	require.Equal(t, "https://file.host", cfg.AnalyticsAPIURL)
+}
+
+func TestEnvOverrideAnalyticsAPIURL(t *testing.T) {
+	tmpDir := setupTest(t)
+
+	configContent := "analytics-api-url: https://file.host\n"
+	err := os.WriteFile(filepath.Join(tmpDir, "config.yaml"), []byte(configContent), 0o600)
+	require.NoError(t, err)
+
+	t.Setenv("REVENIUM_ANALYTICS_API_URL", "https://env.host")
+
+	cfg, err := Load()
+	require.NoError(t, err)
+	require.Equal(t, "https://env.host", cfg.AnalyticsAPIURL)
+}

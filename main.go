@@ -9,21 +9,29 @@ import (
 	"github.com/revenium/revenium-cli/cmd"
 	"github.com/revenium/revenium-cli/cmd/alerts"
 	"github.com/revenium/revenium-cli/cmd/anomalies"
+	"github.com/revenium/revenium-cli/cmd/billing"
 	"github.com/revenium/revenium-cli/cmd/charts"
 	"github.com/revenium/revenium-cli/cmd/credentials"
 	"github.com/revenium/revenium-cli/cmd/guardrails"
+	"github.com/revenium/revenium-cli/cmd/invoices"
 	"github.com/revenium/revenium-cli/cmd/jobs"
 	"github.com/revenium/revenium-cli/cmd/meter"
+	meteringelements "github.com/revenium/revenium-cli/cmd/metering-elements"
 	"github.com/revenium/revenium-cli/cmd/metrics"
 	"github.com/revenium/revenium-cli/cmd/models"
 	"github.com/revenium/revenium-cli/cmd/organizations"
+	periodcharges "github.com/revenium/revenium-cli/cmd/period-charges"
 	"github.com/revenium/revenium-cli/cmd/products"
+	"github.com/revenium/revenium-cli/cmd/refunds"
 	"github.com/revenium/revenium-cli/cmd/sources"
+	"github.com/revenium/revenium-cli/cmd/squads"
 	"github.com/revenium/revenium-cli/cmd/subscribers"
 	"github.com/revenium/revenium-cli/cmd/subscriptions"
 	"github.com/revenium/revenium-cli/cmd/teams"
+	"github.com/revenium/revenium-cli/cmd/tenants"
 	"github.com/revenium/revenium-cli/cmd/tools"
 	"github.com/revenium/revenium-cli/cmd/users"
+	"github.com/revenium/revenium-cli/cmd/workspaces"
 	apierrors "github.com/revenium/revenium-cli/internal/errors"
 	"github.com/revenium/revenium-cli/internal/output"
 )
@@ -47,8 +55,16 @@ func init() {
 	cmd.RegisterCommand(charts.Cmd, "resources")
 	cmd.RegisterCommand(jobs.Cmd, "resources")
 	cmd.RegisterCommand(guardrails.Cmd, "resources")
+	cmd.RegisterCommand(billing.Cmd, "resources")
+	cmd.RegisterCommand(invoices.Cmd, "resources")
+	cmd.RegisterCommand(refunds.Cmd, "resources")
+	cmd.RegisterCommand(periodcharges.Cmd, "resources")
+	cmd.RegisterCommand(workspaces.Cmd, "resources")
+	cmd.RegisterCommand(tenants.Cmd, "resources")
+	cmd.RegisterCommand(meteringelements.Cmd, "resources")
 	cmd.RegisterCommand(meter.Cmd, "monitoring")
 	cmd.RegisterCommand(metrics.Cmd, "monitoring")
+	cmd.RegisterCommand(squads.Cmd, "monitoring")
 }
 
 func main() {

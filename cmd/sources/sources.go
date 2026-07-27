@@ -27,6 +27,9 @@ func init() {
 	Cmd.AddCommand(newCreateCmd())
 	Cmd.AddCommand(newUpdateCmd())
 	Cmd.AddCommand(newDeleteCmd())
+	Cmd.AddCommand(newHistoryCmd())
+	Cmd.AddCommand(logoCmd)
+	initLogo()
 }
 
 // tableDef defines the table layout for source output.

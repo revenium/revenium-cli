@@ -27,6 +27,10 @@ func init() {
 	Cmd.AddCommand(newLookupCmd())
 	Cmd.AddCommand(newUpdateCmd())
 	Cmd.AddCommand(newDeleteCmd())
+	Cmd.AddCommand(newCreateCmd())
+	Cmd.AddCommand(newCloneCmd())
+	Cmd.AddCommand(newHistoryCmd())
+	Cmd.AddCommand(newRatesCmd())
 	Cmd.AddCommand(pricingCmd)
 	initPricing()
 }

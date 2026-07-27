@@ -113,6 +113,85 @@ func TestMeterCompletionWithOptionalFields(t *testing.T) {
 	assert.Equal(t, "2.1.0", receivedBody["agenticJobVersion"])
 }
 
+func TestMeterCompletionSquadAbsentWhenNotPassed(t *testing.T) {
+	var receivedBody map[string]interface{}
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		body, _ := io.ReadAll(r.Body)
+		json.Unmarshal(body, &receivedBody)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		fmt.Fprint(w, `{"id": "cmp-789", "resourceType": "metered-event", "label": "metered-event", "created": "2024-01-15T10:00:00Z"}`)
+	}))
+	defer srv.Close()
+
+	var buf bytes.Buffer
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", "", "", false)
+	cmd.Output = output.NewWithWriter(&buf, &buf, false, false)
+
+	c := newCompletionCmd()
+	c.SetOut(&buf)
+	c.SetArgs([]string{
+		"--model", "gpt-4",
+		"--provider", "openai",
+		"--input-tokens", "500",
+		"--output-tokens", "200",
+		"--total-tokens", "700",
+		"--stop-reason", "END",
+		"--request-time", "2024-01-15T10:00:00Z",
+		"--completion-start-time", "2024-01-15T10:00:01Z",
+		"--response-time", "2024-01-15T10:00:05Z",
+		"--request-duration", "5000",
+		"--is-streamed",
+	})
+	err := c.Execute()
+
+	require.NoError(t, err)
+	assert.NotContains(t, receivedBody, "squadId")
+	assert.NotContains(t, receivedBody, "squadName")
+	assert.NotContains(t, receivedBody, "squadRole")
+}
+
+func TestMeterCompletionSquadPresentWhenPassed(t *testing.T) {
+	var receivedBody map[string]interface{}
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		body, _ := io.ReadAll(r.Body)
+		json.Unmarshal(body, &receivedBody)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		fmt.Fprint(w, `{"id": "cmp-790", "resourceType": "metered-event", "label": "metered-event", "created": "2024-01-15T10:00:00Z"}`)
+	}))
+	defer srv.Close()
+
+	var buf bytes.Buffer
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", "", "", false)
+	cmd.Output = output.NewWithWriter(&buf, &buf, false, false)
+
+	c := newCompletionCmd()
+	c.SetOut(&buf)
+	c.SetArgs([]string{
+		"--model", "gpt-4",
+		"--provider", "openai",
+		"--input-tokens", "500",
+		"--output-tokens", "200",
+		"--total-tokens", "700",
+		"--stop-reason", "END",
+		"--request-time", "2024-01-15T10:00:00Z",
+		"--completion-start-time", "2024-01-15T10:00:01Z",
+		"--response-time", "2024-01-15T10:00:05Z",
+		"--request-duration", "5000",
+		"--is-streamed",
+		"--squad-id", "sq-1",
+		"--squad-name", "Alpha",
+		"--squad-role", "planner",
+	})
+	err := c.Execute()
+
+	require.NoError(t, err)
+	assert.Equal(t, "sq-1", receivedBody["squadId"])
+	assert.Equal(t, "Alpha", receivedBody["squadName"])
+	assert.Equal(t, "planner", receivedBody["squadRole"])
+}
+
 func TestMeterCompletionMissingRequired(t *testing.T) {
 	var buf bytes.Buffer
 	cmd.Output = output.NewWithWriter(&buf, &buf, false, false)
@@ -124,6 +203,164 @@ func TestMeterCompletionMissingRequired(t *testing.T) {
 	err := c.Execute()
 
 	assert.Error(t, err)
+}
+
+// requiredCompletionArgs returns the base set of required flags shared by
+// every TestMeterCompletionNewOptionalFields subtest.
+func requiredCompletionArgs() []string {
+	return []string{
+		"--model", "gpt-4",
+		"--provider", "openai",
+		"--input-tokens", "500",
+		"--output-tokens", "200",
+		"--total-tokens", "700",
+		"--stop-reason", "END",
+		"--request-time", "2024-01-15T10:00:00Z",
+		"--completion-start-time", "2024-01-15T10:00:01Z",
+		"--response-time", "2024-01-15T10:00:05Z",
+		"--request-duration", "5000",
+		"--is-streamed",
+	}
+}
+
+func TestMeterCompletionNewOptionalFields(t *testing.T) {
+	cases := []struct {
+		flag     string
+		args     []string
+		bodyKey  string
+		expected interface{}
+	}{
+		{"response-quality-score", []string{"--response-quality-score", "0.87"}, "responseQualityScore", 0.87},
+		{"cache-creation-token-cost", []string{"--cache-creation-token-cost", "0.02"}, "cacheCreationTokenCost", 0.02},
+		{"cache-read-token-cost", []string{"--cache-read-token-cost", "0.01"}, "cacheReadTokenCost", 0.01},
+		{"cost-type", []string{"--cost-type", "AI"}, "costType", "AI"},
+		{"mediation-latency", []string{"--mediation-latency", "250"}, "mediationLatency", float64(250)},
+		{"system-fingerprint", []string{"--system-fingerprint", "fp_44709d6fcb"}, "systemFingerprint", "fp_44709d6fcb"},
+		{"error-reason", []string{"--error-reason", "rate limited"}, "errorReason", "rate limited"},
+		{"error-code", []string{"--error-code", "429"}, "errorCode", float64(429)},
+		{"middleware-source", []string{"--middleware-source", "litellm"}, "middlewareSource", "litellm"},
+		{"operation-subtype", []string{"--operation-subtype", "streaming"}, "operationSubtype", "streaming"},
+		{"parent-transaction-id", []string{"--parent-transaction-id", "txn-parent-1"}, "parentTransactionId", "txn-parent-1"},
+		{"transaction-name", []string{"--transaction-name", "checkout-flow"}, "transactionName", "checkout-flow"},
+		{"retry-number", []string{"--retry-number", "2"}, "retryNumber", float64(2)},
+		{"trace-name", []string{"--trace-name", "agent-run-7"}, "traceName", "agent-run-7"},
+		{"prompts-truncated", []string{"--prompts-truncated"}, "promptsTruncated", true},
+		{"billing-skipped", []string{"--billing-skipped"}, "billingSkipped", true},
+		{"skip-reason", []string{"--skip-reason", "FREE_TIER"}, "skipReason", "FREE_TIER"},
+		{"pricing-tier", []string{"--pricing-tier", "STANDARD"}, "pricingTier", "STANDARD"},
+		{"requested-service-tier", []string{"--requested-service-tier", "priority"}, "requestedServiceTier", "priority"},
+		{"actual-service-tier", []string{"--actual-service-tier", "default"}, "actualServiceTier", "default"},
+		{"subscription-tier", []string{"--subscription-tier", "pro"}, "subscriptionTier", "pro"},
+		{"cost-multiplier", []string{"--cost-multiplier", "1.5"}, "costMultiplier", 1.5},
+		{"coding-assistant-account-uuid", []string{"--coding-assistant-account-uuid", "uuid-123"}, "codingAssistantAccountUuid", "uuid-123"},
+		{"cache-creation-5m-tokens", []string{"--cache-creation-5m-tokens", "10"}, "cacheCreation5mTokenCount", float64(10)},
+		{"cache-creation-1h-tokens", []string{"--cache-creation-1h-tokens", "20"}, "cacheCreation1hTokenCount", float64(20)},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.flag+"_absent", func(t *testing.T) {
+			var receivedBody map[string]interface{}
+			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				body, _ := io.ReadAll(r.Body)
+				json.Unmarshal(body, &receivedBody)
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusCreated)
+				fmt.Fprint(w, `{"id": "cmp-abs", "resourceType": "metered-event", "label": "metered-event", "created": "2024-01-15T10:00:00Z"}`)
+			}))
+			defer srv.Close()
+
+			var buf bytes.Buffer
+			cmd.APIClient = api.NewClient(srv.URL, "test-key", "", "", "", false)
+			cmd.Output = output.NewWithWriter(&buf, &buf, false, false)
+
+			c := newCompletionCmd()
+			c.SetOut(&buf)
+			c.SetArgs(requiredCompletionArgs())
+			err := c.Execute()
+
+			require.NoError(t, err)
+			assert.NotContains(t, receivedBody, tc.bodyKey)
+		})
+
+		t.Run(tc.flag+"_present", func(t *testing.T) {
+			var receivedBody map[string]interface{}
+			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				body, _ := io.ReadAll(r.Body)
+				json.Unmarshal(body, &receivedBody)
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusCreated)
+				fmt.Fprint(w, `{"id": "cmp-pres", "resourceType": "metered-event", "label": "metered-event", "created": "2024-01-15T10:00:00Z"}`)
+			}))
+			defer srv.Close()
+
+			var buf bytes.Buffer
+			cmd.APIClient = api.NewClient(srv.URL, "test-key", "", "", "", false)
+			cmd.Output = output.NewWithWriter(&buf, &buf, false, false)
+
+			c := newCompletionCmd()
+			c.SetOut(&buf)
+			args := append(requiredCompletionArgs(), tc.args...)
+			c.SetArgs(args)
+			err := c.Execute()
+
+			require.NoError(t, err)
+			assert.Equal(t, tc.expected, receivedBody[tc.bodyKey])
+		})
+	}
+}
+
+func TestMeterCompletionSubscriberAbsentWhenNotPassed(t *testing.T) {
+	var receivedBody map[string]interface{}
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		body, _ := io.ReadAll(r.Body)
+		json.Unmarshal(body, &receivedBody)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		fmt.Fprint(w, `{"id": "cmp-sub-abs", "resourceType": "metered-event", "label": "metered-event", "created": "2024-01-15T10:00:00Z"}`)
+	}))
+	defer srv.Close()
+
+	var buf bytes.Buffer
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", "", "", false)
+	cmd.Output = output.NewWithWriter(&buf, &buf, false, false)
+
+	c := newCompletionCmd()
+	c.SetOut(&buf)
+	c.SetArgs(requiredCompletionArgs())
+	err := c.Execute()
+
+	require.NoError(t, err)
+	assert.NotContains(t, receivedBody, "subscriber")
+}
+
+func TestMeterCompletionSubscriberPresentWhenPassed(t *testing.T) {
+	var receivedBody map[string]interface{}
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		body, _ := io.ReadAll(r.Body)
+		json.Unmarshal(body, &receivedBody)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		fmt.Fprint(w, `{"id": "cmp-sub-pres", "resourceType": "metered-event", "label": "metered-event", "created": "2024-01-15T10:00:00Z"}`)
+	}))
+	defer srv.Close()
+
+	var buf bytes.Buffer
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", "", "", false)
+	cmd.Output = output.NewWithWriter(&buf, &buf, false, false)
+
+	c := newCompletionCmd()
+	c.SetOut(&buf)
+	args := append(requiredCompletionArgs(), "--subscriber-id", "sub-1", "--subscriber-email", "sub@example.com")
+	c.SetArgs(args)
+	err := c.Execute()
+
+	require.NoError(t, err)
+	require.Contains(t, receivedBody, "subscriber")
+	subscriber, ok := receivedBody["subscriber"].(map[string]interface{})
+	require.True(t, ok)
+	assert.Equal(t, "sub-1", subscriber["id"])
+	assert.Equal(t, "sub@example.com", subscriber["email"])
 }
 
 func TestMeterCompletionJSON(t *testing.T) {
