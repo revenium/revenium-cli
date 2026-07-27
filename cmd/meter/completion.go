@@ -19,6 +19,16 @@ func newCompletionCmd() *cobra.Command {
 	var cacheCreationTokenCount, cacheReadTokenCount, requestDuration, timeToFirstToken int
 	var totalCost, inputTokenCost, outputTokenCost, temperature float64
 	var isStreamed bool
+	var squadFlags cmd.SquadFlags
+
+	// New optional fields (Phase 3, METER-01) — full write-schema parity
+	var costType, systemFingerprint, errorReason, middlewareSource, operationSubtype string
+	var parentTransactionId, transactionName, traceName, skipReason, pricingTier string
+	var requestedServiceTier, actualServiceTier, subscriptionTier, codingAssistantAccountUuid string
+	var subscriberID, subscriberEmail string
+	var mediationLatency, errorCode, retryNumber, cacheCreation5mTokenCount, cacheCreation1hTokenCount int
+	var responseQualityScore, cacheCreationTokenCost, cacheReadTokenCost, costMultiplier float64
+	var promptsTruncated, billingSkipped bool
 
 	c := &cobra.Command{
 		Use:         "completion",
@@ -129,6 +139,101 @@ func newCompletionCmd() *cobra.Command {
 				body["inputMessages"] = inputMessages
 			}
 
+			// New optional fields (Phase 3, METER-01) — full write-schema parity
+			if c.Flags().Changed("response-quality-score") {
+				body["responseQualityScore"] = responseQualityScore
+			}
+			if c.Flags().Changed("cache-creation-token-cost") {
+				body["cacheCreationTokenCost"] = cacheCreationTokenCost
+			}
+			if c.Flags().Changed("cache-read-token-cost") {
+				body["cacheReadTokenCost"] = cacheReadTokenCost
+			}
+			if c.Flags().Changed("cost-type") {
+				body["costType"] = costType
+			}
+			if c.Flags().Changed("mediation-latency") {
+				body["mediationLatency"] = mediationLatency
+			}
+			if c.Flags().Changed("system-fingerprint") {
+				body["systemFingerprint"] = systemFingerprint
+			}
+			if c.Flags().Changed("error-reason") {
+				body["errorReason"] = errorReason
+			}
+			if c.Flags().Changed("error-code") {
+				body["errorCode"] = errorCode
+			}
+			// Nested subscriber object (D-08): assembled only when at least one
+			// sub-flag is passed. subscriber.credential.{name,value} are
+			// DELIBERATELY excluded — a secret-bearing credential value could
+			// leak into shell history/process listings for a rarely-used
+			// test-data field. This is an intentional, documented scope
+			// decision, not a silent omission (see 03-01-SUMMARY.md).
+			if c.Flags().Changed("subscriber-id") || c.Flags().Changed("subscriber-email") {
+				subscriber := map[string]interface{}{}
+				if c.Flags().Changed("subscriber-id") {
+					subscriber["id"] = subscriberID
+				}
+				if c.Flags().Changed("subscriber-email") {
+					subscriber["email"] = subscriberEmail
+				}
+				body["subscriber"] = subscriber
+			}
+			if c.Flags().Changed("middleware-source") {
+				body["middlewareSource"] = middlewareSource
+			}
+			if c.Flags().Changed("operation-subtype") {
+				body["operationSubtype"] = operationSubtype
+			}
+			if c.Flags().Changed("parent-transaction-id") {
+				body["parentTransactionId"] = parentTransactionId
+			}
+			if c.Flags().Changed("transaction-name") {
+				body["transactionName"] = transactionName
+			}
+			if c.Flags().Changed("retry-number") {
+				body["retryNumber"] = retryNumber
+			}
+			if c.Flags().Changed("trace-name") {
+				body["traceName"] = traceName
+			}
+			if c.Flags().Changed("prompts-truncated") {
+				body["promptsTruncated"] = promptsTruncated
+			}
+			if c.Flags().Changed("billing-skipped") {
+				body["billingSkipped"] = billingSkipped
+			}
+			if c.Flags().Changed("skip-reason") {
+				body["skipReason"] = skipReason
+			}
+			if c.Flags().Changed("pricing-tier") {
+				body["pricingTier"] = pricingTier
+			}
+			if c.Flags().Changed("requested-service-tier") {
+				body["requestedServiceTier"] = requestedServiceTier
+			}
+			if c.Flags().Changed("actual-service-tier") {
+				body["actualServiceTier"] = actualServiceTier
+			}
+			if c.Flags().Changed("subscription-tier") {
+				body["subscriptionTier"] = subscriptionTier
+			}
+			if c.Flags().Changed("cost-multiplier") {
+				body["costMultiplier"] = costMultiplier
+			}
+			if c.Flags().Changed("coding-assistant-account-uuid") {
+				body["codingAssistantAccountUuid"] = codingAssistantAccountUuid
+			}
+			if c.Flags().Changed("cache-creation-5m-tokens") {
+				body["cacheCreation5mTokenCount"] = cacheCreation5mTokenCount
+			}
+			if c.Flags().Changed("cache-creation-1h-tokens") {
+				body["cacheCreation1hTokenCount"] = cacheCreation1hTokenCount
+			}
+
+			cmd.ApplySquadFlags(c, body, squadFlags)
+
 			if cmd.DryRun() {
 				return dryrun.Render(cmd.Output, "meter", "completion", "/v2/ai/completions", body)
 			}
@@ -147,7 +252,7 @@ func newCompletionCmd() *cobra.Command {
 	c.Flags().IntVar(&inputTokenCount, "input-tokens", 0, "Number of input tokens consumed")
 	c.Flags().IntVar(&outputTokenCount, "output-tokens", 0, "Number of output tokens generated")
 	c.Flags().IntVar(&totalTokenCount, "total-tokens", 0, "Total number of tokens")
-	c.Flags().StringVar(&stopReason, "stop-reason", "", "Stop reason (END, END_SEQUENCE, TIMEOUT, TOKEN_LIMIT, COST_LIMIT, COMPLETION_LIMIT, ERROR, CANCELLED)")
+	c.Flags().StringVar(&stopReason, "stop-reason", "", "Stop reason (END, END_SEQUENCE, TIMEOUT, TOKEN_LIMIT, COST_LIMIT, COMPLETION_LIMIT, ERROR, CANCELLED, CONTENT_FILTER, TOOL_CALL)")
 	c.Flags().StringVar(&requestTime, "request-time", "", "Request timestamp (ISO 8601)")
 	c.Flags().StringVar(&completionStartTime, "completion-start-time", "", "Completion start timestamp (ISO 8601)")
 	c.Flags().StringVar(&responseTime, "response-time", "", "Response timestamp (ISO 8601)")
@@ -182,7 +287,7 @@ func newCompletionCmd() *cobra.Command {
 	c.Flags().StringVar(&agenticJobName, "agentic-job-name", "", "Human-readable agentic job name (UI display, analytics grouping)")
 	c.Flags().StringVar(&agenticJobType, "agentic-job-type", "", "Agentic job category/type (normalized to lowercase on ingest)")
 	c.Flags().StringVar(&agenticJobVersion, "agentic-job-version", "", "Agentic job definition version")
-	c.Flags().StringVar(&operationType, "operation-type", "", "Operation type (CHAT, GENERATE, EMBED, CLASSIFY, SUMMARIZE, TRANSLATE, OTHER)")
+	c.Flags().StringVar(&operationType, "operation-type", "", "Operation type (CHAT, GENERATE, EMBED, CLASSIFY, SUMMARIZE, TRANSLATE, OTHER, TOOL_CALL, RERANK, SEARCH, MODERATION, VISION, TRANSFORM, GUARDRAIL, AUDIO, VIDEO, IMAGE)")
 	c.Flags().StringVar(&agent, "agent", "", "Agent identifier")
 	c.Flags().StringVar(&environment, "environment", "", "Environment name")
 	c.Flags().StringVar(&region, "region", "", "Region identifier")
@@ -192,6 +297,37 @@ func newCompletionCmd() *cobra.Command {
 	c.Flags().StringVar(&systemPrompt, "system-prompt", "", "System prompt text sent with the completion")
 	c.Flags().StringVar(&outputResponse, "output-response", "", "Assistant output/response content")
 	c.Flags().StringVar(&inputMessages, "input-messages", "", "User input messages as JSON array")
+
+	// New optional flags (Phase 3, METER-01) — full write-schema parity
+	c.Flags().Float64Var(&responseQualityScore, "response-quality-score", 0, "Response quality score")
+	c.Flags().Float64Var(&cacheCreationTokenCost, "cache-creation-token-cost", 0, "Cache creation token cost in USD")
+	c.Flags().Float64Var(&cacheReadTokenCost, "cache-read-token-cost", 0, "Cache read token cost in USD")
+	c.Flags().StringVar(&costType, "cost-type", "", "Cost type (AI)")
+	c.Flags().IntVar(&mediationLatency, "mediation-latency", 0, "Mediation latency in milliseconds")
+	c.Flags().StringVar(&systemFingerprint, "system-fingerprint", "", "System fingerprint")
+	c.Flags().StringVar(&errorReason, "error-reason", "", "Error reason")
+	c.Flags().IntVar(&errorCode, "error-code", 0, "Error code")
+	c.Flags().StringVar(&subscriberID, "subscriber-id", "", "Subscriber ID")
+	c.Flags().StringVar(&subscriberEmail, "subscriber-email", "", "Subscriber email")
+	c.Flags().StringVar(&middlewareSource, "middleware-source", "", "Middleware source")
+	c.Flags().StringVar(&operationSubtype, "operation-subtype", "", "Operation subtype")
+	c.Flags().StringVar(&parentTransactionId, "parent-transaction-id", "", "Parent transaction identifier")
+	c.Flags().StringVar(&transactionName, "transaction-name", "", "Transaction name")
+	c.Flags().IntVar(&retryNumber, "retry-number", 0, "Retry attempt number")
+	c.Flags().StringVar(&traceName, "trace-name", "", "Trace name")
+	c.Flags().BoolVar(&promptsTruncated, "prompts-truncated", false, "Whether prompts were truncated")
+	c.Flags().BoolVar(&billingSkipped, "billing-skipped", false, "Whether billing was skipped")
+	c.Flags().StringVar(&skipReason, "skip-reason", "", "Skip reason (FREE_TIER, RATE_LIMITED, QUOTA_EXCEEDED, CONTENT_POLICY_VIOLATION, CAPACITY_UNAVAILABLE, SERVICE_UNAVAILABLE)")
+	c.Flags().StringVar(&pricingTier, "pricing-tier", "", "Pricing tier (STANDARD, BATCH)")
+	c.Flags().StringVar(&requestedServiceTier, "requested-service-tier", "", "Requested service tier")
+	c.Flags().StringVar(&actualServiceTier, "actual-service-tier", "", "Actual service tier")
+	c.Flags().StringVar(&subscriptionTier, "subscription-tier", "", "Subscription tier")
+	c.Flags().Float64Var(&costMultiplier, "cost-multiplier", 0, "Cost multiplier")
+	c.Flags().StringVar(&codingAssistantAccountUuid, "coding-assistant-account-uuid", "", "Coding assistant account UUID")
+	c.Flags().IntVar(&cacheCreation5mTokenCount, "cache-creation-5m-tokens", 0, "Cache creation 5-minute window token count")
+	c.Flags().IntVar(&cacheCreation1hTokenCount, "cache-creation-1h-tokens", 0, "Cache creation 1-hour window token count")
+
+	cmd.AddSquadFlags(c, &squadFlags)
 
 	return c
 }

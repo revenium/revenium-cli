@@ -21,7 +21,7 @@ func TestAIMetrics(t *testing.T) {
 		assert.NotEmpty(t, r.URL.Query().Get("startDate"))
 		assert.NotEmpty(t, r.URL.Query().Get("endDate"))
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `[{"id": "txn-m-1", "transactionId": "txn-m-1", "model": "gpt-4", "inputTokenCount": 1000, "outputTokenCount": 500, "cacheReadTokenCount": 200, "reasoningTokenCount": 100, "timeToFirstToken": 180, "tokensPerMinute": 2500, "requestDuration": 3200, "stopReason": "END", "totalCost": 0.05, "organization": {"id": "org-1", "label": "Acme"}, "agent": "assistant", "subscriberCredential": {"id": "cred-1", "label": "Bob"}}]`)
+		fmt.Fprint(w, `[{"id": "txn-m-1", "transactionId": "txn-m-1", "model": "gpt-4", "inputTokenCount": 1000, "outputTokenCount": 500, "cacheReadTokenCount": 200, "reasoningTokenCount": 100, "timeToFirstToken": 180, "tokensPerMinute": 2500, "requestDuration": 3200, "stopReason": "END", "totalCost": 0.05, "organization": {"id": "org-1", "label": "Acme"}, "agent": "assistant", "subscriberCredential": {"id": "cred-1", "label": "Bob"}, "squadId": "sq-ai-1"}]`)
 	}))
 	defer srv.Close()
 
@@ -51,6 +51,12 @@ func TestAIMetrics(t *testing.T) {
 	assert.Contains(t, out, "Acme")
 	assert.Contains(t, out, "assistant")
 	assert.Contains(t, out, "Bob")
+	assert.Contains(t, out, "Squad")
+	assert.Contains(t, out, "sq-ai-1")
+}
+
+func TestAIMetricsHeadersEndWithSquad(t *testing.T) {
+	assert.Equal(t, "Squad", aiTableDef.Headers[len(aiTableDef.Headers)-1])
 }
 
 func TestAIMetricsEmpty(t *testing.T) {
@@ -99,4 +105,95 @@ func TestAIMetricsJSON(t *testing.T) {
 	require.NoError(t, err)
 	assert.Len(t, result, 1)
 	assert.Equal(t, "txn-m-1", result[0]["id"])
+}
+
+// TestAIMetricsSquadIDForcesFetchAll proves --squad-id overrides an explicit
+// --page-size and fetches every page before filtering (D-10 / Pitfall 5).
+// The server ignores the requested page size and instead paginates by its
+// own 3-page fixture, keyed off the "page" query param.
+func TestAIMetricsSquadIDForcesFetchAll(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Query().Get("page") {
+		case "0", "":
+			fmt.Fprint(w, `{"_embedded":{"aiList":[{"id":"a-1","transactionId":"a-1","model":"gpt-4","squadId":"sq-other-1"}]},"page":{"totalPages":3}}`)
+		case "1":
+			fmt.Fprint(w, `{"_embedded":{"aiList":[{"id":"a-2","transactionId":"a-2","model":"gpt-4","squadId":"sq-other-2"}]},"page":{"totalPages":3}}`)
+		case "2":
+			fmt.Fprint(w, `{"_embedded":{"aiList":[{"id":"a-3","transactionId":"a-3","model":"gpt-4","squadId":"sq-target"}]},"page":{"totalPages":3}}`)
+		default:
+			fmt.Fprint(w, `{"_embedded":{"aiList":[]},"page":{"totalPages":3}}`)
+		}
+	}))
+	defer srv.Close()
+
+	var buf bytes.Buffer
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", "", "", false)
+	cmd.Output = output.NewWithWriter(&buf, &buf, false, false)
+
+	fromFlag = "2024-01-01T00:00:00Z"
+	toFlag = "2024-01-31T23:59:59Z"
+
+	c := newAICmd()
+	c.SetOut(&buf)
+	c.SetArgs([]string{"--squad-id", "sq-target", "--page-size", "1"})
+	err := c.Execute()
+
+	require.NoError(t, err)
+	out := buf.String()
+	assert.Contains(t, out, "a-3")
+	assert.NotContains(t, out, "a-1")
+	assert.NotContains(t, out, "a-2")
+}
+
+// TestAIMetricsSquadIDNoMatch proves zero matches after filtering is a
+// normal empty result (exit 0), not an error (D-10).
+func TestAIMetricsSquadIDNoMatch(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprint(w, `[{"id": "txn-m-1", "transactionId": "txn-m-1", "model": "gpt-4", "squadId": "sq-ai-1"}]`)
+	}))
+	defer srv.Close()
+
+	var buf bytes.Buffer
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", "", "", false)
+	cmd.Output = output.NewWithWriter(&buf, &buf, false, false)
+
+	fromFlag = "2024-01-01T00:00:00Z"
+	toFlag = "2024-01-31T23:59:59Z"
+
+	c := newAICmd()
+	c.SetOut(&buf)
+	c.SetArgs([]string{"--squad-id", "no_match"})
+	err := c.Execute()
+
+	require.NoError(t, err)
+	assert.Contains(t, buf.String(), "No metrics found.")
+}
+
+// TestAIMetricsSquadIDExactMatch proves --squad-id is an exact-match filter
+// over the already-fetched result set (D-09).
+func TestAIMetricsSquadIDExactMatch(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprint(w, `[{"id": "a-1", "transactionId": "a-1", "model": "gpt-4", "squadId": "sq-x"}, {"id": "a-2", "transactionId": "a-2", "model": "gpt-4", "squadId": "sq-y"}]`)
+	}))
+	defer srv.Close()
+
+	var buf bytes.Buffer
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", "", "", false)
+	cmd.Output = output.NewWithWriter(&buf, &buf, false, false)
+
+	fromFlag = "2024-01-01T00:00:00Z"
+	toFlag = "2024-01-31T23:59:59Z"
+
+	c := newAICmd()
+	c.SetOut(&buf)
+	c.SetArgs([]string{"--squad-id", "sq-x"})
+	err := c.Execute()
+
+	require.NoError(t, err)
+	out := buf.String()
+	assert.Contains(t, out, "a-1")
+	assert.NotContains(t, out, "a-2")
 }

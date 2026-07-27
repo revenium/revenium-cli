@@ -10,11 +10,12 @@ import (
 
 // validKeys are the accepted configuration keys.
 var validKeys = map[string]string{
-	"key":       "api-key",
-	"api-url":   "api-url",
-	"team-id":   "team-id",
-	"tenant-id": "tenant-id",
-	"owner-id":  "owner-id",
+	"key":               "api-key",
+	"api-url":           "api-url",
+	"team-id":           "team-id",
+	"tenant-id":         "tenant-id",
+	"owner-id":          "owner-id",
+	"analytics-api-url": "analytics-api-url",
 }
 
 // newSetCmd creates the config set subcommand.
@@ -23,7 +24,7 @@ func newSetCmd() *cobra.Command {
 		Use:       "set",
 		Short:     "Set a configuration value",
 		Args:      cobra.ExactArgs(2),
-		ValidArgs: []string{"key", "api-url", "team-id", "tenant-id", "owner-id"},
+		ValidArgs: []string{"key", "api-url", "team-id", "tenant-id", "owner-id", "analytics-api-url"},
 		Example: `  # Set your API key
   revenium config set key your-api-key
 
@@ -31,14 +32,17 @@ func newSetCmd() *cobra.Command {
   revenium config set team-id your-team-id
 
   # Set custom API URL
-  revenium config set api-url https://custom.api.com/profitstream`,
+  revenium config set api-url https://custom.api.com/profitstream
+
+  # Set custom analytics API URL
+  revenium config set analytics-api-url https://analytics.custom.com`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			key := args[0]
 			value := args[1]
 
 			mappedKey, ok := validKeys[key]
 			if !ok {
-				return fmt.Errorf("unknown config key %q. Valid keys: key, api-url, team-id, tenant-id, owner-id", key)
+				return fmt.Errorf("unknown config key %q. Valid keys: key, api-url, team-id, tenant-id, owner-id, analytics-api-url", key)
 			}
 
 			if err := internalconfig.Set(mappedKey, value); err != nil {

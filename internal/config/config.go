@@ -16,11 +16,12 @@ var configDirOverride string
 
 // Config holds the CLI configuration values.
 type Config struct {
-	APIKey   string
-	APIURL   string
-	TeamID   string
-	TenantID string
-	OwnerID  string
+	APIKey          string
+	APIURL          string
+	TeamID          string
+	TenantID        string
+	OwnerID         string
+	AnalyticsAPIURL string
 }
 
 // configDir returns the configuration directory path.
@@ -68,8 +69,10 @@ func Load() (*Config, error) {
 	_ = viper.BindEnv("team-id")
 	_ = viper.BindEnv("tenant-id")
 	_ = viper.BindEnv("owner-id")
+	_ = viper.BindEnv("analytics-api-url")
 
 	viper.SetDefault("api-url", "https://api.revenium.ai/profitstream")
+	viper.SetDefault("analytics-api-url", "https://app.revenium.ai")
 
 	if err := viper.ReadInConfig(); err != nil {
 		var configNotFound viper.ConfigFileNotFoundError
@@ -82,11 +85,12 @@ func Load() (*Config, error) {
 	}
 
 	return &Config{
-		APIKey:   viper.GetString("api-key"),
-		APIURL:   viper.GetString("api-url"),
-		TeamID:   viper.GetString("team-id"),
-		TenantID: viper.GetString("tenant-id"),
-		OwnerID:  viper.GetString("owner-id"),
+		APIKey:          viper.GetString("api-key"),
+		APIURL:          viper.GetString("api-url"),
+		TeamID:          viper.GetString("team-id"),
+		TenantID:        viper.GetString("tenant-id"),
+		OwnerID:         viper.GetString("owner-id"),
+		AnalyticsAPIURL: viper.GetString("analytics-api-url"),
 	}, nil
 }
 

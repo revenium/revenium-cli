@@ -30,13 +30,26 @@ func init() {
 	Cmd.AddCommand(newCreateCmd())
 	Cmd.AddCommand(newUpdateCmd())
 	Cmd.AddCommand(newDeleteCmd())
+	Cmd.AddCommand(newTagsCmd())
+	Cmd.AddCommand(newChildrenCmd())
 	Cmd.AddCommand(promptCaptureCmd)
 	initPromptCapture()
+	Cmd.AddCommand(codingAssistantFilterCmd)
+	initCodingAssistantFilter()
+	Cmd.AddCommand(logoCmd)
+	initLogo()
 }
 
 // tableDef defines the table layout for team output.
 var tableDef = output.TableDef{
 	Headers:      []string{"ID", "Name"},
+	StatusColumn: -1,
+}
+
+// tagsTableDef defines the single-column layout for the tags verb — the
+// GET /v2/api/teams/{id}/tags response shape is a flat []string.
+var tagsTableDef = output.TableDef{
+	Headers:      []string{"Tag"},
 	StatusColumn: -1,
 }
 

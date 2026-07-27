@@ -20,7 +20,7 @@ func TestVideoMetrics(t *testing.T) {
 		assert.Equal(t, "/v2/api/sources/metrics/ai/video", r.URL.Path)
 		assert.NotEmpty(t, r.URL.Query().Get("startDate"))
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `[{"id": "txn-v-1", "transactionId": "txn-v-1", "model": "sora", "totalDuration": 120, "totalCost": 2.50}]`)
+		fmt.Fprint(w, `[{"id": "txn-v-1", "transactionId": "txn-v-1", "model": "sora", "durationSeconds": 120, "totalCost": 2.50, "squadId": "sq-video-1"}]`)
 	}))
 	defer srv.Close()
 
@@ -40,6 +40,12 @@ func TestVideoMetrics(t *testing.T) {
 	assert.Contains(t, out, "sora")
 	assert.Contains(t, out, "120")
 	assert.Contains(t, out, "$2.50")
+	assert.Contains(t, out, "Squad")
+	assert.Contains(t, out, "sq-video-1")
+}
+
+func TestVideoMetricsHeadersEndWithSquad(t *testing.T) {
+	assert.Equal(t, "Squad", videoTableDef.Headers[len(videoTableDef.Headers)-1])
 }
 
 func TestVideoMetricsEmpty(t *testing.T) {
@@ -67,7 +73,7 @@ func TestVideoMetricsEmpty(t *testing.T) {
 func TestVideoMetricsJSON(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `[{"id": "txn-v-1", "transactionId": "txn-v-1", "model": "sora", "totalDuration": 120, "totalCost": 2.50}]`)
+		fmt.Fprint(w, `[{"id": "txn-v-1", "transactionId": "txn-v-1", "model": "sora", "durationSeconds": 120, "totalCost": 2.50}]`)
 	}))
 	defer srv.Close()
 

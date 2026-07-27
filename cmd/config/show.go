@@ -48,6 +48,7 @@ func newShowCmd() *cobra.Command {
 			fmt.Fprintf(cmd.OutOrStdout(), "Team ID:    %s\n", teamID)
 			fmt.Fprintf(cmd.OutOrStdout(), "Tenant ID:  %s\n", tenantID)
 			fmt.Fprintf(cmd.OutOrStdout(), "Owner ID:   %s\n", ownerID)
+			fmt.Fprintf(cmd.OutOrStdout(), "Analytics API URL: %s\n", cfg.AnalyticsAPIURL)
 			return nil
 		},
 	}

@@ -28,6 +28,7 @@ func init() {
 	Cmd.AddCommand(newListCmd())
 	Cmd.AddCommand(newGetCmd())
 	Cmd.AddCommand(newCreateCmd())
+	Cmd.AddCommand(newEventsCmd())
 	Cmd.AddCommand(budgetCmd)
 	initBudget()
 }

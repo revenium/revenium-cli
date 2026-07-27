@@ -30,6 +30,8 @@ func init() {
 	Cmd.AddCommand(newCreateCmd())
 	Cmd.AddCommand(newUpdateCmd())
 	Cmd.AddCommand(newDeleteCmd())
+	Cmd.AddCommand(newBilledAmountCmd())
+	Cmd.AddCommand(newQuotaCmd())
 }
 
 // tableDef defines the table layout for subscription output.

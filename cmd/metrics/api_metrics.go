@@ -6,13 +6,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/revenium/revenium-cli/cmd"
-	"github.com/revenium/revenium-cli/internal/output"
 )
-
-var apiMetricsTableDef = output.TableDef{
-	Headers:      []string{"ID", "Source", "Requests", "Errors", "Latency"},
-	StatusColumn: -1,
-}
 
 func newAPIMetricsCmd() *cobra.Command {
 	c := &cobra.Command{
@@ -25,36 +19,14 @@ func newAPIMetricsCmd() *cobra.Command {
   # Query API metrics with time range
   revenium metrics api --from 2024-01-01T00:00:00Z --to 2024-01-31T23:59:59Z`,
 		RunE: func(c *cobra.Command, args []string) error {
-			var metrics []map[string]interface{}
-			path := buildPath("/v2/api/sources/metrics/apis")
-			if err := cmd.APIClient.DoList(c.Context(), path, cmd.ListOptsFromFlags(c), &metrics); err != nil {
-				return err
-			}
-			if len(metrics) == 0 {
-				if cmd.Output.IsJSON() {
-					return cmd.Output.RenderJSON([]interface{}{})
-				}
-				fmt.Fprintln(c.OutOrStdout(), "No metrics found.")
-				return nil
-			}
-			return cmd.Output.Render(apiMetricsTableDef, toAPIMetricsRows(metrics), metrics)
+			// D-06: this endpoint is not present in the live Revenium API spec
+			// (checked platform, metering, and analytics specs on 2026-07-20).
+			// Kept registered (not deleted) per the flag-don't-delete policy, but
+			// returns a clear error before any HTTP call is made.
+			return fmt.Errorf("metrics api is not currently available: this endpoint is not present in the live Revenium API spec (checked platform, metering, and analytics specs on 2026-07-20). It is flagged in the drift report; see docs/analytics-coverage.md")
 		},
 	}
 
 	cmd.AddListFlags(c)
 	return c
-}
-
-func toAPIMetricsRows(metrics []map[string]interface{}) [][]string {
-	rows := make([][]string, len(metrics))
-	for i, m := range metrics {
-		rows[i] = []string{
-			str(m, "transactionId"),
-			str(m, "source"),
-			formatNumber(floatVal(m, "requests")),
-			formatNumber(floatVal(m, "errors")),
-			fmt.Sprintf("%.2fms", floatVal(m, "latency")),
-		}
-	}
-	return rows
 }

@@ -1,6 +1,9 @@
 package meter
 
 import (
+	"encoding/json"
+	"fmt"
+
 	"github.com/spf13/cobra"
 
 	"github.com/revenium/revenium-cli/cmd"
@@ -16,6 +19,13 @@ func newVideoCmd() *cobra.Command {
 	var durationSeconds, totalCost, creditsConsumed, requestedDurationSeconds, creditRate float64
 	var asyncOperation bool
 	var agenticJobID, agenticJobName, agenticJobType, agenticJobVersion string
+	var costType, parentTransactionID, transactionName, traceType, traceName string
+	var errorReason, middlewareSource, sourceTransactionID, skipReason, pricingTier string
+	var requestedServiceTier, actualServiceTier, priorityTier, outputResponse, inputMessages string
+	var subscriberID, subscriberEmail string
+	var retryNumber, errorCode int
+	var promptsTruncated, billingSkipped bool
+	var squadFlags cmd.SquadFlags
 
 	c := &cobra.Command{
 		Use:         "video",
@@ -111,6 +121,82 @@ func newVideoCmd() *cobra.Command {
 			if c.Flags().Changed("completion-status") {
 				body["completionStatus"] = completionStatus
 			}
+			if c.Flags().Changed("cost-type") {
+				body["costType"] = costType
+			}
+			if c.Flags().Changed("parent-transaction-id") {
+				body["parentTransactionId"] = parentTransactionID
+			}
+			if c.Flags().Changed("transaction-name") {
+				body["transactionName"] = transactionName
+			}
+			if c.Flags().Changed("retry-number") {
+				body["retryNumber"] = retryNumber
+			}
+			if c.Flags().Changed("trace-type") {
+				body["traceType"] = traceType
+			}
+			if c.Flags().Changed("trace-name") {
+				body["traceName"] = traceName
+			}
+			if c.Flags().Changed("error-reason") {
+				body["errorReason"] = errorReason
+			}
+			if c.Flags().Changed("error-code") {
+				body["errorCode"] = errorCode
+			}
+			if c.Flags().Changed("middleware-source") {
+				body["middlewareSource"] = middlewareSource
+			}
+			if c.Flags().Changed("source-transaction-id") {
+				body["sourceTransactionId"] = sourceTransactionID
+			}
+			if c.Flags().Changed("output-response") {
+				body["outputResponse"] = outputResponse
+			}
+			if c.Flags().Changed("input-messages") {
+				var msgs []interface{}
+				if err := json.Unmarshal([]byte(inputMessages), &msgs); err != nil {
+					return fmt.Errorf("--input-messages must be valid JSON array: %w", err)
+				}
+				body["inputMessages"] = inputMessages
+			}
+			if c.Flags().Changed("prompts-truncated") {
+				body["promptsTruncated"] = promptsTruncated
+			}
+			if c.Flags().Changed("billing-skipped") {
+				body["billingSkipped"] = billingSkipped
+			}
+			if c.Flags().Changed("skip-reason") {
+				body["skipReason"] = skipReason
+			}
+			if c.Flags().Changed("pricing-tier") {
+				body["pricingTier"] = pricingTier
+			}
+			if c.Flags().Changed("requested-service-tier") {
+				body["requestedServiceTier"] = requestedServiceTier
+			}
+			if c.Flags().Changed("actual-service-tier") {
+				body["actualServiceTier"] = actualServiceTier
+			}
+			if c.Flags().Changed("priority-tier") {
+				body["priorityTier"] = priorityTier
+			}
+			// subscriber is a nested object (SubscriberResource: id, email, credential).
+			// Only id/email are exposed as CLI flags (D-08); credential.name/credential.value
+			// are deliberately excluded to avoid leaking credential material via shell
+			// history/process listings for what is typically test/demo metering data.
+			if c.Flags().Changed("subscriber-id") || c.Flags().Changed("subscriber-email") {
+				subscriber := map[string]interface{}{}
+				if c.Flags().Changed("subscriber-id") {
+					subscriber["id"] = subscriberID
+				}
+				if c.Flags().Changed("subscriber-email") {
+					subscriber["email"] = subscriberEmail
+				}
+				body["subscriber"] = subscriber
+			}
+			cmd.ApplySquadFlags(c, body, squadFlags)
 
 			if cmd.DryRun() {
 				return dryrun.Render(cmd.Output, "meter", "video", "/v2/ai/video", body)
@@ -131,7 +217,7 @@ func newVideoCmd() *cobra.Command {
 	c.Flags().StringVar(&responseTime, "response-time", "", "Response timestamp (ISO 8601)")
 	c.Flags().IntVar(&requestDuration, "request-duration", 0, "Request duration in milliseconds")
 	c.Flags().Float64Var(&durationSeconds, "duration-seconds", 0, "Video duration in seconds")
-	c.Flags().StringVar(&billingUnit, "billing-unit", "", "Billing unit (PER_SECOND, CREDITS)")
+	c.Flags().StringVar(&billingUnit, "billing-unit", "", "Billing unit (PER_IMAGE, PER_MINUTE, PER_SECOND, PER_CHARACTER, PER_TOKEN, CREDITS)")
 	_ = c.MarkFlagRequired("model")
 	_ = c.MarkFlagRequired("provider")
 	_ = c.MarkFlagRequired("request-time")
@@ -143,7 +229,7 @@ func newVideoCmd() *cobra.Command {
 	// Optional flags
 	c.Flags().StringVar(&transactionID, "transaction-id", "", "Unique transaction identifier")
 	c.Flags().StringVar(&traceId, "trace-id", "", "Trace identifier for distributed tracing")
-	c.Flags().StringVar(&operationType, "operation-type", "", "Operation type (VIDEO, GENERATE, etc.)")
+	c.Flags().StringVar(&operationType, "operation-type", "", "Operation type (CHAT, GENERATE, EMBED, CLASSIFY, SUMMARIZE, TRANSLATE, OTHER, TOOL_CALL, RERANK, SEARCH, MODERATION, VISION, TRANSFORM, GUARDRAIL, AUDIO, VIDEO, IMAGE)")
 	c.Flags().StringVar(&operationSubtype, "operation-subtype", "", "Operation subtype")
 	c.Flags().Float64Var(&totalCost, "total-cost", 0, "Total cost in USD")
 	c.Flags().StringVar(&agent, "agent", "", "Agent identifier")
@@ -166,6 +252,28 @@ func newVideoCmd() *cobra.Command {
 	c.Flags().Float64Var(&creditRate, "credit-rate", 0, "Credit rate")
 	c.Flags().BoolVar(&asyncOperation, "async-operation", false, "Whether this is an async operation")
 	c.Flags().StringVar(&completionStatus, "completion-status", "", "Completion status (SUCCESS, PARTIAL_TIMEOUT, FAILED)")
+	c.Flags().StringVar(&costType, "cost-type", "", "Cost type (AI)")
+	c.Flags().StringVar(&parentTransactionID, "parent-transaction-id", "", "Parent transaction identifier")
+	c.Flags().StringVar(&transactionName, "transaction-name", "", "Transaction name")
+	c.Flags().IntVar(&retryNumber, "retry-number", 0, "Retry attempt number")
+	c.Flags().StringVar(&traceType, "trace-type", "", "Trace type classification for distributed tracing")
+	c.Flags().StringVar(&traceName, "trace-name", "", "Trace name")
+	c.Flags().StringVar(&errorReason, "error-reason", "", "Error reason")
+	c.Flags().IntVar(&errorCode, "error-code", 0, "Error code")
+	c.Flags().StringVar(&subscriberID, "subscriber-id", "", "Subscriber identifier")
+	c.Flags().StringVar(&subscriberEmail, "subscriber-email", "", "Subscriber email")
+	c.Flags().StringVar(&middlewareSource, "middleware-source", "", "Middleware source")
+	c.Flags().StringVar(&sourceTransactionID, "source-transaction-id", "", "Source transaction identifier")
+	c.Flags().StringVar(&inputMessages, "input-messages", "", "User input messages as JSON array")
+	c.Flags().StringVar(&outputResponse, "output-response", "", "Assistant output/response content")
+	c.Flags().BoolVar(&promptsTruncated, "prompts-truncated", false, "Whether prompts were truncated")
+	c.Flags().BoolVar(&billingSkipped, "billing-skipped", false, "Whether billing was skipped")
+	c.Flags().StringVar(&skipReason, "skip-reason", "", "Skip reason (FREE_TIER, RATE_LIMITED, QUOTA_EXCEEDED, CONTENT_POLICY_VIOLATION, CAPACITY_UNAVAILABLE, SERVICE_UNAVAILABLE)")
+	c.Flags().StringVar(&pricingTier, "pricing-tier", "", "Pricing tier (STANDARD, BATCH)")
+	c.Flags().StringVar(&requestedServiceTier, "requested-service-tier", "", "Requested service tier")
+	c.Flags().StringVar(&actualServiceTier, "actual-service-tier", "", "Actual service tier")
+	c.Flags().StringVar(&priorityTier, "priority-tier", "", "Priority tier (e.g., best_effort, on_demand, committed)")
+	cmd.AddSquadFlags(c, &squadFlags)
 
 	return c
 }

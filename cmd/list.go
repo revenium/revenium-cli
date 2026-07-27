@@ -13,28 +13,30 @@ func AddListFlags(c *cobra.Command) {
 }
 
 // ListOptsFromFlags builds ListOptions from the command's flags.
-// In table mode (non-JSON), FetchAll defaults to true so all pages are aggregated.
-// In JSON mode, single-page API behavior is used by default.
-// Explicitly setting --page or --page-size always uses single-page mode.
+//
+// All pages are aggregated by default, in every output mode. Only an explicit
+// --page opts out, because only --page expresses "give me exactly this one
+// page"; --page-size merely selects the batch size to fetch in.
+//
+// This deliberately does NOT special-case JSON mode. JSON is the automation
+// path, where silently returning the first page — while the caller believes it
+// received the whole result set — is the most damaging possible default. A
+// month-of-spend query that quietly returns only the newest page is
+// indistinguishable from an accurate one until the numbers are reconciled
+// against another source.
 func ListOptsFromFlags(c *cobra.Command) api.ListOptions {
-	explicitPaging := c.Flags().Changed("page") || c.Flags().Changed("page-size")
-
 	page := -1
 	pageSize := -1
-	if explicitPaging {
+	if c.Flags().Changed("page") {
 		page, _ = c.Flags().GetInt("page")
+	}
+	if c.Flags().Changed("page-size") {
 		pageSize, _ = c.Flags().GetInt("page-size")
-		if !c.Flags().Changed("page") {
-			page = -1
-		}
-		if !c.Flags().Changed("page-size") {
-			pageSize = -1
-		}
 	}
 
 	return api.ListOptions{
 		Page:     page,
 		PageSize: pageSize,
-		FetchAll: !Output.IsJSON() && !explicitPaging,
+		FetchAll: page < 0,
 	}
 }

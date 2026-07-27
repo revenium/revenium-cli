@@ -25,6 +25,8 @@ func initPricing() {
 	pricingCmd.AddCommand(newPricingCreateCmd())
 	pricingCmd.AddCommand(newPricingUpdateCmd())
 	pricingCmd.AddCommand(newPricingDeleteCmd())
+	pricingCmd.AddCommand(newPricingCoverageCmd())
+	pricingCmd.AddCommand(newPricingBulkSaveCmd())
 }
 
 // pricingTableDef defines the table layout for pricing dimension output.

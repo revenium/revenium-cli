@@ -21,7 +21,7 @@ func TestToolEventMetrics(t *testing.T) {
 		assert.NotEmpty(t, r.URL.Query().Get("startDate"))
 		assert.NotEmpty(t, r.URL.Query().Get("endDate"))
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `[{"id": "txn-te-1", "transactionId": "txn-te-1", "tool": "code-search", "invocations": 250, "totalCost": 0.125}]`)
+		fmt.Fprint(w, `[{"id": "txn-te-1", "transactionId": "txn-te-1", "toolName": "code-search", "toolId": "tool-1", "callCount": 250, "costUsd": 0.125}]`)
 	}))
 	defer srv.Close()
 
@@ -69,7 +69,7 @@ func TestToolEventMetricsEmpty(t *testing.T) {
 func TestToolEventMetricsJSON(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `[{"id": "txn-te-1", "transactionId": "txn-te-1", "tool": "code-search", "invocations": 250, "totalCost": 0.125}]`)
+		fmt.Fprint(w, `[{"id": "txn-te-1", "transactionId": "txn-te-1", "toolName": "code-search", "toolId": "tool-1", "callCount": 250, "costUsd": 0.125}]`)
 	}))
 	defer srv.Close()
 
