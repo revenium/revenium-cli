@@ -156,6 +156,23 @@ protection rule on `main`. Alternatively, configure `brews.pull_request: { enabl
 true, base: { branch: main } }` in `.goreleaser.yml` to route the formula update
 through a PR instead of a direct push.
 
+### Canonical run rebuilds the rc and fails with `already_exists`
+
+**Warning sign:** the canonical `vX.Y.Z` run logs `releasing tag=vX.Y.Z-rc.N` and archive
+names containing `-rc.N`, then fails with
+`422 Validation Failed [{Resource:ReleaseAsset Field:name Code:already_exists}]`.
+
+**Cause:** the rc and canonical tags sit on the same commit, because this runbook has you
+cut both with no commits in between. GoReleaser derives its version from `git describe`
+when the tag is not supplied, and `describe` cannot rank two tags on one commit reliably —
+in CI it resolved to the rc, rebuilt the rc's artifacts, and tried to upload them over the
+rc release's existing assets.
+
+**Fix:** the workflow now passes `GORELEASER_CURRENT_TAG: ${{ github.ref_name }}`, which
+pins the run to the tag that triggered it. If you see this on an older workflow revision,
+add that env var rather than deleting the rc tag (D-07 keeps rc tags). Re-cut the canonical
+tag on the commit carrying the fix so one commit holds one release tag.
+
 ### GoReleaser version mismatch / schema drift
 
 **Warning sign:** "field X is unsupported" / "field X is unknown" / "field X is removed"

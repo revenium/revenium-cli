@@ -31,3 +31,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAP_GITHUB_TOKEN: ${{ secrets.TAP_GITHUB_TOKEN }}
+          # Release the tag that triggered this run, not whatever `git describe`
+          # picks. RELEASING.md has you cut vX.Y.Z-rc.N and then vX.Y.Z with no
+          # commits between them, so both tags land on one commit and describe
+          # resolves ambiguously — on v1.3.0 it chose the rc, rebuilt rc.1
+          # artifacts, and failed uploading them over the rc release's own
+          # assets (422 already_exists). This also keeps the before-hook's
+          # extract-release-notes {{ .Tag }} on the right CHANGELOG section.
+          GORELEASER_CURRENT_TAG: ${{ github.ref_name }}
