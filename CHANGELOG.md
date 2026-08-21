@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-08-21
+
 ### Added
 
 - **Skill tracking.** `meter completion` accepts `--skill-name`, `--skill-invocation-trigger`, `--skill-source`, `--skill-kind`, `--skill-plugin-name`, and `--skill-marketplace-name`, sent only when passed. These fields are specific to the completion endpoint — the audio, image, video, and tool-event schemas do not define them.
@@ -97,7 +99,8 @@ This release reconciles the CLI against all three Revenium OpenAPI specs — pla
 
 (See https://github.com/revenium/revenium-cli/releases/tag/v1.0.3 — v1.0.x history is not back-filled in this CHANGELOG; only v1.1.0+ entries are curated.)
 
-[Unreleased]: https://github.com/revenium/revenium-cli/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/revenium/revenium-cli/compare/v1.4.0...HEAD
+[1.4.0]: https://github.com/revenium/revenium-cli/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/revenium/revenium-cli/compare/v1.2.1...v1.3.0
 [1.2.1]: https://github.com/revenium/revenium-cli/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/revenium/revenium-cli/compare/v1.1.2...v1.2.0
