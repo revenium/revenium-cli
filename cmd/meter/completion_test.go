@@ -192,6 +192,43 @@ func TestMeterCompletionSquadPresentWhenPassed(t *testing.T) {
 	assert.Equal(t, "planner", receivedBody["squadRole"])
 }
 
+func TestMeterCompletionSkillFieldsPresentWhenPassed(t *testing.T) {
+	var receivedBody map[string]interface{}
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		body, _ := io.ReadAll(r.Body)
+		json.Unmarshal(body, &receivedBody)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		fmt.Fprint(w, `{"id": "cmp-791", "resourceType": "metered-event", "label": "metered-event", "created": "2024-01-15T10:00:00Z"}`)
+	}))
+	defer srv.Close()
+
+	var buf bytes.Buffer
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", "", "", false)
+	cmd.Output = output.NewWithWriter(&buf, &buf, false, false)
+
+	c := newCompletionCmd()
+	c.SetOut(&buf)
+	args := append(requiredCompletionArgs(),
+		"--skill-name", "code-reviewer",
+		"--skill-invocation-trigger", "explicit",
+		"--skill-source", "marketplace",
+		"--skill-kind", "plugin",
+		"--skill-plugin-name", "review-plugin",
+		"--skill-marketplace-name", "anthropic-marketplace",
+	)
+	c.SetArgs(args)
+	err := c.Execute()
+
+	require.NoError(t, err)
+	assert.Equal(t, "code-reviewer", receivedBody["skillName"])
+	assert.Equal(t, "explicit", receivedBody["skillInvocationTrigger"])
+	assert.Equal(t, "marketplace", receivedBody["skillSource"])
+	assert.Equal(t, "plugin", receivedBody["skillKind"])
+	assert.Equal(t, "review-plugin", receivedBody["skillPluginName"])
+	assert.Equal(t, "anthropic-marketplace", receivedBody["skillMarketplaceName"])
+}
+
 func TestMeterCompletionMissingRequired(t *testing.T) {
 	var buf bytes.Buffer
 	cmd.Output = output.NewWithWriter(&buf, &buf, false, false)

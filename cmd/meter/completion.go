@@ -29,6 +29,7 @@ func newCompletionCmd() *cobra.Command {
 	var mediationLatency, errorCode, retryNumber, cacheCreation5mTokenCount, cacheCreation1hTokenCount int
 	var responseQualityScore, cacheCreationTokenCost, cacheReadTokenCost, costMultiplier float64
 	var promptsTruncated, billingSkipped bool
+	var skillName, skillInvocationTrigger, skillSource, skillKind, skillPluginName, skillMarketplaceName string
 
 	c := &cobra.Command{
 		Use:         "completion",
@@ -232,6 +233,25 @@ func newCompletionCmd() *cobra.Command {
 				body["cacheCreation1hTokenCount"] = cacheCreation1hTokenCount
 			}
 
+			if c.Flags().Changed("skill-name") {
+				body["skillName"] = skillName
+			}
+			if c.Flags().Changed("skill-invocation-trigger") {
+				body["skillInvocationTrigger"] = skillInvocationTrigger
+			}
+			if c.Flags().Changed("skill-source") {
+				body["skillSource"] = skillSource
+			}
+			if c.Flags().Changed("skill-kind") {
+				body["skillKind"] = skillKind
+			}
+			if c.Flags().Changed("skill-plugin-name") {
+				body["skillPluginName"] = skillPluginName
+			}
+			if c.Flags().Changed("skill-marketplace-name") {
+				body["skillMarketplaceName"] = skillMarketplaceName
+			}
+
 			cmd.ApplySquadFlags(c, body, squadFlags)
 
 			if cmd.DryRun() {
@@ -326,6 +346,14 @@ func newCompletionCmd() *cobra.Command {
 	c.Flags().StringVar(&codingAssistantAccountUuid, "coding-assistant-account-uuid", "", "Coding assistant account UUID")
 	c.Flags().IntVar(&cacheCreation5mTokenCount, "cache-creation-5m-tokens", 0, "Cache creation 5-minute window token count")
 	c.Flags().IntVar(&cacheCreation1hTokenCount, "cache-creation-1h-tokens", 0, "Cache creation 1-hour window token count")
+
+	// Skill tracking fields
+	c.Flags().StringVar(&skillName, "skill-name", "", "Skill name")
+	c.Flags().StringVar(&skillInvocationTrigger, "skill-invocation-trigger", "", "How the skill was invoked")
+	c.Flags().StringVar(&skillSource, "skill-source", "", "Skill source")
+	c.Flags().StringVar(&skillKind, "skill-kind", "", "Skill kind")
+	c.Flags().StringVar(&skillPluginName, "skill-plugin-name", "", "Plugin the skill belongs to")
+	c.Flags().StringVar(&skillMarketplaceName, "skill-marketplace-name", "", "Marketplace the skill was obtained from")
 
 	cmd.AddSquadFlags(c, &squadFlags)
 
