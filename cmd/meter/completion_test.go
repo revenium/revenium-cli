@@ -192,6 +192,35 @@ func TestMeterCompletionSquadPresentWhenPassed(t *testing.T) {
 	assert.Equal(t, "planner", receivedBody["squadRole"])
 }
 
+func TestMeterCompletionSkillFieldsAbsentWhenNotPassed(t *testing.T) {
+	var receivedBody map[string]interface{}
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		body, _ := io.ReadAll(r.Body)
+		json.Unmarshal(body, &receivedBody)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		fmt.Fprint(w, `{"id": "cmp-792", "resourceType": "metered-event", "label": "metered-event", "created": "2024-01-15T10:00:00Z"}`)
+	}))
+	defer srv.Close()
+
+	var buf bytes.Buffer
+	cmd.APIClient = api.NewClient(srv.URL, "test-key", "", "", "", false)
+	cmd.Output = output.NewWithWriter(&buf, &buf, false, false)
+
+	c := newCompletionCmd()
+	c.SetOut(&buf)
+	c.SetArgs(requiredCompletionArgs())
+	err := c.Execute()
+
+	require.NoError(t, err)
+	assert.NotContains(t, receivedBody, "skillName")
+	assert.NotContains(t, receivedBody, "skillInvocationTrigger")
+	assert.NotContains(t, receivedBody, "skillSource")
+	assert.NotContains(t, receivedBody, "skillKind")
+	assert.NotContains(t, receivedBody, "skillPluginName")
+	assert.NotContains(t, receivedBody, "skillMarketplaceName")
+}
+
 func TestMeterCompletionSkillFieldsPresentWhenPassed(t *testing.T) {
 	var receivedBody map[string]interface{}
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

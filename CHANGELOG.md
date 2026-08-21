@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Skill tracking.** `meter completion` accepts `--skill-name`, `--skill-invocation-trigger`, `--skill-source`, `--skill-kind`, `--skill-plugin-name`, and `--skill-marketplace-name`, sent only when passed. These fields are specific to the completion endpoint — the audio, image, video, and tool-event schemas do not define them.
+
 ## [1.3.0] - 2026-07-27
 
 This release reconciles the CLI against all three Revenium OpenAPI specs — platform, metering, and analytics — and adds squad support across metering and metrics. It also fixes a data-truncation bug that made scripted queries silently return partial results; read the Changed section before upgrading if you parse CLI output in automation.
