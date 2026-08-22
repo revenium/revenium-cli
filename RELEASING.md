@@ -6,15 +6,64 @@ canonical GoReleaser pipeline (`.github/workflows/release.yml` + `.goreleaser.ym
 It assumes `revenium/homebrew-tap` and `TAP_GITHUB_TOKEN` are already configured. For the
 one-time provisioning that got us here, see `.planning/phases/17-release-pipeline-finish/`.
 
+## Release Path
+
+There is exactly one supported way to ship a release. Development happens in the internal
+repository, the public repository receives a mirrored snapshot of the allowlisted paths, and
+tags are cut on the public repository. In order:
+
+1. **Land the work on `main` in the internal repo, `revenium/revenium-cli-internal`.** All
+   development — features, fixes, tests — goes there first.
+
+2. **Promote `CHANGELOG.md` there** (Prerequisites item 4 below). The changelog is written in
+   the internal repo and reaches the public repo through the sync, never the other way round.
+
+3. **Mirror into the public clone:** `scripts/public-sync.sh vX.Y.Z`. This copies only the
+   paths listed in `public-allowlist.txt` from the internal repo into the public clone
+   (default `../revenium-cli`) on a `vX.Y.Z-public-sync` branch. `public-allowlist.txt` is the
+   sole control file for what crosses; anything not listed there never reaches public. The
+   script does not push, tag, or release.
+
+4. **Push the sync branch, open a PR, and merge it to `main` on `revenium/revenium-cli`.**
+
+5. **Cut `vX.Y.Z-rc.N`, then `vX.Y.Z`, from the merged PUBLIC `main`** — see Release Flow
+   below. That is the only place `.github/workflows/release.yml` fires.
+
+The tail of that sequence — review the branch, push it, merge the PR, then cut the tags — is
+exactly what `scripts/public-sync.sh` prints under "Next steps" when it finishes. The script and
+this runbook are meant to tell the same story; if they ever disagree, the script is what
+actually runs.
+
+### What is not supported
+
+- **Committing release work directly to the public repo.** The internal repo is authoritative
+  for every allowlisted path, so the next routine sync deletes public-only files and reverts
+  public-only edits underneath those paths. Work committed only to public is work waiting to be
+  un-shipped — see "Sync refuses: public-only files would be deleted" under Troubleshooting for
+  what this has already cost.
+
+- **Tagging from the internal repo.** No release workflow runs there. An internal tag publishes
+  nothing to the GitHub Releases page and updates no Homebrew formula; it only looks like a
+  release.
+
+**Note for readers of the public repository:** `scripts/public-sync.sh` and
+`public-allowlist.txt` are internal-only tooling and are deliberately not mirrored, so they are
+not present in this repository — searching for them here will turn up nothing. Everything else in
+this runbook — the tags, the GoReleaser pipeline, the verification checklist, the rollback
+sequence — applies here exactly as written.
+
 ## Prerequisites
 
 Before cutting any release tag, confirm every item below.
 
-1. **Clean working tree on `main`.** `git status` shows no uncommitted changes, and
-   `main` is at the commit you intend to release. If you need a pre-release fix, land
-   it on `main` first.
+1. **Clean working tree on internal `main`.** In the internal repo,
+   `revenium/revenium-cli-internal`, `git status` shows no uncommitted changes and `main`
+   is at the commit you intend to release. If you need a pre-release fix, land it on
+   internal `main` first — not on the public repo (see Release Path). The public clone
+   must be clean too: `scripts/public-sync.sh` refuses to run against a public clone that
+   has uncommitted changes.
 
-2. **Test suite green.** Run the full Go test suite:
+2. **Test suite green.** Run the full Go test suite in the internal repo:
 
    ```sh
    go test ./... -count=1
@@ -26,6 +75,12 @@ Before cutting any release tag, confirm every item below.
    go test ./... -count=1 -race
    ```
 
+   The sync guards described under Troubleshooting carry their own regression harness,
+   `scripts/ci/public-sync-guards.test.sh` (20 cases), which
+   `.github/workflows/sync-guards.yml` runs on every pull request and every push to `main`.
+   Both files are internal-only tooling and are not mirrored — like `public-sync.sh` itself,
+   they guard the step before the release rather than the release workflow.
+
 3. **`goreleaser` installed locally.** The maintainer workstation does NOT ship
    `goreleaser` by default. Install one of:
 
@@ -35,10 +90,13 @@ Before cutting any release tag, confirm every item below.
    go install github.com/goreleaser/goreleaser/v2@latest
    ```
 
-   Confirm with `goreleaser --version` (expect v2.x).
+   Confirm with `goreleaser --version` (expect v2.x). This is a workstation tool rather
+   than a per-repo one, and `.goreleaser.yml` is mirrored, so it behaves the same in either
+   clone.
 
-4. **`CHANGELOG.md` updated.** Promote the contents of the `## [Unreleased]` section
-   to a new dated version section in `CHANGELOG.md`:
+4. **`CHANGELOG.md` updated in the internal repo.** Promote the contents of the
+   `## [Unreleased]` section to a new dated version section in the internal
+   `CHANGELOG.md`:
 
    - Add a `## [X.Y.Z] - YYYY-MM-DD` header (ISO-8601 date; bracket-wrapped version).
    - Add an `### Added` / `### Changed` / `### Fixed` / `### Removed` / `### Deprecated` /
@@ -50,7 +108,12 @@ Before cutting any release tag, confirm every item below.
    The version header MUST use the bracketed form `## [X.Y.Z]` — the
    `scripts/extract-release-notes.sh` awk pattern requires it.
 
-5. **Validate locally (recommended).** Two cheap pre-flight checks:
+   Do this in the internal repo and let the sync carry it to public. Editing the public
+   `CHANGELOG.md` directly puts released sections on one side only, which the sync then
+   refuses to mirror over — see "Sync refuses: diverged CHANGELOG history".
+
+5. **Validate locally (recommended).** Two cheap pre-flight checks, run in the internal
+   repo before syncing:
 
    ```sh
    make release-check   # goreleaser check — schema/syntax validation, ~1s
@@ -58,7 +121,9 @@ Before cutting any release tag, confirm every item below.
    ```
 
    These targets are wired in `Makefile` for convenience. Neither pushes anything; both
-   write to the gitignored `dist/` directory.
+   write to the gitignored `dist/` directory. `Makefile` and `.goreleaser.yml` are both
+   mirrored, so the same two targets work in the public clone after the merge if you want to
+   re-check there before tagging.
 
 ## Release Flow
 
@@ -68,6 +133,10 @@ The pipeline always cuts a release-candidate (`-rc.N`) tag first, then the canon
 
 Always cut a release-candidate tag before the canonical version. The pipeline has historical
 failure precedent and rc validation is the gate (D-06).
+
+Run this in the public clone, on the merged `main` of `revenium/revenium-cli`. `origin` there
+is the public repo, and pushing the tag to it is what triggers
+`.github/workflows/release.yml`.
 
 ```sh
 git tag -a vX.Y.Z-rc.1 -m "Release vX.Y.Z-rc.1"
@@ -88,7 +157,8 @@ Behavior:
 
 ### Canonical release
 
-Once an `rc.N` run is green, cut the canonical tag:
+Once an `rc.N` run is green, cut the canonical tag — again in the public clone, on that
+same merged `main` of `revenium/revenium-cli`:
 
 ```sh
 git tag -a vX.Y.Z -m "Release vX.Y.Z"
@@ -132,6 +202,83 @@ above run regardless and are the spec-mandated verification (RLSE-03).
 
 Common failure modes, with warning signs and one-line fixes. If the workflow's `Run
 GoReleaser` step fails, search the log for any of these strings first.
+
+The first three entries below are different: they cover `scripts/public-sync.sh` refusing
+before it mirrors anything, which happens before a tag is ever cut.
+
+All three guards run before the sync writes anything: before `git switch -c`, before the first
+`rsync`. A refusal therefore leaves the public clone exactly as it found it — no branch, no file
+change, nothing to undo. `--dry-run` prints the identical reports, then carries on to show what
+would change without stopping and without writing, so it is the safe way to inspect a refusal.
+The override flags suppress only the stop, never the report, and each waives only its own guard.
+
+### Sync refuses: public-only files would be deleted
+
+**Warning sign:** `scripts/public-sync.sh` prints `WARN: the public repo tracks N file(s) with
+no counterpart in this internal repo:`, lists the paths, and exits non-zero with `error:
+refusing to mirror over public-only files (back-port them, then re-run)`.
+
+**Cause:** the mirror copies each allowlisted directory with `rsync -a --delete`, so a file that
+exists only in the public repo is deleted by a routine sync. Nothing about that is a
+malfunction — deleting what the source does not have is what a mirror does.
+
+This is not hypothetical. On 2026-08-22, v1.4.0 (the `--skill-*` flags on `meter completion`) and v1.5.0 (`--ticket-id`
+across the four AI metering commands — completion, audio, image, video) were developed and
+released straight from the public repo, inverting the path above. v1.5.0 added `cmd/ticket.go`
+and `cmd/meter/ticket_test.go`, which existed nowhere but public. A routine `public-sync.sh` run
+at that moment would have deleted both files and reverted the skill-flag edits to
+`cmd/meter/completion.go` — silently un-shipping two already-published releases, with a green
+build and no error anywhere. What it cost: every one of those changes had to be back-ported into
+the internal repo before any sync could safely run again, and the guards documented here had to
+be written so the next occurrence refuses instead of proceeding.
+
+**Fix:** back-port the listed files into the internal repo on `main`, commit them, and re-run
+the sync. Pass `--allow-delete` only when you genuinely intend those files to disappear from
+the public repo.
+
+### Sync refuses: public commits not represented internally
+
+**Warning sign:** `scripts/public-sync.sh` prints `WARN: public main carries N commit(s) with no
+counterpart in this internal repo:`, lists each one as short-sha plus subject, and exits
+non-zero with `error: refusing to mirror over public-only commits (back-port them, then
+re-run)`.
+
+**Cause:** public `main` carries work that never landed internally, and the mirror would
+overwrite the files those commits touched. This is the half of the problem the file-level guard
+above cannot see: a public-only commit that only *modifies* a file both repos already have
+leaves every path in place, so there is no orphan to report — and the mirror reverts the edit
+with nothing printed. The `--skill-*` changes to `cmd/meter/completion.go` in the 2026-08-22
+incident are exactly that shape, which is why the orphan guard alone would not have covered it.
+
+Commits are matched by normalized subject (a trailing GitHub ` (#N)` squash suffix is ignored on
+both sides) with a `git patch-id --stable` fallback for back-ports that were reworded — never by
+SHA. The two repos share no commit graph, because public history is built from squashed sync
+commits, so a correctly back-ported commit legitimately has a different SHA and still matches.
+The comparison window starts at the newest `vX.Y.Z ... public sync` commit in public history; if
+no such marker is found, the entire public history is compared and the script says so.
+
+**Fix:** back-port the listed commits into the internal repo, commit them, and re-run — a
+reworded or squashed back-port still matches. `--allow-diverged` proceeds anyway, overwriting
+the work those commits did.
+
+### Sync refuses: diverged CHANGELOG history
+
+**Warning sign:** `scripts/public-sync.sh` prints `WARN: public CHANGELOG.md has released
+version(s) the internal CHANGELOG.md lacks:` with the version numbers, and exits non-zero with
+`error: refusing to mirror over diverged CHANGELOG history (reconcile, then re-run)`.
+
+**Cause:** `CHANGELOG.md` is an allowlisted file, so the sync copies the internal one over the
+public one wholesale. Any released version section that exists only in the public changelog is
+erased, taking public release history with it.
+
+This guard compares version *sections*, not file trees, which is why it did not catch the
+2026-08-22 incident and why the other two guards had to be added. Even when it does fire it
+names no file and no commit, so it cannot tell you that `cmd/ticket.go` is about to be deleted;
+and public-only work that leaves `CHANGELOG.md` alone never trips it at all.
+
+**Fix:** add the missing version sections to the internal `CHANGELOG.md`, commit, and re-run.
+This guard has no override flag — `--allow-delete` deliberately does not waive it, and neither
+does `--allow-diverged`.
 
 ### Token expired or under-scoped
 
