@@ -10,16 +10,6 @@ The official command-line interface for [Revenium](https://revenium.ai) — the 
 
 ![Revenium Labs](https://img.shields.io/badge/Revenium-Labs-6f42c1?style=for-the-badge)
 
-```
-$ revenium sources list
-╭──────────┬───────────────┬───────┬──────────╮
-│ ID       │ Name          │ Type  │ Status   │
-├──────────┼───────────────┼───────┼──────────┤
-│ vKab65   │ Default       │ AI    │ active   │
-│ x9Rt42   │ Chat Gateway  │ API   │ active   │
-╰──────────┴───────────────┴───────┴──────────╯
-```
-
 > ### 🧪 This is a Revenium Labs project
 > **Revenium Labs** projects are field-developed, best-effort solutions. They are working,
 > beta-quality software, built to solve real customer problems and shared in the open. They are
@@ -32,6 +22,16 @@ $ revenium sources list
 >   fit your use case. [Come talk to us on Discord](https://discord.gg/J2DbmjZ2nA).
 >
 > → **[What is Revenium Labs?](https://github.com/revenium/.github/blob/main/LABS.md)**
+
+```
+$ revenium sources list
+╭──────────┬───────────────┬───────┬──────────╮
+│ ID       │ Name          │ Type  │ Status   │
+├──────────┼───────────────┼───────┼──────────┤
+│ vKab65   │ Default       │ AI    │ active   │
+│ x9Rt42   │ Chat Gateway  │ API   │ active   │
+╰──────────┴───────────────┴───────┴──────────╯
+```
 
 ## Installation
 
