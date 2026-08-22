@@ -26,6 +26,7 @@ func newVideoCmd() *cobra.Command {
 	var retryNumber, errorCode int
 	var promptsTruncated, billingSkipped bool
 	var squadFlags cmd.SquadFlags
+	var ticketID string
 
 	c := &cobra.Command{
 		Use:         "video",
@@ -197,6 +198,7 @@ func newVideoCmd() *cobra.Command {
 				body["subscriber"] = subscriber
 			}
 			cmd.ApplySquadFlags(c, body, squadFlags)
+			cmd.ApplyTicketFlag(c, body, ticketID)
 
 			if cmd.DryRun() {
 				return dryrun.Render(cmd.Output, "meter", "video", "/v2/ai/video", body)
@@ -274,6 +276,7 @@ func newVideoCmd() *cobra.Command {
 	c.Flags().StringVar(&actualServiceTier, "actual-service-tier", "", "Actual service tier")
 	c.Flags().StringVar(&priorityTier, "priority-tier", "", "Priority tier (e.g., best_effort, on_demand, committed)")
 	cmd.AddSquadFlags(c, &squadFlags)
+	cmd.AddTicketFlag(c, &ticketID)
 
 	return c
 }

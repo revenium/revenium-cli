@@ -29,6 +29,7 @@ func newAudioCmd() *cobra.Command {
 	var errorCode, retryNumber int
 	var promptsTruncated, billingSkipped bool
 	var squadFlags cmd.SquadFlags
+	var ticketID string
 
 	c := &cobra.Command{
 		Use:         "audio",
@@ -217,6 +218,7 @@ func newAudioCmd() *cobra.Command {
 				body["subscriber"] = subscriber
 			}
 			cmd.ApplySquadFlags(c, body, squadFlags)
+			cmd.ApplyTicketFlag(c, body, ticketID)
 
 			if cmd.DryRun() {
 				return dryrun.Render(cmd.Output, "meter", "audio", "/v2/ai/audio", body)
@@ -298,6 +300,7 @@ func newAudioCmd() *cobra.Command {
 	c.Flags().StringVar(&subscriberID, "subscriber-id", "", "Subscriber identifier")
 	c.Flags().StringVar(&subscriberEmail, "subscriber-email", "", "Subscriber email address")
 	cmd.AddSquadFlags(c, &squadFlags)
+	cmd.AddTicketFlag(c, &ticketID)
 
 	return c
 }

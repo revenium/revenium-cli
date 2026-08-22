@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Ticket attribution.** `meter completion|audio|image|video` accept `--ticket-id`, sent only when passed, for attributing cost to an external ticket or issue (e.g. `JIRA-123`, `LINEAR-456`; max 256 characters). The tool-event schema does not define the field, so `meter tool-event` does not expose the flag.
+
 ## [1.4.0] - 2026-08-21
 
 ### Added

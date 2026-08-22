@@ -20,6 +20,7 @@ func newImageCmd() *cobra.Command {
 	var sourceImageProvided bool
 	var agenticJobID, agenticJobName, agenticJobType, agenticJobVersion string
 	var squadFlags cmd.SquadFlags
+	var ticketID string
 
 	// New optional fields (METER-03 field parity)
 	var costType, parentTransactionId, transactionName, traceType, traceName string
@@ -197,6 +198,7 @@ func newImageCmd() *cobra.Command {
 				body["subscriber"] = subscriber
 			}
 			cmd.ApplySquadFlags(c, body, squadFlags)
+			cmd.ApplyTicketFlag(c, body, ticketID)
 
 			if cmd.DryRun() {
 				return dryrun.Render(cmd.Output, "meter", "image", "/v2/ai/images", body)
@@ -273,6 +275,7 @@ func newImageCmd() *cobra.Command {
 	c.Flags().StringVar(&subscriberID, "subscriber-id", "", "Subscriber identifier")
 	c.Flags().StringVar(&subscriberEmail, "subscriber-email", "", "Subscriber email")
 	cmd.AddSquadFlags(c, &squadFlags)
+	cmd.AddTicketFlag(c, &ticketID)
 
 	return c
 }

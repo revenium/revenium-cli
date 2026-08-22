@@ -20,6 +20,7 @@ func newCompletionCmd() *cobra.Command {
 	var totalCost, inputTokenCost, outputTokenCost, temperature float64
 	var isStreamed bool
 	var squadFlags cmd.SquadFlags
+	var ticketID string
 
 	// New optional fields (Phase 3, METER-01) — full write-schema parity
 	var costType, systemFingerprint, errorReason, middlewareSource, operationSubtype string
@@ -253,6 +254,7 @@ func newCompletionCmd() *cobra.Command {
 			}
 
 			cmd.ApplySquadFlags(c, body, squadFlags)
+			cmd.ApplyTicketFlag(c, body, ticketID)
 
 			if cmd.DryRun() {
 				return dryrun.Render(cmd.Output, "meter", "completion", "/v2/ai/completions", body)
@@ -356,6 +358,7 @@ func newCompletionCmd() *cobra.Command {
 	c.Flags().StringVar(&skillMarketplaceName, "skill-marketplace-name", "", "Marketplace the skill was obtained from")
 
 	cmd.AddSquadFlags(c, &squadFlags)
+	cmd.AddTicketFlag(c, &ticketID)
 
 	return c
 }
