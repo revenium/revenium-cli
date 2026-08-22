@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-08-21
+
 ### Added
 
 - **Ticket attribution.** `meter completion|audio|image|video` accept `--ticket-id`, sent only when passed, for attributing cost to an external ticket or issue (e.g. `JIRA-123`, `LINEAR-456`; max 256 characters). The tool-event schema does not define the field, so `meter tool-event` does not expose the flag.
@@ -103,7 +105,8 @@ This release reconciles the CLI against all three Revenium OpenAPI specs — pla
 
 (See https://github.com/revenium/revenium-cli/releases/tag/v1.0.3 — v1.0.x history is not back-filled in this CHANGELOG; only v1.1.0+ entries are curated.)
 
-[Unreleased]: https://github.com/revenium/revenium-cli/compare/v1.4.0...HEAD
+[Unreleased]: https://github.com/revenium/revenium-cli/compare/v1.5.0...HEAD
+[1.5.0]: https://github.com/revenium/revenium-cli/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/revenium/revenium-cli/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/revenium/revenium-cli/compare/v1.2.1...v1.3.0
 [1.2.1]: https://github.com/revenium/revenium-cli/compare/v1.2.0...v1.2.1
