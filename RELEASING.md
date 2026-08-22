@@ -178,9 +178,67 @@ tag on the commit carrying the fix so one commit holds one release tag.
 **Warning sign:** "field X is unsupported" / "field X is unknown" / "field X is removed"
 in the GoReleaser step.
 
-**Fix:** Pin `version: "~> v2.14"` (or the current v2.x minor at release time) in
-`.github/workflows/release.yml`'s `goreleaser-action` step instead of the loose `"~> v2"`
-range. The current config uses the range form; pinning is a future hardening item.
+**Fix:** The workflow now pins `version: "~> v2.15"` in
+`.github/workflows/release.yml`'s `goreleaser-action` step rather than the loose `"~> v2"`
+range, so a new v2 minor cannot change release behaviour unannounced. To move to a newer
+minor, bump that pin deliberately after running `make release-check` locally against the
+new version.
+
+### Pending: `brews` is soft-deprecated in favour of `homebrew_casks`
+
+`goreleaser check` currently emits `brews is being phased out in favor of homebrew_casks`.
+This is a **warning, not an error** — `make release-check` exits 0 and releases are
+unaffected. It is recorded here because the eventual removal will be a hard break.
+
+Migration is config-ready but **not applied**, because it requires coordinated changes to
+`revenium/homebrew-tap` and affects existing users. What it involves:
+
+- The tap artifact moves from `Formula/revenium.rb` to `Casks/revenium.rb`. The old
+  formula must be deleted from the tap, otherwise formula users silently pin to the last
+  formula version while cask users keep updating.
+- `tap_migrations.json` must be added to the tap so existing installs migrate on
+  `brew update` instead of stranding users.
+- The cask needs a `postflight` `xattr -dr com.apple.quarantine` hook, since the binaries
+  are not Apple-notarized.
+
+Two things verified empirically against GoReleaser v2.15.4 and Homebrew's own source, both
+contradicting the common assumption that casks are macOS-only:
+
+- **Linux support survives.** The generated cask carries `on_linux` blocks for amd64 and
+  arm64. Homebrew's `extend/os/linux/cask/installer.rb` refuses a cask on Linux only when
+  it declares `depends_on macos:`, which this one does not.
+- **Completions survive**, but only if configured. A naive migration drops them silently;
+  the `completions:` mapping below restores the bash/zsh/fish install lines.
+
+The verified replacement block, if and when this is applied:
+
+```yaml
+homebrew_casks:
+  - name: revenium
+    repository:
+      owner: revenium
+      name: homebrew-tap
+      token: "{{ .Env.TAP_GITHUB_TOKEN }}"
+    skip_upload: auto
+    directory: Casks
+    homepage: https://github.com/revenium/revenium-cli
+    description: Manage your Revenium account from the command line
+    license: MIT
+    binaries:
+      - revenium
+    completions:
+      bash: completions/revenium.bash
+      zsh: completions/revenium.zsh
+      fish: completions/revenium.fish
+    hooks:
+      post:
+        install: |
+          if OS.mac?
+            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/revenium"]
+          end
+```
+
+Note `binaries:` (plural) — the singular `binary:` field is itself deprecated.
 
 ### `completions.sh` failing on CI
 

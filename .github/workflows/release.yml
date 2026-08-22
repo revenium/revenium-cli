@@ -26,7 +26,11 @@ jobs:
         uses: goreleaser/goreleaser-action@v7
         with:
           distribution: goreleaser
-          version: "~> v2"
+          # Pinned to a minor, not the open "~> v2" range: GoReleaser ships
+          # deprecations that later become removals, so a new v2 minor can
+          # break a release with no warning. Bump this deliberately after
+          # running `make release-check` against the new version locally.
+          version: "~> v2.15"
           args: release --clean --release-notes release-notes.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
