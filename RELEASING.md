@@ -331,6 +331,22 @@ range, so a new v2 minor cannot change release behaviour unannounced. To move to
 minor, bump that pin deliberately after running `make release-check` locally against the
 new version.
 
+### Sync PRs must be merged with a merge commit, never squashed
+
+`public-sync.sh` writes a `Public-Sync: <version>` trailer on every sync commit, and the
+SYNC-02 divergence guard keys on that trailer to recognise its own prior syncs. A GitHub
+**squash** merge builds a brand-new commit from the PR title and body and drops the trailer,
+so the squashed sync reads as public-only work and the next `public-sync.sh` run refuses to
+mirror.
+
+Merge sync PRs with `gh pr merge <N> --merge` (or the "Create a merge commit" button). If one
+is squashed by accident, the next sync needs a single `--allow-diverged` run to get past it —
+verify first that the flagged commit really is the earlier sync and not genuine public-only
+work.
+
+This was hit on 2026-08-22: PR #12 was squash-merged, and the very next dry-run reported it as
+divergence.
+
 ### Pending: `brews` is soft-deprecated in favour of `homebrew_casks`
 
 `goreleaser check` currently emits `brews is being phased out in favor of homebrew_casks`.

@@ -18,3 +18,9 @@ completions/
 
 # OS
 .DS_Store
+
+# Build output from `go build ./tools/coverage-audit`, which lands at the repo
+# root. Anchored with a leading slash: unanchored, the pattern also matches the
+# directory tools/coverage-audit and silently ignores every new source file in
+# the package it was written to protect.
+/coverage-audit
