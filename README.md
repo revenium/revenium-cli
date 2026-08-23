@@ -23,16 +23,6 @@ The official command-line interface for [Revenium](https://revenium.ai) — the 
 >
 > → **[What is Revenium Labs?](https://github.com/revenium/.github/blob/main/LABS.md)**
 
-```
-$ revenium sources list
-╭──────────┬───────────────┬───────┬──────────╮
-│ ID       │ Name          │ Type  │ Status   │
-├──────────┼───────────────┼───────┼──────────┤
-│ vKab65   │ Default       │ AI    │ active   │
-│ x9Rt42   │ Chat Gateway  │ API   │ active   │
-╰──────────┴───────────────┴───────┴──────────╯
-```
-
 ## Installation
 
 See [INSTALL.md](INSTALL.md) for detailed installation instructions.
@@ -572,6 +562,30 @@ Other useful Makefile targets: `make test`, `make test-race`, `make lint`, `make
 ```sh
 go test ./...
 ```
+
+## Endpoint Coverage Audit
+
+Internal maintenance tooling, not something you need to run to use the CLI. `make coverage-audit` fetches the published Revenium OpenAPI documents and reports every API operation the CLI has no command for, alongside the operations that are deliberately skipped and the reason each one is:
+
+```sh
+make coverage-audit           # revalidate the cached specs, then audit
+make coverage-audit-offline   # audit the cache already on disk; no network
+```
+
+The same audit has a field dimension, which answers the narrower question: of the endpoints the CLI does call, which request-body properties and query parameters does it never set, and which keys does it send that no schema declares:
+
+```sh
+make field-audit              # revalidate, then emit the field rows as TSV
+make field-audit-offline      # the same over the cache already on disk
+make field-backtest           # prove the join still reproduces the known drift
+scripts/ci/coverage-audit.sh --offline --field-report   # the rendered report
+```
+
+The three `make` targets emit seven fixed tab-separated columns so two runs can be compared with `comm`; `--field-report` is the rendered form, which names the command file every finding belongs to, separates spec-`required` properties from optional ones, and prints what each suppression rule removed. `make field-backtest` runs the field join over a `git archive` of the commit that preceded the known v1.4.0/v1.5.0 drift and asserts that exactly those rows closed and nothing opened.
+
+Repeat runs revalidate rather than re-download: unchanged documents come back as a `304` and the cached copy is reused. The offline form makes no request at all, so it is the one to run while working through the report. Both fail closed — if the spec set cannot be established, no report is printed rather than a partial one.
+
+The audit runs from the internal development repository and is not part of a release build.
 
 ## AI Agent Integration
 
