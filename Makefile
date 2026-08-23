@@ -23,12 +23,17 @@ lint:
 # Internal maintenance tooling — see scripts/ci/coverage-audit.sh. Revalidates
 # the cached OpenAPI documents (unchanged ones are not re-downloaded), then
 # reports every spec operation the CLI does not call.
+# NOTE: this Makefile is mirrored to the public repo, but the scripts these
+# targets call are INTERNAL_ONLY. Each guards itself so a public user gets an
+# explanation instead of a bare 'No such file or directory'.
 coverage-audit:
+	@test -x scripts/ci/coverage-audit.sh || { echo "make coverage-audit: internal maintenance tooling — scripts/ci/coverage-audit.sh is not present in this repository (it is internal-only; see public-allowlist.txt)" >&2; exit 2; }
 	scripts/ci/coverage-audit.sh
 
 # The same report with no network access at all, against the cache already on
 # disk. This is the form to run repeatedly while working through the gaps.
 coverage-audit-offline:
+	@test -x scripts/ci/coverage-audit.sh || { echo "make coverage-audit-offline: internal maintenance tooling — scripts/ci/coverage-audit.sh is not present in this repository (it is internal-only; see public-allowlist.txt)" >&2; exit 2; }
 	scripts/ci/coverage-audit.sh --offline
 
 # The field dimension of the same audit, through the same wrapper: one TSV row
@@ -40,11 +45,13 @@ coverage-audit-offline:
 # and comm, and make's own echo of the recipe line would arrive as the first row
 # of it.
 field-audit:
+	@test -x scripts/ci/coverage-audit.sh || { echo "make field-audit: internal maintenance tooling — scripts/ci/coverage-audit.sh is not present in this repository (it is internal-only; see public-allowlist.txt)" >&2; exit 2; }
 	@scripts/ci/coverage-audit.sh --fields
 
 # The field report with no network access at all. This is the form to run
 # repeatedly while working through the rows.
 field-audit-offline:
+	@test -x scripts/ci/coverage-audit.sh || { echo "make field-audit-offline: internal maintenance tooling — scripts/ci/coverage-audit.sh is not present in this repository (it is internal-only; see public-allowlist.txt)" >&2; exit 2; }
 	@scripts/ci/coverage-audit.sh --offline --fields
 
 # The live half of SC2: run the field audit over a git archive of the pinned
@@ -58,6 +65,7 @@ field-audit-offline:
 # fixture and needs no history at all. This target is the live counterpart, run
 # on demand, and the one that notices when upstream renames a property.
 field-backtest:
+	@test -x scripts/ci/field-backtest.sh || { echo "make field-backtest: internal maintenance tooling — scripts/ci/field-backtest.sh is not present in this repository (it is internal-only; see public-allowlist.txt)" >&2; exit 2; }
 	@scripts/ci/field-backtest.sh
 
 clean:
