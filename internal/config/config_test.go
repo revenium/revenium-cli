@@ -13,6 +13,31 @@ import (
 func setupTest(t *testing.T) string {
 	t.Helper()
 	viper.Reset()
+
+	// SAFE-03: isolate every test in this package from the developer's own
+	// REVENIUM_* environment. Without this, TestLoadConfig reads a real API key
+	// instead of the fixture and echoes it into the assertion diff — green in
+	// CI's clean environment, red and leaky on every developer machine.
+	//
+	// t.Setenv rather than os.Unsetenv: it restores the prior value on cleanup
+	// for free, and viper treats a present-but-empty variable as unset
+	// (allowEmptyEnv defaults to false), so "" is a real clear.
+	//
+	// The precedence tests below call t.Setenv AFTER setupTest, so theirs still
+	// wins — t.Cleanup unwinds LIFO, so this loop's restore runs last.
+	//
+	// t.Setenv panics if the test has already called t.Parallel(). No test in
+	// this file does today; a future parallel test here will panic loudly at
+	// this line rather than silently losing its isolation, which is the
+	// outcome we want.
+	//
+	// Ranging over config.go's envBoundKeys (via envVarName) rather than
+	// listing REVENIUM_* names here is what makes a seventh bound key
+	// impossible to add in production without also isolating it in tests.
+	for _, k := range envBoundKeys {
+		t.Setenv(envVarName(k), "")
+	}
+
 	tmpDir := t.TempDir()
 	configDirOverride = tmpDir
 	t.Cleanup(func() {
@@ -20,6 +45,36 @@ func setupTest(t *testing.T) string {
 		viper.Reset()
 	})
 	return tmpDir
+}
+
+// TestSetupTestIsolatesRealEnvironment proves setupTest's isolation rather than
+// trusting it. THE ORDERING IS THE WHOLE POINT: the sentinel is exported BEFORE
+// setupTest runs, so setupTest is what clears it. Export it after setupTest and
+// this test asserts nothing at all.
+//
+// This is what makes SAFE-03's key-safety half true rather than merely asserted.
+// Once the fixture value is what Load() returns even with a real-looking key
+// exported, the only API key an assertion failure anywhere in this package can
+// print IS the fixture — which is why require.Equal and its diff output are kept
+// everywhere else rather than traded for opaque require.True assertions that
+// print nothing (D-26-13's rejected alternative). Diagnosable output on every
+// future failure is worth more than guarding a case this test already rules out.
+func TestSetupTestIsolatesRealEnvironment(t *testing.T) {
+	// Before setupTest — this stands in for the developer's own exported key.
+	t.Setenv("REVENIUM_API_KEY", "sentinel-must-not-appear")
+
+	tmpDir := setupTest(t) // ...which clears it.
+
+	configContent := "api-key: test-key-123\napi-url: https://custom.api.com\n"
+	err := os.WriteFile(filepath.Join(tmpDir, "config.yaml"), []byte(configContent), 0o600)
+	require.NoError(t, err)
+
+	cfg, err := Load()
+	require.NoError(t, err)
+	require.Equal(t, "test-key-123", cfg.APIKey)
+	require.NotEqual(t, "sentinel-must-not-appear", cfg.APIKey,
+		"setupTest did not clear REVENIUM_API_KEY: the developer's exported environment reached Load(), "+
+			"so any assertion failure in this package can print a real API key into terminal and CI output")
 }
 
 func TestLoadConfig(t *testing.T) {

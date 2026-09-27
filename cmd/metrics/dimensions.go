@@ -22,7 +22,7 @@ var validDimensionNames = []string{
 
 // validateDimensionName rejects an unknown dimension name before it ever
 // reaches the request path (T-04-11 mitigation), mirroring the
-// validSquadPeriods/ValidatePeriod precedent in cmd/squad_executions.go.
+// validPeriods/ValidatePeriod precedent in cmd/squad_executions.go.
 func validateDimensionName(c *cobra.Command, args []string) error {
 	name := args[0]
 	for _, v := range validDimensionNames {

@@ -23,6 +23,8 @@ import (
 	periodcharges "github.com/revenium/revenium-cli/cmd/period-charges"
 	"github.com/revenium/revenium-cli/cmd/products"
 	"github.com/revenium/revenium-cli/cmd/refunds"
+	"github.com/revenium/revenium-cli/cmd/sessions"
+	"github.com/revenium/revenium-cli/cmd/skills"
 	"github.com/revenium/revenium-cli/cmd/sources"
 	"github.com/revenium/revenium-cli/cmd/squads"
 	"github.com/revenium/revenium-cli/cmd/subscribers"
@@ -65,6 +67,8 @@ func init() {
 	cmd.RegisterCommand(meter.Cmd, "monitoring")
 	cmd.RegisterCommand(metrics.Cmd, "monitoring")
 	cmd.RegisterCommand(squads.Cmd, "monitoring")
+	cmd.RegisterCommand(skills.Cmd, "monitoring")
+	cmd.RegisterCommand(sessions.Cmd, "monitoring")
 }
 
 func main() {

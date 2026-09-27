@@ -14,6 +14,27 @@ import (
 // configDirOverride allows tests to redirect config operations to a temp directory.
 var configDirOverride string
 
+// envBoundKeys is the single list of config keys bound to REVENIUM_* environment
+// variables. Load() binds from it and internal/config's test helper clears from
+// it, so a seventh key cannot be bound in production without also being isolated
+// in tests — which is exactly how SAFE-03's regression got here.
+var envBoundKeys = []string{
+	"api-key",
+	"api-url",
+	"team-id",
+	"tenant-id",
+	"owner-id",
+	"analytics-api-url",
+}
+
+// envVarName reproduces the SetEnvPrefix("REVENIUM") + SetEnvKeyReplacer("-" -> "_")
+// transform that Load() configures on viper. It exists so the test helper derives
+// each variable name from the bound key rather than hard-coding a parallel
+// spelling that can drift from the binding.
+func envVarName(key string) string {
+	return "REVENIUM_" + strings.ToUpper(strings.ReplaceAll(key, "-", "_"))
+}
+
 // Config holds the CLI configuration values.
 type Config struct {
 	APIKey          string
@@ -64,12 +85,9 @@ func Load() (*Config, error) {
 	viper.AutomaticEnv()
 	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
 
-	_ = viper.BindEnv("api-key")
-	_ = viper.BindEnv("api-url")
-	_ = viper.BindEnv("team-id")
-	_ = viper.BindEnv("tenant-id")
-	_ = viper.BindEnv("owner-id")
-	_ = viper.BindEnv("analytics-api-url")
+	for _, k := range envBoundKeys {
+		_ = viper.BindEnv(k)
+	}
 
 	viper.SetDefault("api-url", "https://api.revenium.ai/profitstream")
 	viper.SetDefault("analytics-api-url", "https://app.revenium.ai")

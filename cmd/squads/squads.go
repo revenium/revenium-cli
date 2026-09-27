@@ -36,9 +36,34 @@ var Cmd = &cobra.Command{
 
   # Scope any of the above to a period
   revenium squads list --period SEVEN_DAYS`,
-	PersistentPreRunE: func(c *cobra.Command, args []string) error {
-		// Run the root PersistentPreRunE first (config/API client init).
-		if root := c.Root(); root != nil && root.PersistentPreRunE != nil {
+}
+
+func init() {
+	// The hook is assigned here rather than as a field of the Cmd composite
+	// literal above because its guard has to name Cmd, and referring to Cmd
+	// from inside its own initializer is a Go initialization cycle
+	// ("initialization cycle: Cmd refers to itself").
+	//
+	// Why the guard compares root against Cmd and not against c: cobra walks
+	// up from the executed command to the nearest ancestor carrying a
+	// PersistentPreRunE, then invokes that hook passing the executed LEAF as
+	// c. Running Cmd unattached with `list --period X` therefore enters here
+	// with c == the list command and root == Cmd, so the `root != c` form
+	// never trips and this closure calls itself until the process dies with
+	// `fatal error: stack overflow`. Comparing against the hook's owner —
+	// root != Cmd — is what actually detects "Cmd is its own root", i.e. that
+	// the root hook we would delegate to IS this very closure.
+	//
+	// cmd/metrics/dimensions.go carries the leaf-command variant of this same
+	// guard (`root != c`); that form is correct there precisely because
+	// dimensions is a leaf, so c IS the hook's owner. The divergence here is
+	// deliberate, not drift. cmd/skills/skills.go carries the identical
+	// parent-command form.
+	Cmd.PersistentPreRunE = func(c *cobra.Command, args []string) error {
+		// Run the root PersistentPreRunE first (config/API client init) —
+		// but only when a real root sits above Cmd, as it does under
+		// main.go's rootCmd.
+		if root := c.Root(); root != nil && root != Cmd && root.PersistentPreRunE != nil {
 			if err := root.PersistentPreRunE(c, args); err != nil {
 				return err
 			}
@@ -47,10 +72,8 @@ var Cmd = &cobra.Command{
 		// ever reach the URL (D-01 rationale: squads owns period, not
 		// metrics' --from/--to).
 		return cmd.ValidatePeriod(periodFlag)
-	},
-}
+	}
 
-func init() {
 	Cmd.PersistentFlags().StringVar(&periodFlag, "period", "",
 		"Time period: HOUR, EIGHT_HOURS, TWENTY_FOUR_HOURS, SEVEN_DAYS, "+
 			"THIRTY_DAYS, NINETY_DAYS, SIX_MONTHS, TWELVE_MONTHS (default THIRTY_DAYS server-side)")

@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-09-26
+
+This release carries two internal milestones at once — v1.6 (API drift sweep and release-path hardening) and v1.7 (jobs economics and dev-spec coverage) — neither of which was ever tagged publicly. It adds 26 commands, the largest of them a complete job-type economics and ROI surface. No public v1.6.0 release exists; this supersedes it.
+
+### Added
+
+- **Drift and coverage report published.** `docs/drift-coverage-report.md` now ships with the repository, at the path this changelog has advertised since v1.3.0. Its four finding tables — deliberate skips, gap triage, audit-visible deprecations, and spec asymmetries — are generated from the coverage audit rather than kept by hand, so the report is refreshed against the OpenAPI specs instead of drifting away from them. The judgement around them is still written by a person and says so.
+- **Skill usage read-back.** `revenium skills list` ranks skills by attributed cost and `revenium skills get <skillId>` returns one skill's usage detail. Both accept `--period` (`HOUR`, `EIGHT_HOURS`, `TWENTY_FOUR_HOURS`, `SEVEN_DAYS`, `THIRTY_DAYS`, `NINETY_DAYS`, `SIX_MONTHS`, `TWELVE_MONTHS`; omitted, the server applies its `THIRTY_DAYS` default) and `--json`; `list` also accepts `--page`/`--page-size`. This closes the read side of the write-only skill tracking that shipped in v1.4.0. `--skill-invocation-trigger` stays write-only — neither response schema declares it.
+- **Job type economics contracts.** `revenium jobs types economics get <type>` reads a job type's declared economics document and `revenium jobs types economics set <type> --file <doc>` upserts it. `set` replaces the WHOLE document — any metric, dimension or allowed value absent from the supplied JSON is removed — so it first reads the current contract and requires `--yes` only when the replace would remove something already declared. Creating a contract where none exists removes nothing and needs no confirmation, which makes it safe unattended. The read-only `jobType` and `currentBaseline` keys are stripped from input and reported on stderr, so a document from `economics get --json` can be edited and fed straight back. Six closed enums are validated locally with indexed messages before any request is built.
+- **Immutable pre-AI baselines.** `revenium jobs types baselines list <type>` returns a job type's baseline versions newest first, and `revenium jobs types baselines append <type>` adds a new immutable version from nine scalars. Baselines are append-only and are never altered by `economics set`.
+- **Declared outcome facts.** `revenium jobs types facts append <type> --file <entries>` appends `PERIOD` outcome facts and `revenium jobs outcome-metrics <agenticJobId> --file <entries>` appends late `PER_JOB` outcome metrics to a job that has already finished. Both take a JSON array (or `-` for stdin), send every entry in the order given without merging or deduplicating, and validate each entry by index before any request exists — a rejected entry means nothing was appended. Both endpoints append *declared* facts, so the job type's economics contract must exist first. Appended entries are permanent, cannot be amended, and the API exposes no read-back, which is why `facts` has no `list` verb.
+- **Aggregate ROI.** `revenium jobs roi-summary` reports ROI across job types on the analytics host, with four filter flags translated to their API names and omitted when unset; `--metric-type` outside the declared enum is refused before any request is made.
+- **Bulk job delete.** `revenium jobs delete` now accepts multiple ids and routes by arity to the single-item or bulk endpoint. A bodyless 2xx bulk delete is reported as UNCONFIRMED rather than as success, and any id the server reports that the operator never named is surfaced.
+- **Optimistic concurrency on outcome updates.** `revenium jobs outcome-update` accepts `--expected-entity-version`, sent only when passed, so a caller can refuse to overwrite an outcome that changed underneath it.
+- **Team settings.** `revenium teams pr-health get|set`, `revenium teams attribution-identity-policy get|set`, and `revenium teams verified-domains list|add|remove`. `get` renders effective values with a caption naming where each came from; `verified-domains remove` emits a parseable JSON success document.
+- **Session attribution.** `revenium sessions attribution <sessionId>` reads a coding-assistant session's attribution. The sibling write is deliberately not exposed — it reads as an automated tooling callback keyed by an opaque session UUID rather than an operator action.
+- **Seat and pull-request billing reads.** `revenium billing seats` returns the seat census, `revenium billing vcs-pr-health` reports pull-request health, and `revenium billing vcs-prs-by-org-unit` breaks pull requests down by org unit with a total line and a stable row order. Each renders an explicit empty state rather than a blank table.
+- **Cost-control preview.** `revenium guardrails org-unit-group-preview` previews which org units a grouping rule would select. It creates nothing despite being a POST.
+
+### Deprecated
+
+- **`revenium billing users get`** warns on stderr that its endpoint has been withdrawn, naming `revenium billing users` and then `revenium billing vcs-pr-health` as successors in that order — the withdrawn endpoint returned per-user cost detail, so the surviving list is the closer redirect. `revenium billing users` itself is unaffected and does not warn.
+- **`revenium billing claude-code-contributions`** warns on stderr before issuing its request, naming `revenium billing vcs-prs` as the successor. The warning is emitted before the call is built, so it appears even when the withdrawn endpoint 404s. stdout remains a single parseable JSON document and the exit code is unchanged.
+
 ## [1.5.0] - 2026-08-21
 
 ### Added
@@ -105,7 +129,8 @@ This release reconciles the CLI against all three Revenium OpenAPI specs — pla
 
 (See https://github.com/revenium/revenium-cli/releases/tag/v1.0.3 — v1.0.x history is not back-filled in this CHANGELOG; only v1.1.0+ entries are curated.)
 
-[Unreleased]: https://github.com/revenium/revenium-cli/compare/v1.5.0...HEAD
+[Unreleased]: https://github.com/revenium/revenium-cli/compare/v1.7.0...HEAD
+[1.7.0]: https://github.com/revenium/revenium-cli/compare/v1.5.0...v1.7.0
 [1.5.0]: https://github.com/revenium/revenium-cli/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/revenium/revenium-cli/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/revenium/revenium-cli/compare/v1.2.1...v1.3.0

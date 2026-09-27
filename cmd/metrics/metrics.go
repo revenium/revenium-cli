@@ -26,9 +26,36 @@ var Cmd = &cobra.Command{
 
   # Query audio metrics as JSON
   revenium metrics audio --json`,
-	PersistentPreRunE: func(c *cobra.Command, args []string) error {
-		// Run the root PersistentPreRunE first (config/API client init).
-		if root := c.Root(); root != nil && root.PersistentPreRunE != nil {
+}
+
+func init() {
+	// Assigned here rather than inside the composite literal above: naming Cmd
+	// within its own initializer is the Go initialization cycle
+	// ("initialization cycle: Cmd refers to itself").
+	//
+	// The root PersistentPreRunE has to run first because it is what
+	// initializes config and cmd.APIClient; skipping it would leave the
+	// shipped `revenium metrics ...` commands calling into a nil client.
+	//
+	// Why the guard compares root against Cmd and not against c: cobra walks
+	// up from the executed command to the nearest ancestor carrying a
+	// PersistentPreRunE, then invokes that hook passing the executed LEAF as
+	// c. Running Cmd unattached with `ai --from X` therefore enters here with
+	// c == the ai command and root == Cmd, so the leaf form would never trip
+	// and this closure would call itself until the process dies with
+	// `fatal error: stack overflow`. Comparing against the hook's OWNER is
+	// what actually detects "Cmd is its own root", i.e. that the root hook we
+	// would delegate to IS this very closure.
+	//
+	// cmd/metrics/dimensions.go carries the leaf-command variant of this same
+	// guard (comparing root against c); that form is correct there precisely
+	// because dimensions is a leaf, so there c IS the hook's owner. The
+	// divergence is deliberate, not drift.
+	Cmd.PersistentPreRunE = func(c *cobra.Command, args []string) error {
+		// Run the root PersistentPreRunE first (config/API client init) —
+		// but only when a real root sits above Cmd, as it does under
+		// main.go's rootCmd.
+		if root := c.Root(); root != nil && root != Cmd && root.PersistentPreRunE != nil {
 			if err := root.PersistentPreRunE(c, args); err != nil {
 				return err
 			}
@@ -37,10 +64,8 @@ var Cmd = &cobra.Command{
 			return err
 		}
 		return normalizeDateFlag("to", &toFlag)
-	},
-}
+	}
 
-func init() {
 	Cmd.PersistentFlags().StringVar(&fromFlag, "from", "", "Start date (ISO 8601, e.g. 2024-01-15T00:00:00Z)")
 	Cmd.PersistentFlags().StringVar(&toFlag, "to", "", "End date (ISO 8601, e.g. 2024-01-15T23:59:59Z)")
 
