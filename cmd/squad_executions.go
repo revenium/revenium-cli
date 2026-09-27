@@ -10,30 +10,45 @@ import (
 	"github.com/revenium/revenium-cli/internal/output"
 )
 
-// validSquadPeriods is the exact eight-value `period` enum accepted by every
-// /v2/api/squads* endpoint (RESEARCH: HOUR, EIGHT_HOURS, TWENTY_FOUR_HOURS,
-// SEVEN_DAYS, THIRTY_DAYS, NINETY_DAYS, SIX_MONTHS, TWELVE_MONTHS). All five
-// endpoints default to THIRTY_DAYS server-side when period is omitted — do
-// not hardcode that default client-side (RESEARCH anti-pattern).
-var validSquadPeriods = []string{
+// validPeriods is the exact eight-value `period` enum shared by the
+// /v2/api/squads* endpoints and the /v2/api/skills endpoints (HOUR,
+// EIGHT_HOURS, TWENTY_FOUR_HOURS, SEVEN_DAYS, THIRTY_DAYS, NINETY_DAYS,
+// SIX_MONTHS, TWELVE_MONTHS), verified value-for-value against the cached
+// platform spec on 2026-08-23.
+//
+// Every one of those endpoints documents a THIRTY_DAYS server-side default
+// when period is omitted — do not hardcode that default client-side (a
+// recorded v1.3 anti-pattern). An empty string means the caller omits the
+// query param entirely and lets the server apply it.
+//
+// Two caller families reach these values through ValidatePeriod: cmd/squads
+// (list, get, timeline, executions) and cmd/skills (list, get). A third
+// surface adopting a `period` parameter should join them here rather than
+// declaring a second copy — one enum, not two (D-22-02). Two copies of one
+// enum is precisely the drift this milestone exists to detect.
+var validPeriods = []string{
 	"HOUR", "EIGHT_HOURS", "TWENTY_FOUR_HOURS", "SEVEN_DAYS",
 	"THIRTY_DAYS", "NINETY_DAYS", "SIX_MONTHS", "TWELVE_MONTHS",
 }
 
-// ValidatePeriod validates p against the Squads API's period enum. An empty
-// string is valid — it means the caller omits the query param entirely,
-// letting the server apply its documented THIRTY_DAYS default (T-2-02
-// mitigation: reject unknown values before they ever reach the URL).
+// ValidatePeriod validates p against the shared platform `period` enum
+// declared above. It is called by both the squads and the skills command
+// families, so its wording and error message stay surface-neutral.
+//
+// An empty string is valid — it means the caller omits the query param
+// entirely, letting the server apply its documented THIRTY_DAYS default
+// (T-2-02 / T-22-01 mitigation: reject unknown values before they are ever
+// interpolated into a request URL).
 func ValidatePeriod(p string) error {
 	if p == "" {
 		return nil
 	}
-	for _, v := range validSquadPeriods {
+	for _, v := range validPeriods {
 		if p == v {
 			return nil
 		}
 	}
-	return fmt.Errorf("--period %q is not valid (expected one of: %s)", p, strings.Join(validSquadPeriods, ", "))
+	return fmt.Errorf("--period %q is not valid (expected one of: %s)", p, strings.Join(validPeriods, ", "))
 }
 
 // SquadExecutionsTableDef defines the table layout for flat squad-execution

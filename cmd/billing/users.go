@@ -62,6 +62,23 @@ func newUsersGetCmd() *cobra.Command {
   # Get a user's cost detail as JSON
   revenium billing users get jane@example.com --json`,
 		RunE: func(c *cobra.Command, args []string) error {
+			// BILL-07 deprecation notice, copied in form from the shipped
+			// precedent at cmd/subscriptions/create.go:32-35. It goes to the
+			// cobra command's error writer, never through cmd.Output (whose
+			// writer is stdout, internal/output/output.go:80-83), so --json
+			// stdout stays parseable; and it is emitted BEFORE the request is
+			// built so it reaches the operator even when the withdrawn endpoint
+			// 404s.
+			//
+			// The order of the two successors is fixed and load-bearing
+			// (D-30-01): this endpoint returned per-user COST detail, so the
+			// surviving `revenium billing users` list is the closer redirect for
+			// the question the operator was actually asking.
+			// `revenium billing vcs-pr-health` answers a different, adjacent
+			// question and is named second. Two successors are named because
+			// neither one alone replaces the withdrawn endpoint.
+			fmt.Fprintln(c.ErrOrStderr(), "Warning: `revenium billing users get` is deprecated; its endpoint is withdrawn upstream. Use `revenium billing users` instead for cost, or `revenium billing vcs-pr-health` for per-engineer activity.")
+
 			path := fmt.Sprintf("/v2/api/billing/users/%s", url.PathEscape(args[0]))
 			var detail map[string]interface{}
 			if err := cmd.APIClient.Do(c.Context(), "GET", path, nil, &detail); err != nil {
@@ -87,6 +104,12 @@ func newUsersCmd() *cobra.Command {
 
   # Get a specific user's cost detail
   revenium billing users get jane@example.com`,
+		// D-30-02: this list targets /v2/api/billing/users, which is PRESENT
+		// and healthy in the dev platform document at 2.20.0-SNAPSHOT. Only
+		// the `get <email>` child's endpoint is withdrawn. Deliberately no
+		// deprecation notice here — warning that a working command is going
+		// away would misreport the state of the system. Do not "complete"
+		// the BILL-07 change by adding one.
 		RunE: func(c *cobra.Command, args []string) error {
 			var users []map[string]interface{}
 			if err := cmd.APIClient.DoList(c.Context(), "/v2/api/billing/users", cmd.ListOptsFromFlags(c), &users); err != nil {

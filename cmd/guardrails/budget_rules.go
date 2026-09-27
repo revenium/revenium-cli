@@ -2,6 +2,8 @@ package guardrails
 
 import (
 	"fmt"
+	"math"
+	"strconv"
 
 	"github.com/spf13/cobra"
 
@@ -46,11 +48,35 @@ var tableDef = output.TableDef{
 }
 
 // str safely extracts a string value from a map, returning "" for missing or nil keys.
+//
+// INTEGRAL JSON NUMBERS ARE FORMATTED AS INTEGERS (code review WR-02).
+// encoding/json decodes EVERY number into a float64, and fmt.Sprint formats a
+// float with the %v verb — strconv's 'g' — which switches to scientific
+// notation above a million. A seven-digit targetCount therefore reached the
+// operator as "1e+06": abbreviated at exactly the magnitude where the figure
+// carries the most weight, in a sentence whose whole job is to be read before
+// a spend cap is written.
+//
+// The ten-to-the-fifteenth bound is where a float64 stops representing every
+// integer exactly. Past it, printing an integer would itself be a claim the
+// value no longer supports, so those keep going through fmt.Sprint. Infinities
+// and NaN fall through for the same reason: NaN fails the truncation equality
+// (it compares unequal to everything, itself included) and an infinity fails
+// the bound.
+//
+// Everything else — strings, bools, objects, fractional numbers — is unchanged.
+// The four other renderers in this package share this helper; their shipped
+// fixtures (hardLimit 1000, warnThreshold 800) already rendered as digits under
+// %v and render identically here.
 func str(m map[string]interface{}, key string) string {
-	if v, ok := m[key]; ok && v != nil {
-		return fmt.Sprint(v)
+	v, ok := m[key]
+	if !ok || v == nil {
+		return ""
 	}
-	return ""
+	if f, ok := v.(float64); ok && f == math.Trunc(f) && math.Abs(f) < 1e15 {
+		return strconv.FormatInt(int64(f), 10)
+	}
+	return fmt.Sprint(v)
 }
 
 // boolStatus renders a bool field as "active"/"inactive" (RESEARCH D-03).

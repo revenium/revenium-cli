@@ -31,6 +31,12 @@ const fixtureSquadExecution = `[{
 	"status": "SUCCESS"
 }]`
 
+// TestValidatePeriod exercises the shared platform `period` enum, not a
+// squads-only one: both cmd/squads and cmd/skills validate through
+// ValidatePeriod, so the eight values, the empty-string-is-valid behaviour
+// and the error-message format are a contract for every period-taking
+// surface. cmd/squads' own tests assert the error names the offending value,
+// so that format must not drift.
 func TestValidatePeriod(t *testing.T) {
 	assert.NoError(t, ValidatePeriod(""))
 

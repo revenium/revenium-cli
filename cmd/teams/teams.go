@@ -38,6 +38,12 @@ func init() {
 	initCodingAssistantFilter()
 	Cmd.AddCommand(logoCmd)
 	initLogo()
+	Cmd.AddCommand(prHealthCmd)
+	initPrHealth()
+	Cmd.AddCommand(attributionIdentityPolicyCmd)
+	initAttributionIdentityPolicy()
+	Cmd.AddCommand(verifiedDomainsCmd)
+	initVerifiedDomains()
 }
 
 // tableDef defines the table layout for team output.

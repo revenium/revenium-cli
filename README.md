@@ -190,6 +190,72 @@ revenium teams prompt-capture get <team-id>
 revenium teams prompt-capture set <team-id> --enabled true
 ```
 
+#### Team PR Health
+
+View and update the PR health thresholds for a team. The API returns *effective* values with its own defaults already applied, and carries no provenance, so the CLI cannot tell a configured value from a server default and does not guess. Both flags on `set` are required, and the CLI refuses `--aging-days >= --rotting-days` before sending anything. The `--fields Value` shown below names a table column, not a response key — see Field Filtering under Output Formats for what that means when `--json` is also passed.
+
+```sh
+revenium teams pr-health get <team-id>
+revenium teams pr-health get <team-id> --fields Value
+revenium teams pr-health set <team-id> --aging-days 14 --rotting-days 30
+```
+
+#### Team Attribution Identity Policy
+
+Read and set how a team's AI activity is attributed to an identity. The policy is one of two values: `VERIFIED_DOMAIN_ONLY`, which accepts only identities on a domain the tenant has verified, and `ALLOW_SELF_ASSERTED_UNVERIFIED`, which accepts any structurally valid identity. The value is compared exactly, so lowercase spellings are refused before anything is sent. The `--fields Value` shown below names a table column, not a response key — see Field Filtering under Output Formats for what that means when `--json` is also passed.
+
+```sh
+revenium teams attribution-identity-policy get <team-id>
+revenium teams attribution-identity-policy get <team-id> --fields Value
+revenium teams attribution-identity-policy set <team-id> --policy VERIFIED_DOMAIN_ONLY
+revenium teams attribution-identity-policy set <team-id> --policy ALLOW_SELF_ASSERTED_UNVERIFIED
+```
+
+`set` prints an advisory on stderr before it sends the request, because the stored policy is currently recorded intent and is not enforced by the platform:
+
+```
+Note: this policy is recorded intent and is not currently enforced. While the platform's verified-domain gate is deactivated, attribution resolves every team to ALLOW_SELF_ASSERTED_UNVERIFIED and accepts structurally valid identities from any domain; structurally invalid addresses are rejected either way.
+```
+
+Storing `VERIFIED_DOMAIN_ONLY` therefore does not currently close anything, and a `200` echoing the strict value back is not evidence that it did. The notice is printed for both values rather than only the strict one, so it does not encode a guess about which platform gate is live today. It goes to **stderr** specifically so that `--json` output stays parseable — redirect stderr if a script should not see it. `get` prints no such notice: it reports a stored value and makes no claim about enforcement.
+
+#### Team Verified Domains
+
+List, add and remove the verified domains for a team's tenant.
+
+```sh
+revenium teams verified-domains list <team-id>
+revenium teams verified-domains list <team-id> --fields Domain
+revenium teams verified-domains add <team-id> acme.example
+revenium teams verified-domains remove <team-id> acme.example
+revenium teams verified-domains remove <team-id> acme.example --yes
+revenium teams verified-domains remove <team-id> <domain> --json
+```
+
+The verbs are `list | add | remove` rather than the `get | set` pair the sibling settings groups use, because this endpoint is a collection rather than a scalar setting: `add` appends **one** domain and leaves the rest of the collection alone. Calling it `set` would suggest it replaces the collection, which it does not.
+
+The domain travels exactly as you type it — no lowercasing, no trimming, no hostname format check. That matters most on `remove`, where the domain is matched against stored rows by the server: a client-side transform that disagreed with the server's would be a delete that quietly removed nothing while reporting success. If a removal returns a `404`, the domain as typed did not match a stored row.
+
+`add` takes no `--source` or `--join-policy` flag — the platform assigns both — but it renders them back, so you can see the join policy attached to the domain you just verified. `list` and `add` share one `Domain | Source | Join Policy` table. An empty collection is a normal answer, not an error: `No verified domains found for this team.` in table mode, and `[]` under `--json`. The `--fields Domain` shown above names a table column, not a response key — see Field Filtering under Output Formats for what that means when `--json` is also passed.
+
+`remove` goes through the same confirmation prompt every destructive command uses when it runs interactively, and `--yes` skips it. The prompt reads:
+
+```
+Delete verified domain acme.example? [y/N]
+```
+
+The verb in the prompt is `Delete` while the command is `remove`: the shared confirmation helper is reused unchanged, and it spells the word that way. `--dry-run` reports what would be sent and never prompts.
+
+That shared helper skips the prompt in three cases: when `--yes` is passed, when `--json` is set, and when stdin is not a terminal. A piped or CI invocation therefore proceeds without prompting and deletes on the strength of the command line alone. This is inherited behaviour, shared by every destructive command in the CLI rather than specific to this one — pass `--yes` explicitly when you mean it, and do not rely on the prompt as a safety net in a non-interactive context.
+
+Under `--json`, `remove` emits a JSON object in place of the prose sentence, carrying `removed`, `domain` and `teamId`, so a script can parse the result of a delete instead of string-matching a sentence:
+
+```json
+{ "removed": true, "domain": "acme.example", "teamId": "team-123" }
+```
+
+The document is the CLI's own — a `204` carries no body to relay — and it is emitted only after the delete succeeds. A failed delete relays the server's error and emits no success document.
+
 #### Agentic Jobs
 
 Manage Agentic Jobs and report their outcomes. Updates use PATCH semantics — only fields you pass are changed.
@@ -201,13 +267,23 @@ revenium jobs get <agenticJobId>
 revenium jobs create --type <type> --status RUNNING
 revenium jobs update <agenticJobId> --status COMPLETED
 revenium jobs delete <agenticJobId>
+revenium jobs delete <agenticJobId>...                     # two or more ids: one bulk request
 
 # Sub-resources
 revenium jobs outcome <agenticJobId> --outcome SUCCESS    # immutable; second call returns 409
 revenium jobs roi <agenticJobId>                          # ROI metrics
+revenium jobs roi-summary                                 # aggregate ROI summary across job types
 revenium jobs transactions <agenticJobId>                 # AI transactions for the job
 revenium jobs types                                       # available job types
 revenium jobs conversion-funnel                           # aggregate conversion funnel
+revenium jobs outcome-metrics <agenticJobId> --file <path>  # appends late per-job outcome metrics
+
+# Job type economics and pre-AI baselines
+revenium jobs types economics get <type>                  # declared contract + baseline in force
+revenium jobs types economics set <type> --file <path>    # replaces the WHOLE document; --dry-run first
+revenium jobs types baselines list <type>                 # every version ever declared, newest first
+revenium jobs types baselines append <type>               # append-only; earlier versions never change
+revenium jobs types facts append <type> --file <path>     # append-only; no way to fetch a fact afterwards
 ```
 
 #### Guardrails
@@ -225,7 +301,24 @@ revenium guardrails budget-rules delete <id>
 # Read-only enforcement state
 revenium guardrails enforcement-rules get <team-id>       # compiled rules per team
 revenium guardrails enforcement-events list               # audit trail of enforcement events
+
+# Department scope preview - a POST that creates nothing
+revenium guardrails org-unit-group-preview --parent-org-unit-id 40
+revenium guardrails org-unit-group-preview --parent-org-unit-id 40 --json
 ```
+
+`org-unit-group-preview` answers the question you ask *before* creating a department-scoped budget rule: how many direct sub-teams would such a rule independently cap? **It creates nothing.** It is a read that happens to be sent as a `POST`, so it carries no confirmation prompt and no `--dry-run` — there is nothing to confirm and nothing to preview. Creating the budget rule is a separate `revenium guardrails budget-rules create` call.
+
+`--parent-org-unit-id` takes the **raw numeric org-unit id**, not a Revenium hashid. Org-unit ids are the one identifier in this API that is never hashed, so pasting a hashid here — the habit every other command trains — returns an error rather than a result.
+
+The endpoint is inert unless both the `org-unit-budgets-enabled` and `org-unit-attribution-enabled` feature flags are enabled for the team, in which case it returns a `422`. The CLI does not pre-refuse the call, because it cannot see the flags' state; it names both flags in the error instead:
+
+```
+Request failed (HTTP 422): Department budgets not enabled for this team
+This preview requires both the org-unit-budgets-enabled and org-unit-attribution-enabled feature flags to be enabled for this team. Contact Revenium support to enable them.
+```
+
+An org unit with no direct sub-teams is a real answer rather than an empty result, and reads as `This org unit has no direct sub-teams, so a department-scoped budget rule would cap nothing.` One caveat: `--fields` does not narrow this command's table output, because it renders two sections below a single output-mode branch and only the branch honours the filter; use `--json` when you need to select fields from this command.
 
 #### Organizations
 
@@ -275,6 +368,44 @@ revenium metrics tool-events
 ```
 
 All metrics commands support `--from` and `--to` flags for filtering by time range (ISO 8601 format).
+
+**Skill usage.**
+
+```sh
+# Skills ranked by attributed cost
+revenium skills list
+
+# Scope to a period
+revenium skills list --period SEVEN_DAYS
+
+# Full-fidelity JSON for scripting
+revenium skills list --json
+
+# One skill's usage detail
+revenium skills get <skillId>
+```
+
+`skills` takes `--period` rather than the `--from`/`--to` range the metrics commands use. It accepts `HOUR`, `EIGHT_HOURS`, `TWENTY_FOUR_HOURS`, `SEVEN_DAYS`, `THIRTY_DAYS`, `NINETY_DAYS`, `SIX_MONTHS`, and `TWELVE_MONTHS`; omit the flag and the server applies its `THIRTY_DAYS` default.
+
+These commands read back the skill attribution written by `meter completion --skill-*`. `--skill-invocation-trigger` is the one written field with no read-side counterpart in either response schema, so it can be recorded but not queried back.
+
+### Sessions
+
+Read which ticket a coding-assistant session is attributed to, and how that attribution changed over the life of the session.
+
+```sh
+# Every recorded attribution interval for a session
+revenium sessions attribution <session-id>
+
+# The intervals as a JSON array, including write provenance
+revenium sessions attribution <session-id> --json
+```
+
+Intervals are listed **current first**, in the order the platform returns them — the API states that ordering as part of its contract, so the CLI does not re-sort and cannot reorder an interval away from the position the server guarantees. The first row is what the session is attributed to now.
+
+The table carries four columns — `Effective From`, `Ticket`, `Title` and `Splits` — and those are the fields *every* caller receives. A response to a management-plane credential also carries write provenance (which API key wrote the attribution, who created and modified it, and the subscriber's email); a narrower metering-scoped credential is not sent those fields at all. Rather than show one caller four permanently blank columns, the table renders the fields common to both and `--json` emits the intervals as a JSON array carrying every field the caller's credential plane received — which is where a management-plane caller reads the provenance the table omits, so the four-column table stays lossless. That array is the same top-level type whether the session has intervals or none, so a script parses either state without branching on shape. The HAL collection envelope — the `_embedded` wrapper and the collection-level `_links` — is unwrapped rather than republished; this operation declares no pagination for those links to drive.
+
+`Splits` is a count, not a list. An interval split across several tickets shows how many members it has — `3` — and an em dash when there is no split; the members, with their weights, are available under `--json`. A session with nothing recorded prints `No attribution intervals recorded for this session.`, which is an ordinary answer rather than an error.
 
 ### Metering
 
@@ -353,6 +484,91 @@ revenium meter completion --model gpt-4 --provider openai \
 
 All metering commands support optional fields for cost tracking (`--total-cost`), organizational attribution (`--agent`, `--environment`, `--organization-name`, `--product-name`), distributed tracing (`--transaction-id`, `--trace-id`, `--trace-type`), and conversation content (`--system-prompt`, `--input-messages`, `--output-response`). Use `revenium meter <subcommand> --help` for the full list of flags.
 
+### Billing
+
+`revenium billing` is a read-only cost-attribution and engineering-analytics surface on the platform host. Every verb honours the global `--team-id`, `--json`, `--fields` and `--quiet` flags documented earlier in this file.
+
+**Seat utilization.**
+
+`revenium billing seats` gets the daily Claude Enterprise seat utilization census.
+
+| Flag     | Description                                        |
+|----------|----------------------------------------------------|
+| `--from` | First UTC day to return, inclusive (`yyyy-MM-dd`) — required |
+| `--to`   | Last UTC day to return, inclusive (`yyyy-MM-dd`) — required  |
+
+```sh
+# Get daily seat utilization for a date range
+revenium billing seats --from 2026-08-01 --to 2026-08-22
+
+# Get the full response as JSON
+revenium billing seats --from 2026-08-01 --to 2026-08-22 --json
+```
+
+This command requires a resolved team — set one with `--team-id`, `REVENIUM_TEAM_ID`, or `revenium config set team-id <id>`. A withheld count renders as a dash rather than a zero: the vendor withholds seat and invite figures for RBAC-scoped queries, and a withheld figure is not an organization that assigned no seats.
+
+**PR health.**
+
+`revenium billing vcs-pr-health` gets per-engineer PR health for a VCS source.
+
+| Flag       | Description                                                    |
+|------------|----------------------------------------------------------------|
+| `--source` | VCS source: `github` or `gitlab` — required                     |
+| `--from`   | Start date (ISO `yyyy-MM-dd`) of the closed/merged window — required |
+| `--to`     | End date (ISO `yyyy-MM-dd`), inclusive — required               |
+
+```sh
+# Get PR health for GitHub over a date range
+revenium billing vcs-pr-health --source github --from 2026-05-17 --to 2026-08-17
+
+# Get the full response, including the oldest open-PR detail, as JSON
+revenium billing vcs-pr-health --source github --from 2026-05-17 --to 2026-08-17 --json
+```
+
+Two things about this report are easy to get wrong. Aging and rotting classify open PRs by **inactivity** against the organization's own thresholds, not by age — a PR opened months ago but reviewed yesterday is neither. And the date range scopes the closed-without-merge counts only; the open-PR columns reflect the current synced state regardless of `--from` and `--to`. `--json` additionally carries the `oldest` open-PR detail list that the table summarises away.
+
+**Merged PRs by department.**
+
+`revenium billing vcs-prs-by-org-unit` gets the daily merged-PR series, optionally grouped by department.
+
+| Flag                    | Description                                                                                  |
+|-------------------------|----------------------------------------------------------------------------------------------|
+| `--from`                | Start date (ISO `yyyy-MM-dd`) — required                                                      |
+| `--to`                  | End date (ISO `yyyy-MM-dd`) — required                                                        |
+| `--group-by`            | Return one row per (day, department) instead of the plain daily total; only `orgUnit` is supported by the server |
+| `--org-unit-id`         | Scope the result to a single department, which must belong to the caller's organization       |
+| `--include-descendants` | Also include the descendant departments of `--org-unit-id`; the server ignores this when `--org-unit-id` is omitted |
+
+```sh
+# Get the plain workspace daily total of merged PRs
+revenium billing vcs-prs-by-org-unit --from 2026-03-15 --to 2026-04-14
+
+# Break the same series down by department
+revenium billing vcs-prs-by-org-unit --from 2026-03-15 --to 2026-04-14 --group-by orgUnit
+
+# Scope to one department and its descendants
+revenium billing vcs-prs-by-org-unit --from 2026-03-15 --to 2026-04-14 \
+  --group-by orgUnit --org-unit-id 4821 --include-descendants
+
+# Get the full response as JSON
+revenium billing vcs-prs-by-org-unit --from 2026-03-15 --to 2026-04-14 --json
+```
+
+The server caps a request at 35 days and rejects a wider range. Users who resolve to no department are not dropped — they appear under the server's own `Unassigned` label, so grouped totals reconcile against the ungrouped total.
+
+**Deprecated.**
+
+Two billing commands target endpoints that have been withdrawn upstream. Both still work and both print a notice on **stderr**; stdout is unaffected, so `--json` pipelines are safe.
+
+| Command                                    | Successor                                                                                    |
+|--------------------------------------------|----------------------------------------------------------------------------------------------|
+| `revenium billing claude-code-contributions` | `revenium billing vcs-prs`                                                                    |
+| `revenium billing users get <email>`         | `revenium billing users` for cost, or `revenium billing vcs-pr-health` for per-engineer activity |
+
+`revenium billing users` (the list form) is not deprecated and emits no notice.
+
+**Availability.** `revenium billing seats`, `revenium billing vcs-pr-health` and `revenium billing vcs-prs-by-org-unit` are present in the development platform API document and absent from the cached production document. Until the production API ships them, these three commands may return `404` against `api.revenium.ai`. That is expected, not a CLI defect — the commands were built against the dev specification deliberately.
+
 ## Output Formats
 
 ### Table (default)
@@ -395,10 +611,15 @@ revenium models list --output json | jq '.[].name'
 
 ### Field Filtering
 
-Use `--fields` to limit the fields included in output. Works with both JSON and table modes:
+Use `--fields` to limit the fields included in output. The flag is accepted in both modes, but the two modes match different vocabularies:
+
+- **Table mode** — `--fields` names **column headers**, and matches them case-insensitively. `--fields Value` and `--fields value` select the same column.
+- **JSON mode** — `--fields` names the raw response keys the API sends, and matches them case-sensitively. A payload carrying `agingDays` is selected by `--fields agingDays` and by nothing else.
+
+A column header that is not also a response key therefore narrows the table but produces an **empty document** when combined with `--json`. `--fields Value` on `teams pr-health get` and on `teams attribution-identity-policy get`, and `--fields Domain` on `teams verified-domains list`, are all of that kind: each filters the table as you expect and each yields `{}` (or `[{}]`) under `--json`, because the response has no key spelled that way. Avoid pairing a column header with `--json` until the two vocabularies are unified — name the response key instead, or drop `--fields` and select with `jq`.
 
 ```sh
-# Only return id and name in JSON output
+# Only return id and name in JSON output — both are response keys
 revenium sources list --output json --fields id,name
 
 # Filter table columns
@@ -408,6 +629,8 @@ revenium sources list --fields id,name,status
 ### Quiet Mode
 
 Suppress non-error output with `--quiet` / `-q`. Useful in scripts where you only care about the exit code:
+
+`--quiet` suppresses advisory captions, empty-state sentences and success lines as well as tables — a qualifier is never left standing without the payload it qualifies, so `teams pr-health get --quiet`, `teams verified-domains list --quiet`, `teams verified-domains remove --quiet` and `sessions attribution --quiet` print nothing at all. The one exception is `--quiet` combined with `--json`: the JSON document is still emitted, because suppressing a machine-readable result would leave the combination with no use. Errors go to stderr and are never suppressed.
 
 ```sh
 revenium sources delete src-123 --yes --quiet

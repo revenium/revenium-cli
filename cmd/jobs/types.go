@@ -9,11 +9,29 @@ import (
 	"github.com/revenium/revenium-cli/internal/output"
 )
 
+// typesCmd is the registered `jobs types` command, held in a package variable
+// so sub-resources have a non-nil parent to hang off. Before Phase 27 the
+// command was constructed and discarded, so there was nothing to register
+// children onto.
+var typesCmd *cobra.Command
+
 // init registers newTypesCmd() onto the package-level jobs.Cmd. Per Phase 12
 // D-21 and Go's multi-init-per-package semantics, this composes with the
 // init()s in jobs.go (list+get) and create.go/update.go/delete.go/outcome.go.
 func init() {
-	Cmd.AddCommand(newTypesCmd())
+	typesCmd = newTypesCmd()
+	Cmd.AddCommand(typesCmd)
+	// Sub-resource children are registered HERE and never from a child
+	// file: Go runs package initializers in lexical filename order, so an
+	// initializer in economics.go would run before this one and see a nil
+	// typesCmd — silently registering nothing, or panicking on every
+	// `revenium` invocation including --help.
+	typesCmd.AddCommand(economicsCmd)
+	initEconomics()
+	typesCmd.AddCommand(baselinesCmd)
+	initBaselines()
+	typesCmd.AddCommand(factsCmd)
+	initFacts()
 }
 
 // typesTableDef defines the single-column layout for the types output.
@@ -38,11 +56,26 @@ func newTypesCmd() *cobra.Command {
 		Use:   "types",
 		Short: "List available job types",
 		Args:  cobra.NoArgs, // CF-17 — aggregate verb, no id
+		// The last two lines exist so `revenium jobs types --help` surfaces
+		// the sub-resources. Cobra lists child commands under "Available
+		// Commands", but only by their one-line Short — an operator reading
+		// this help has no way to see the shape of an actual invocation
+		// (which verb, and that a <type> is positional) without drilling into
+		// two more --help calls.
 		Example: `  # List all available job types
   revenium jobs types
 
   # As JSON for scripting
-  revenium jobs types --json`,
+  revenium jobs types --json
+
+  # Read a job type's declared economics contract
+  revenium jobs types economics get acme-review
+
+  # List a job type's immutable pre-AI baseline versions, newest first
+  revenium jobs types baselines list acme-review
+
+  # Append a job type's declared period outcome facts from a file
+  revenium jobs types facts append acme-review --file facts.json`,
 		RunE: func(c *cobra.Command, args []string) error {
 			// Typed []string decode — pagination helper does not fit
 			// this shape (RESEARCH §A4 + Pitfall 2).
