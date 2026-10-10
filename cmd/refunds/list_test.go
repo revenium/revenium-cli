@@ -25,7 +25,7 @@ func TestListRefunds(t *testing.T) {
 		fmt.Fprint(w, `{
 			"_embedded": {
 				"refundResourceList": [
-					{"id":"ref-1","amount":50.25,"currency":"USD","status":"COMPLETED"}
+					{"id":"ref-1","created":"2024-01-15T10:00:00Z","amount":50.25,"currency":"USD","status":"COMPLETED"}
 				]
 			},
 			"_links": {},
@@ -46,6 +46,8 @@ func TestListRefunds(t *testing.T) {
 	out := buf.String()
 	assert.Contains(t, out, "ref-1")
 	assert.Contains(t, out, "COMPLETED")
+	assert.Contains(t, out, "Created")
+	assert.Contains(t, out, "2024-01-15 10:00:00 UTC")
 }
 
 // TestListRefundsEmpty asserts the empty-state phrase fires for an empty

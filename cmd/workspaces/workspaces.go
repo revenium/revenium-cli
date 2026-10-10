@@ -37,11 +37,11 @@ func init() {
 	Cmd.AddCommand(newListCmd())
 }
 
-// tableDef defines the 3-column layout for the workspaces list verb.
+// tableDef defines the column layout for the workspaces list verb.
 // WorkspaceMetadataResource has no natural lifecycle status field, so
 // StatusColumn is -1 (matches cmd/squads/list.go's listTableDef precedent).
 var tableDef = output.TableDef{
-	Headers:      []string{"ID", "Name", "Provider"},
+	Headers:      []string{"ID", "Name", "Provider", "Created"},
 	StatusColumn: -1,
 }
 
@@ -55,11 +55,11 @@ func str(m map[string]interface{}, key string) string {
 	return ""
 }
 
-// toRows converts a slice of workspace maps to 3-col table row strings.
+// toRows converts a slice of workspace maps to table row strings.
 func toRows(workspaces []map[string]interface{}) [][]string {
 	rows := make([][]string, len(workspaces))
 	for i, w := range workspaces {
-		rows[i] = []string{str(w, "id"), str(w, "name"), str(w, "provider")}
+		rows[i] = []string{str(w, "id"), str(w, "name"), str(w, "provider"), output.TimestampVal(w, "created")}
 	}
 	return rows
 }

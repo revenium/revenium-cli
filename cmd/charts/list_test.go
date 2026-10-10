@@ -19,7 +19,7 @@ func TestListCharts(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "/v2/api/reports/chart-definitions", r.URL.Path)
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `[{"id": "chart-1", "label": "Revenue Chart", "type": "bar", "created": "2026-01-01"}]`)
+		fmt.Fprint(w, `[{"id": "chart-1", "label": "Revenue Chart", "type": "bar", "created": "2026-01-01T08:30:00Z"}]`)
 	}))
 	defer srv.Close()
 
@@ -35,6 +35,7 @@ func TestListCharts(t *testing.T) {
 	out := buf.String()
 	assert.Contains(t, out, "chart-1")
 	assert.Contains(t, out, "Revenue Chart")
+	assert.Contains(t, out, "2026-01-01 08:30:00 UTC")
 }
 
 func TestListChartsEmpty(t *testing.T) {

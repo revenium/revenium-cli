@@ -53,7 +53,7 @@ func toEnforcementEventRows(events []map[string]interface{}) [][]string {
 			str(e, "action"),
 			str(e, "metricType"),
 			fmt.Sprintf("%v/%v", e["currentValue"], e["threshold"]),
-			eventTime(e),
+			output.FormatTimestamp(eventTime(e)),
 		}
 	}
 	return rows

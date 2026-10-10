@@ -225,6 +225,7 @@ func TestSessionsAttributionRendersIntervals(t *testing.T) {
 	assert.Equal(t, []string{http.MethodGet}, rec.methodsSeen(), "a read issues no request of any other method")
 	assert.Equal(t, []string{"/v2/api/sessions/sess-1/attribution"}, rec.pathsSeen())
 	assert.NotContains(t, out, "_links", "HAL navigation noise must not become a row")
+	assert.Contains(t, out, "2026-02-01 00:00:00 UTC")
 }
 
 // TestSessionsAttributionPreservesServerOrder is the SC4 assertion, and it is

@@ -22,7 +22,7 @@ func TestGetTenant(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "/v2/api/tenants/ten-1", r.URL.Path)
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `{"id":"ten-1","name":"Acme Tenant","status":"ACTIVE"}`)
+		fmt.Fprint(w, `{"id":"ten-1","created":"2024-01-15T10:00:00Z","name":"Acme Tenant","status":"ACTIVE"}`)
 	}))
 	defer srv.Close()
 
@@ -39,6 +39,8 @@ func TestGetTenant(t *testing.T) {
 	out := buf.String()
 	assert.Contains(t, out, "ten-1")
 	assert.Contains(t, out, "Acme Tenant")
+	assert.Contains(t, out, "Created")
+	assert.Contains(t, out, "2024-01-15 10:00:00 UTC")
 }
 
 // TestGetTenantJSON asserts --json mode emits parseable JSON containing the

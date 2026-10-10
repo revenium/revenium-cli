@@ -53,6 +53,7 @@ func TestModelHistory(t *testing.T) {
 	assert.Contains(t, out, "Old")
 	assert.Contains(t, out, "New")
 	assert.Contains(t, out, "jane@example.com")
+	assert.Contains(t, out, "2026-07-01 00:00:00 UTC")
 }
 
 // TestModelHistoryEmpty asserts the empty-state phrase fires for a plain-array

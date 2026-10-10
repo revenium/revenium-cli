@@ -20,7 +20,7 @@ func TestListSubscribers(t *testing.T) {
 		assert.Equal(t, "/v2/api/subscribers", r.URL.Path)
 		w.Header().Set("Content-Type", "application/json")
 		fmt.Fprint(w, `[
-			{"id": "sub-1", "email": "john@example.com", "firstName": "John", "lastName": "Doe"},
+			{"id": "sub-1", "created": "2024-01-15T10:00:00Z", "email": "john@example.com", "firstName": "John", "lastName": "Doe"},
 			{"id": "sub-2", "email": "jane@example.com", "firstName": "Jane", "lastName": "Smith"}
 		]`)
 	}))
@@ -42,6 +42,8 @@ func TestListSubscribers(t *testing.T) {
 	assert.Contains(t, out, "sub-2")
 	assert.Contains(t, out, "Jane Smith")
 	assert.Contains(t, out, "jane@example.com")
+	assert.Contains(t, out, "Created")
+	assert.Contains(t, out, "2024-01-15 10:00:00 UTC")
 }
 
 func TestListSubscribersEmpty(t *testing.T) {

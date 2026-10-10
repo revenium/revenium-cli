@@ -19,7 +19,7 @@ func TestListTeams(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "/v2/api/teams", r.URL.Path)
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `[{"id": "team-1", "name": "Engineering", "label": "Engineering", "description": "Engineering team", "resourceType": "team"}]`)
+		fmt.Fprint(w, `[{"id": "team-1", "created": "2024-01-15T10:00:00Z", "name": "Engineering", "label": "Engineering", "description": "Engineering team", "resourceType": "team"}]`)
 	}))
 	defer srv.Close()
 
@@ -35,6 +35,8 @@ func TestListTeams(t *testing.T) {
 	out := buf.String()
 	assert.Contains(t, out, "team-1")
 	assert.Contains(t, out, "Engineering")
+	assert.Contains(t, out, "Created")
+	assert.Contains(t, out, "2024-01-15 10:00:00 UTC")
 }
 
 func TestListTeamsEmpty(t *testing.T) {

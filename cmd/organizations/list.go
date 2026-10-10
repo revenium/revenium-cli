@@ -11,7 +11,7 @@ import (
 // newListCmd returns the `revenium organizations list` command.
 // Endpoint: GET /v2/api/organizations (RESEARCH-LOCKED — `tenantId` is auto-injected
 // as a query param by Client.Do from the configured client tenant). Renders the
-// shared 3-col tableDef (ID / Name / Status) populated via toRows. Empty list
+// shared tableDef (ID / Name / Status / Created) populated via toRows. Empty list
 // emits the canonical empty-state phrase per D-04d for non-JSON or `[]` JSON. DoList
 // handles HATEOAS `_embedded.organizationResourceList` unwrap and auto-pagination
 // via cmd.AddListFlags (CF-12-19).

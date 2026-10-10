@@ -29,7 +29,7 @@ func TestListOrganizations(t *testing.T) {
 		fmt.Fprint(w, `{
 			"_embedded": {
 				"organizationResourceList": [
-					{"id":"org-1","name":"Acme Corporation","label":"Acme Corporation"}
+					{"id":"org-1","created":"2024-01-15T10:00:00Z","name":"Acme Corporation","label":"Acme Corporation"}
 				]
 			},
 			"_links": {},
@@ -50,6 +50,8 @@ func TestListOrganizations(t *testing.T) {
 	out := buf.String()
 	assert.Contains(t, out, "org-1")
 	assert.Contains(t, out, "Acme Corporation")
+	assert.Contains(t, out, "Created")
+	assert.Contains(t, out, "2024-01-15 10:00:00 UTC")
 }
 
 // TestListOrganizationsEmpty asserts the empty-state phrase fires for the

@@ -26,7 +26,7 @@ func TestUsersMeSubscriptions(t *testing.T) {
 		case "/v2/api/users/me":
 			fmt.Fprint(w, `{"id": "user-1"}`)
 		case "/v2/api/users/user-1/subscriptions":
-			fmt.Fprint(w, `[{"id":"sub-1","name":"My Sub","product":{"label":"Widget Plan"}}]`)
+			fmt.Fprint(w, `[{"id":"sub-1","created":"2024-01-15T10:00:00Z","name":"My Sub","product":{"label":"Widget Plan"}}]`)
 		default:
 			t.Fatalf("unexpected path: %s", r.URL.Path)
 		}
@@ -47,6 +47,8 @@ func TestUsersMeSubscriptions(t *testing.T) {
 	out := buf.String()
 	assert.Contains(t, out, "sub-1")
 	assert.Contains(t, out, "Widget Plan")
+	assert.Contains(t, out, "Created")
+	assert.Contains(t, out, "2024-01-15 10:00:00 UTC")
 }
 
 // TestUsersMeSubscriptionsProductID asserts --product-id, when passed, is

@@ -35,7 +35,7 @@ func init() {
 
 // tableDef defines the table layout for tool output.
 var tableDef = output.TableDef{
-	Headers:      []string{"ID", "Name", "Type", "Provider", "Enabled"},
+	Headers:      []string{"ID", "Name", "Type", "Provider", "Enabled", "Created"},
 	StatusColumn: -1,
 }
 
@@ -49,6 +49,7 @@ func toRows(tools []map[string]interface{}) [][]string {
 			str(t, "toolType"),
 			str(t, "toolProvider"),
 			boolStr(t, "enabled"),
+			output.TimestampVal(t, "created"),
 		}
 	}
 	return rows
@@ -72,12 +73,5 @@ func boolStr(m map[string]interface{}, key string) string {
 
 // renderTool renders a single tool as a single-row table or JSON.
 func renderTool(tool map[string]interface{}) error {
-	rows := [][]string{{
-		str(tool, "id"),
-		str(tool, "name"),
-		str(tool, "toolType"),
-		str(tool, "toolProvider"),
-		boolStr(tool, "enabled"),
-	}}
-	return cmd.Output.Render(tableDef, rows, tool)
+	return cmd.Output.Render(tableDef, toRows([]map[string]interface{}{tool}), tool)
 }

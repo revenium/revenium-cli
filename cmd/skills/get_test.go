@@ -116,6 +116,8 @@ func TestSkillsGet(t *testing.T) {
 	assert.Contains(t, out, "342")         // callCount
 	assert.Contains(t, out, "57")          // traceCount
 	assert.Contains(t, out, "$12.47")      // totalCost
+	assert.Contains(t, out, "2026-06-01 12:00:00 UTC")
+	assert.Contains(t, out, "2026-06-29 18:30:00 UTC")
 }
 
 func TestSkillsGetWithPeriod(t *testing.T) {

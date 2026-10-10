@@ -29,7 +29,7 @@ func init() {
 
 // invoicesTableDef defines the shared column layout for the list/get verbs.
 var invoicesTableDef = output.TableDef{
-	Headers:      []string{"ID", "Invoice Number", "State", "Total", "Currency"},
+	Headers:      []string{"ID", "Invoice Number", "State", "Total", "Currency", "Created"},
 	StatusColumn: 2,
 }
 
@@ -51,6 +51,7 @@ func invoicesToRows(invoices []map[string]interface{}) [][]string {
 			str(inv, "state"),
 			str(inv, "total"),
 			str(inv, "currency"),
+			output.TimestampVal(inv, "created"),
 		}
 	}
 	return rows
@@ -58,12 +59,5 @@ func invoicesToRows(invoices []map[string]interface{}) [][]string {
 
 // renderInvoice renders a single invoice as a single-row table or JSON.
 func renderInvoice(invoice map[string]interface{}) error {
-	rows := [][]string{{
-		str(invoice, "id"),
-		str(invoice, "invoiceNumber"),
-		str(invoice, "state"),
-		str(invoice, "total"),
-		str(invoice, "currency"),
-	}}
-	return cmd.Output.Render(invoicesTableDef, rows, invoice)
+	return cmd.Output.Render(invoicesTableDef, invoicesToRows([]map[string]interface{}{invoice}), invoice)
 }

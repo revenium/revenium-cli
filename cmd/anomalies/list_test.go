@@ -19,7 +19,7 @@ func TestListAnomalies(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "/v2/api/sources/ai/anomaly", r.URL.Path)
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `[{"id": "anom-1", "label": "High Cost Alert", "status": "active"}]`)
+		fmt.Fprint(w, `[{"id": "anom-1", "created": "2024-01-15T10:00:00Z", "label": "High Cost Alert", "status": "active"}]`)
 	}))
 	defer srv.Close()
 
@@ -35,6 +35,8 @@ func TestListAnomalies(t *testing.T) {
 	out := buf.String()
 	assert.Contains(t, out, "anom-1")
 	assert.Contains(t, out, "High Cost Alert")
+	assert.Contains(t, out, "Created")
+	assert.Contains(t, out, "2024-01-15 10:00:00 UTC")
 }
 
 func TestListAnomaliesEmpty(t *testing.T) {

@@ -28,7 +28,7 @@ func TestMeteringElementsList(t *testing.T) {
 		fmt.Fprint(w, `{
 			"_embedded": {
 				"meteringElementDefinitionResourceList": [
-					{"id":"me-1","name":"Tokens","type":"NUMBER","description":"Token count"}
+					{"id":"me-1","created":"2024-01-15T10:00:00Z","name":"Tokens","type":"NUMBER","description":"Token count"}
 				]
 			},
 			"_links": {},
@@ -50,6 +50,8 @@ func TestMeteringElementsList(t *testing.T) {
 	assert.Contains(t, out, "me-1")
 	assert.Contains(t, out, "Tokens")
 	assert.Contains(t, out, "NUMBER")
+	assert.Contains(t, out, "Created")
+	assert.Contains(t, out, "2024-01-15 10:00:00 UTC")
 }
 
 // TestMeteringElementsListEmpty asserts the empty-state phrase fires for the

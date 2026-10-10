@@ -40,10 +40,10 @@ func initBudgetRules() {
 	budgetRulesCmd.AddCommand(newBudgetRulesDeleteCmd())
 }
 
-// tableDef defines the 3-column table layout (D-02): ID / Name / Status.
+// tableDef defines the table layout (D-02): ID / Name / Status / Created.
 // Column 2 is sourced from `enabled` (bool → "active"/"inactive") per RESEARCH D-03.
 var tableDef = output.TableDef{
-	Headers:      []string{"ID", "Name", "Status"},
+	Headers:      []string{"ID", "Name", "Status", "Created"},
 	StatusColumn: 2,
 }
 
@@ -95,7 +95,7 @@ func boolStatus(m map[string]interface{}, key string) string {
 	return fmt.Sprint(v)
 }
 
-// toRows converts a slice of budget-rule maps to 3-col table row strings.
+// toRows converts a slice of budget-rule maps to table row strings.
 func toRows(rules []map[string]interface{}) [][]string {
 	rows := make([][]string, len(rules))
 	for i, r := range rules {
@@ -103,6 +103,7 @@ func toRows(rules []map[string]interface{}) [][]string {
 			str(r, "id"),
 			str(r, "name"),
 			boolStatus(r, "enabled"),
+			output.TimestampVal(r, "created"),
 		}
 	}
 	return rows
@@ -116,18 +117,13 @@ func toRows(rules []map[string]interface{}) [][]string {
 // passthrough and we MUST NOT print the secondary blocks (they would
 // contaminate the JSON output stream).
 //
-// In table mode, the 3-col ID/Name/Status table is rendered first, then
+// In table mode, the ID/Name/Status/Created table is rendered first, then
 // (only when present and non-empty) a "Filters:" block and a
 // "Notification channels:" block are appended. Absent or empty arrays stay
 // silent so rules with no scope or no channels keep their original
-// 3-col output unchanged.
+// table output unchanged.
 func renderRule(rule map[string]interface{}) error {
-	rows := [][]string{{
-		str(rule, "id"),
-		str(rule, "name"),
-		boolStatus(rule, "enabled"),
-	}}
-	if err := cmd.Output.Render(tableDef, rows, rule); err != nil {
+	if err := cmd.Output.Render(tableDef, toRows([]map[string]interface{}{rule}), rule); err != nil {
 		return err
 	}
 

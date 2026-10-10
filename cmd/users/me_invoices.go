@@ -15,7 +15,7 @@ func init() {
 }
 
 var meInvoicesTableDef = output.TableDef{
-	Headers:      []string{"ID", "Invoice Number", "State", "Total", "Currency"},
+	Headers:      []string{"ID", "Invoice Number", "State", "Total", "Currency", "Created"},
 	StatusColumn: -1,
 }
 
@@ -28,6 +28,7 @@ func meInvoicesToRows(items []map[string]interface{}) [][]string {
 			str(m, "state"),
 			str(m, "totalAmount"),
 			str(m, "currency"),
+			output.TimestampVal(m, "created"),
 		}
 	}
 	return rows

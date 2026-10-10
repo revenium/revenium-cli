@@ -35,6 +35,7 @@ func TestListAlerts(t *testing.T) {
 	out := buf.String()
 	assert.Contains(t, out, "alert-1")
 	assert.Contains(t, out, "Cost Spike")
+	assert.Contains(t, out, "2026-01-15 10:00:00 UTC")
 }
 
 func TestListAlertsEmpty(t *testing.T) {

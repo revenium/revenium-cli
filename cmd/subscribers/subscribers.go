@@ -36,7 +36,7 @@ func init() {
 
 // tableDef defines the table layout for subscriber output.
 var tableDef = output.TableDef{
-	Headers: []string{"ID", "Name", "Email"},
+	Headers: []string{"ID", "Name", "Email", "Created"},
 }
 
 // toRows converts a slice of subscriber maps to table row strings.
@@ -48,6 +48,7 @@ func toRows(subscribers []map[string]interface{}) [][]string {
 			str(s, "id"),
 			name,
 			str(s, "email"),
+			output.TimestampVal(s, "created"),
 		}
 	}
 	return rows
@@ -63,11 +64,5 @@ func str(m map[string]interface{}, key string) string {
 
 // renderSubscriber renders a single subscriber as a single-row table or JSON.
 func renderSubscriber(sub map[string]interface{}) error {
-	name := strings.TrimSpace(str(sub, "firstName") + " " + str(sub, "lastName"))
-	rows := [][]string{{
-		str(sub, "id"),
-		name,
-		str(sub, "email"),
-	}}
-	return cmd.Output.Render(tableDef, rows, sub)
+	return cmd.Output.Render(tableDef, toRows([]map[string]interface{}{sub}), sub)
 }

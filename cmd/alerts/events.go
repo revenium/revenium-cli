@@ -37,7 +37,7 @@ func toEventRows(events []map[string]interface{}) [][]string {
 		rows[i] = []string{
 			str(e, "id"),
 			str(e, "label"),
-			str(e, "triggeredTimestamp"),
+			output.TimestampVal(e, "triggeredTimestamp"),
 			str(e, "resolved"),
 			str(e, "triggeredValue"),
 		}
@@ -47,14 +47,7 @@ func toEventRows(events []map[string]interface{}) [][]string {
 
 // renderEvent renders a single AI Alert as a single-row table or JSON.
 func renderEvent(event map[string]interface{}) error {
-	rows := [][]string{{
-		str(event, "id"),
-		str(event, "label"),
-		str(event, "triggeredTimestamp"),
-		str(event, "resolved"),
-		str(event, "triggeredValue"),
-	}}
-	return cmd.Output.Render(eventsTableDef, rows, event)
+	return cmd.Output.Render(eventsTableDef, toEventRows([]map[string]interface{}{event}), event)
 }
 
 // newEventsCmd returns the `revenium alerts events` command. See the

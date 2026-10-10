@@ -67,6 +67,7 @@ func TestSquadsTimeline(t *testing.T) {
 	assert.Contains(t, out, "DocExtractor")
 	assert.Contains(t, out, "Document Extraction")
 	assert.Contains(t, out, "gpt-4")
+	assert.Contains(t, out, "2025-09-01 00:00:00 UTC")
 }
 
 func TestSquadsTimelineRejectsPathTraversal(t *testing.T) {

@@ -20,7 +20,7 @@ func TestListTools(t *testing.T) {
 		assert.Equal(t, "/v2/api/tools", r.URL.Path)
 		w.Header().Set("Content-Type", "application/json")
 		fmt.Fprint(w, `[
-			{"id": "tool-1", "toolId": "my-tool", "name": "My Tool", "description": "A test tool", "toolType": "MCP_SERVER", "toolProvider": "acme", "enabled": true, "configSource": "DATABASE"}
+			{"id": "tool-1", "created": "2024-01-15T10:00:00Z", "toolId": "my-tool", "name": "My Tool", "description": "A test tool", "toolType": "MCP_SERVER", "toolProvider": "acme", "enabled": true, "configSource": "DATABASE"}
 		]`)
 	}))
 	defer srv.Close()
@@ -38,6 +38,8 @@ func TestListTools(t *testing.T) {
 	assert.Contains(t, out, "tool-1")
 	assert.Contains(t, out, "My Tool")
 	assert.Contains(t, out, "MCP_SERVER")
+	assert.Contains(t, out, "Created")
+	assert.Contains(t, out, "2024-01-15 10:00:00 UTC")
 }
 
 func TestListToolsEmpty(t *testing.T) {

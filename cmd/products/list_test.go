@@ -19,7 +19,7 @@ func TestListProducts(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "/v2/api/products", r.URL.Path)
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `[{"id": "prod-1", "name": "My Product", "status": "active"}]`)
+		fmt.Fprint(w, `[{"id": "prod-1", "created": "2024-01-15T10:00:00Z", "name": "My Product", "status": "active"}]`)
 	}))
 	defer srv.Close()
 
@@ -35,6 +35,8 @@ func TestListProducts(t *testing.T) {
 	out := buf.String()
 	assert.Contains(t, out, "prod-1")
 	assert.Contains(t, out, "My Product")
+	assert.Contains(t, out, "Created")
+	assert.Contains(t, out, "2024-01-15 10:00:00 UTC")
 }
 
 func TestListProductsEmpty(t *testing.T) {

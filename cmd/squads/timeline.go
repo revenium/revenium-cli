@@ -25,7 +25,7 @@ func toTimelineRows(events []map[string]interface{}) [][]string {
 	rows := make([][]string, len(events))
 	for i, e := range events {
 		rows[i] = []string{
-			str(e, "startTime"),
+			output.TimestampVal(e, "startTime"),
 			str(e, "agent"),
 			str(e, "role"),
 			str(e, "model"),

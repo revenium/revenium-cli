@@ -25,7 +25,7 @@ func TestListInvoices(t *testing.T) {
 		fmt.Fprint(w, `{
 			"_embedded": {
 				"invoiceResourceList": [
-					{"id":"inv-1","invoiceNumber":"INV-001","state":"PAID","total":100.5,"currency":"USD"}
+					{"id":"inv-1","created":"2024-01-15T10:00:00Z","invoiceNumber":"INV-001","state":"PAID","total":100.5,"currency":"USD"}
 				]
 			},
 			"_links": {},
@@ -46,6 +46,8 @@ func TestListInvoices(t *testing.T) {
 	out := buf.String()
 	assert.Contains(t, out, "inv-1")
 	assert.Contains(t, out, "INV-001")
+	assert.Contains(t, out, "Created")
+	assert.Contains(t, out, "2024-01-15 10:00:00 UTC")
 }
 
 // TestListInvoicesEmpty asserts the empty-state phrase fires for an empty

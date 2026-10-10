@@ -37,7 +37,7 @@ func init() {
 
 // tableDef defines the table layout for product output.
 var tableDef = output.TableDef{
-	Headers:      []string{"ID", "Name", "Status"},
+	Headers:      []string{"ID", "Name", "Status", "Created"},
 	StatusColumn: 2,
 }
 
@@ -49,6 +49,7 @@ func toRows(products []map[string]interface{}) [][]string {
 			str(p, "id"),
 			str(p, "name"),
 			str(p, "status"),
+			output.TimestampVal(p, "created"),
 		}
 	}
 	return rows
@@ -64,10 +65,5 @@ func str(m map[string]interface{}, key string) string {
 
 // renderProduct renders a single product as a single-row table or JSON.
 func renderProduct(product map[string]interface{}) error {
-	rows := [][]string{{
-		str(product, "id"),
-		str(product, "name"),
-		str(product, "status"),
-	}}
-	return cmd.Output.Render(tableDef, rows, product)
+	return cmd.Output.Render(tableDef, toRows([]map[string]interface{}{product}), product)
 }

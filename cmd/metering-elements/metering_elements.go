@@ -40,12 +40,12 @@ func init() {
 	Cmd.AddCommand(newDeleteCmd())
 }
 
-// tableDef defines the shared 4-column layout for list/get verbs.
+// tableDef defines the shared column layout for list/get verbs.
 // MeteringElementDefinitionResource_Read has no lifecycle status field
 // (same precedent as cmd/organizations' orgStatus — D-04a), so there is no
 // status column: StatusColumn: -1.
 var tableDef = output.TableDef{
-	Headers:      []string{"ID", "Name", "Type", "Description"},
+	Headers:      []string{"ID", "Name", "Type", "Description", "Created"},
 	StatusColumn: -1,
 }
 
@@ -58,7 +58,7 @@ func str(m map[string]interface{}, key string) string {
 	return ""
 }
 
-// toRows converts a slice of metering element maps to 4-col table row
+// toRows converts a slice of metering element maps to table row
 // strings.
 func toRows(elements []map[string]interface{}) [][]string {
 	rows := make([][]string, len(elements))
@@ -68,6 +68,7 @@ func toRows(elements []map[string]interface{}) [][]string {
 			str(e, "name"),
 			str(e, "type"),
 			str(e, "description"),
+			output.TimestampVal(e, "created"),
 		}
 	}
 	return rows
@@ -76,13 +77,7 @@ func toRows(elements []map[string]interface{}) [][]string {
 // renderElement renders a single metering element definition as a
 // single-row table or JSON. Shared by the get / create / update verbs.
 func renderElement(element map[string]interface{}) error {
-	rows := [][]string{{
-		str(element, "id"),
-		str(element, "name"),
-		str(element, "type"),
-		str(element, "description"),
-	}}
-	return cmd.Output.Render(tableDef, rows, element)
+	return cmd.Output.Render(tableDef, toRows([]map[string]interface{}{element}), element)
 }
 
 // validTypes enumerates the allowed `type` values for a metering element

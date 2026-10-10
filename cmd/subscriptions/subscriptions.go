@@ -36,7 +36,7 @@ func init() {
 
 // tableDef defines the table layout for subscription output.
 var tableDef = output.TableDef{
-	Headers:      []string{"ID", "Name", "Email", "Product"},
+	Headers:      []string{"ID", "Name", "Email", "Product", "Created"},
 	StatusColumn: -1,
 }
 
@@ -49,6 +49,7 @@ func toRows(subs []map[string]interface{}) [][]string {
 			str(s, "name"),
 			str(s, "label"),
 			nestedStr(s, "product", "label"),
+			output.TimestampVal(s, "created"),
 		}
 	}
 	return rows
@@ -72,11 +73,5 @@ func str(m map[string]interface{}, key string) string {
 
 // renderSubscription renders a single subscription as a single-row table or JSON.
 func renderSubscription(sub map[string]interface{}) error {
-	rows := [][]string{{
-		str(sub, "id"),
-		str(sub, "name"),
-		str(sub, "label"),
-		nestedStr(sub, "product", "label"),
-	}}
-	return cmd.Output.Render(tableDef, rows, sub)
+	return cmd.Output.Render(tableDef, toRows([]map[string]interface{}{sub}), sub)
 }

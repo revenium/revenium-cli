@@ -11,7 +11,7 @@ import (
 
 // newGetCmd returns the `revenium organizations get <id>` command.
 // Endpoint: GET /v2/api/organizations/{url.PathEscape(id)} (RESEARCH-LOCKED).
-// The single-row 3-col render (D-04c) is delegated to the package-level renderOrg
+// The single-row render (D-04c) is delegated to the package-level renderOrg
 // helper from organizations.go. Args validation uses cobra.MatchAll(ExactArgs(1),
 // ValidResourceID) per CF-12-16. 404 / other errors flow through internal/api
 // default mapping (CF-13-18).

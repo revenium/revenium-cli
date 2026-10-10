@@ -34,9 +34,9 @@ func init() {
 	Cmd.AddCommand(newUsageCmd())
 }
 
-// tenantsTableDef defines the 3-column layout for the tenants get verb.
+// tenantsTableDef defines the column layout for the tenants get verb.
 var tenantsTableDef = output.TableDef{
-	Headers:      []string{"ID", "Name", "Status"},
+	Headers:      []string{"ID", "Name", "Status", "Created"},
 	StatusColumn: 2,
 }
 
@@ -56,6 +56,7 @@ func renderTenant(tenant map[string]interface{}) error {
 		str(tenant, "id"),
 		str(tenant, "name"),
 		str(tenant, "status"),
+		output.TimestampVal(tenant, "created"),
 	}}
 	return cmd.Output.Render(tenantsTableDef, rows, tenant)
 }

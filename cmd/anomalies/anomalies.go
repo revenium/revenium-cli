@@ -36,7 +36,7 @@ func init() {
 
 // tableDef defines the table layout for anomaly output.
 var tableDef = output.TableDef{
-	Headers:      []string{"ID", "Name", "Status"},
+	Headers:      []string{"ID", "Name", "Status", "Created"},
 	StatusColumn: 2,
 }
 
@@ -48,6 +48,7 @@ func toRows(anomalies []map[string]interface{}) [][]string {
 			str(a, "id"),
 			str(a, "label"),
 			str(a, "status"),
+			output.TimestampVal(a, "created"),
 		}
 	}
 	return rows
@@ -63,10 +64,5 @@ func str(m map[string]interface{}, key string) string {
 
 // renderAnomaly renders a single anomaly as a single-row table or JSON.
 func renderAnomaly(anomaly map[string]interface{}) error {
-	rows := [][]string{{
-		str(anomaly, "id"),
-		str(anomaly, "label"),
-		str(anomaly, "status"),
-	}}
-	return cmd.Output.Render(tableDef, rows, anomaly)
+	return cmd.Output.Render(tableDef, toRows([]map[string]interface{}{anomaly}), anomaly)
 }

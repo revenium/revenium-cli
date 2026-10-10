@@ -33,7 +33,7 @@ func TestPeriodChargesList(t *testing.T) {
 		if cursor == "" {
 			pageCharges = append(pageCharges, "page1")
 			fmt.Fprint(w, `{
-				"_embedded": {"periodChargeResourceList": [{"id":"pc-1","amount":10.5,"currency":"USD"}]},
+				"_embedded": {"periodChargeResourceList": [{"id":"pc-1","created":"2024-01-15T10:00:00Z","amount":10.5,"currency":"USD"}]},
 				"hasMore": true,
 				"cursor": "cursor-abc"
 			}`)
@@ -68,6 +68,8 @@ func TestPeriodChargesList(t *testing.T) {
 	out := buf.String()
 	assert.Contains(t, out, "pc-1", "item from page 1 must appear")
 	assert.Contains(t, out, "pc-2", "item from page 2 must appear")
+	assert.Contains(t, out, "Created")
+	assert.Contains(t, out, "2024-01-15 10:00:00 UTC")
 }
 
 func TestPeriodChargesListEmpty(t *testing.T) {

@@ -27,7 +27,7 @@ func TestWorkspacesList(t *testing.T) {
 		fmt.Fprint(w, `{
 			"_embedded": {
 				"objectList": [
-					{"id":"ws-1","name":"Production","provider":"aws"}
+					{"id":"ws-1","created":"2024-01-15T10:00:00Z","name":"Production","provider":"aws"}
 				]
 			},
 			"_links": {}
@@ -48,6 +48,8 @@ func TestWorkspacesList(t *testing.T) {
 	assert.Contains(t, out, "ws-1")
 	assert.Contains(t, out, "Production")
 	assert.Contains(t, out, "aws")
+	assert.Contains(t, out, "Created")
+	assert.Contains(t, out, "2024-01-15 10:00:00 UTC")
 }
 
 // TestWorkspacesListFilters asserts --provider and --query are flag-gated

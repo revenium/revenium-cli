@@ -23,7 +23,7 @@ func TestListJobs(t *testing.T) {
 		fmt.Fprint(w, `{
 			"_embedded": {
 				"jobResourceList": [
-					{"id": "JMwX9g4", "agenticJobId": "loan-app-1", "label": "Process Loan", "executionStatus": "SUCCESS"}
+					{"id": "JMwX9g4", "agenticJobId": "loan-app-1", "label": "Process Loan", "executionStatus": "SUCCESS", "created": "2026-01-15T10:00:00.123Z", "updated": "2026-01-15T10:05:00Z"}
 				]
 			},
 			"_links": {},
@@ -44,6 +44,10 @@ func TestListJobs(t *testing.T) {
 	out := buf.String()
 	assert.Contains(t, out, "JMwX9g4")
 	assert.Contains(t, out, "Process Loan")
+	assert.Contains(t, out, "Created")
+	assert.Contains(t, out, "Updated")
+	assert.Contains(t, out, "2026-01-15 10:00:00 UTC")
+	assert.Contains(t, out, "2026-01-15 10:05:00 UTC")
 }
 
 func TestListJobsEmpty(t *testing.T) {
@@ -68,7 +72,7 @@ func TestListJobsEmpty(t *testing.T) {
 func TestListJobsJSON(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `[{"id": "JMwX9g4", "agenticJobId": "loan-app-1", "label": "Process Loan", "executionStatus": "SUCCESS"}]`)
+		fmt.Fprint(w, `[{"id": "JMwX9g4", "agenticJobId": "loan-app-1", "label": "Process Loan", "executionStatus": "SUCCESS", "created": "2026-01-15T10:00:00.123Z"}]`)
 	}))
 	defer srv.Close()
 
@@ -87,6 +91,8 @@ func TestListJobsJSON(t *testing.T) {
 	assert.Len(t, result, 1)
 	assert.Equal(t, "JMwX9g4", result[0]["id"])
 	assert.Equal(t, "loan-app-1", result[0]["agenticJobId"])
+	assert.Contains(t, buf.String(), "2026-01-15T10:00:00.123Z")
+	assert.NotContains(t, buf.String(), "UTC")
 }
 
 func TestListJobsEmptyJSON(t *testing.T) {
