@@ -172,7 +172,8 @@ This tag:
   body extracted from `CHANGELOG.md` (`--release-notes dist/release-notes.md`).
 - Updates `Formula/revenium.rb` on `revenium/homebrew-tap` with the canonical
   6-platform shape including completion install lines.
-- Receives the "Latest" badge on the GitHub Releases page (`release.make_latest: true`).
+- Receives the "Latest" badge on the GitHub Releases page (`release.make_latest` is true for
+  canonical tags only; GitHub rejects a pre-release marked Latest with a 422).
 
 Tags MUST be annotated (`git tag -a`), not lightweight. The annotated form matches the
 existing v1.0.x history and the convention from the retired `scripts/release.sh`.
