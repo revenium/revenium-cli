@@ -64,5 +64,7 @@ brews:
 release:
   prerelease: auto
   draft: false
-  make_latest: true
+  # GitHub rejects a pre-release marked Latest (422 "Latest release cannot be
+  # draft or prerelease"), so only a canonical tag may claim Latest.
+  make_latest: "{{ if .Prerelease }}false{{ else }}true{{ end }}"
   mode: append

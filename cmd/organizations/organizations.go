@@ -35,7 +35,6 @@ func init() {
 }
 
 // tableDef defines the shared column layout for list/get/children verbs (D-04).
-// Strict mirror of cmd/jobs/jobs.go — Status column is index 2 (zero-indexed).
 var tableDef = output.TableDef{
 	Headers:      []string{"ID", "Name", "Status", "Created"},
 	StatusColumn: 2,
