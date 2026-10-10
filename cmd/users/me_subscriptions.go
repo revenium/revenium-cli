@@ -14,12 +14,12 @@ func init() {
 	meCmd.AddCommand(newMeSubscriptionsCmd())
 }
 
-// meSubscriptionsTableDef reuses cmd/subscriptions' column set (ID / Name /
-// Product) but is duplicated locally rather than importing cmd/subscriptions
+// meSubscriptionsTableDef mirrors cmd/subscriptions' columns except Email, and is
+// duplicated locally rather than importing cmd/subscriptions
 // (05-PATTERNS RES-05 — planner's call, kept package-local for consistency
 // with the other three me-sublist helpers in this file).
 var meSubscriptionsTableDef = output.TableDef{
-	Headers:      []string{"ID", "Name", "Product"},
+	Headers:      []string{"ID", "Name", "Product", "Created"},
 	StatusColumn: -1,
 }
 
@@ -30,6 +30,7 @@ func meSubscriptionsToRows(items []map[string]interface{}) [][]string {
 			str(m, "id"),
 			str(m, "name"),
 			meNestedStr(m, "product", "label"),
+			output.TimestampVal(m, "created"),
 		}
 	}
 	return rows

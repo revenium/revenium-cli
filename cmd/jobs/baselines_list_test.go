@@ -99,6 +99,7 @@ func TestBaselinesListSortsDescending(t *testing.T) {
 	assert.Equal(t, []string{"5", "3", "2", "1"},
 		[]string{rows[1][0], rows[2][0], rows[3][0], rows[4][0]},
 		"the whole table must be descending, not merely its first row")
+	assert.Contains(t, buf.String(), "2026-01-05 00:00:00 UTC")
 }
 
 // TestBaselinesListJSONOrder proves the table and --json come from the same

@@ -91,7 +91,7 @@ func toBaselineRows(baselines []map[string]interface{}) [][]string {
 			money(b, "hourlyRate", currency),
 			str(b, "provenance"),
 			str(b, "declaredBy"),
-			str(b, "effectiveFrom"),
+			output.TimestampVal(b, "effectiveFrom"),
 		}
 	}
 	return rows

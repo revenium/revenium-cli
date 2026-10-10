@@ -19,7 +19,7 @@ func TestGetJob(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "/v2/api/jobs/loan-app-1", r.URL.Path)
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `{"id": "JMwX9g4", "agenticJobId": "loan-app-1", "label": "Process Loan", "executionStatus": "SUCCESS"}`)
+		fmt.Fprint(w, `{"id": "JMwX9g4", "agenticJobId": "loan-app-1", "label": "Process Loan", "executionStatus": "SUCCESS", "created": "2026-01-15T10:00:00.123Z", "updated": "2026-01-15T10:05:00Z"}`)
 	}))
 	defer srv.Close()
 
@@ -36,6 +36,10 @@ func TestGetJob(t *testing.T) {
 	out := buf.String()
 	assert.Contains(t, out, "JMwX9g4")
 	assert.Contains(t, out, "Process Loan")
+	assert.Contains(t, out, "Created")
+	assert.Contains(t, out, "Updated")
+	assert.Contains(t, out, "2026-01-15 10:00:00 UTC")
+	assert.Contains(t, out, "2026-01-15 10:05:00 UTC")
 }
 
 func TestGetJobJSON(t *testing.T) {

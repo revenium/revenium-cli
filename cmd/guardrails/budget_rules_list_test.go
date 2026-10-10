@@ -29,7 +29,7 @@ func TestBudgetRulesList(t *testing.T) {
 		fmt.Fprint(w, `{
 			"_embedded": {
 				"objectList": [
-					{"id":"jR2kmLs","name":"Q3 OpenAI Budget","enabled":true,"shadowMode":false,"action":"BLOCK","metricType":"TOTAL_COST","windowType":"MONTHLY","hardLimit":1000.0,"warnThreshold":800.0}
+					{"id":"jR2kmLs","created":"2024-01-15T10:00:00Z","name":"Q3 OpenAI Budget","enabled":true,"shadowMode":false,"action":"BLOCK","metricType":"TOTAL_COST","windowType":"MONTHLY","hardLimit":1000.0,"warnThreshold":800.0}
 				]
 			},
 			"_links": {},
@@ -52,6 +52,8 @@ func TestBudgetRulesList(t *testing.T) {
 	assert.Contains(t, out, "Q3 OpenAI Budget")
 	// Load-bearing: proves boolStatus(r,"enabled") mapped true → "active" (RESEARCH D-03).
 	assert.Contains(t, buf.String(), "active")
+	assert.Contains(t, out, "Created")
+	assert.Contains(t, out, "2024-01-15 10:00:00 UTC")
 }
 
 // TestBudgetRulesListEmpty asserts the empty-state phrase fires for the

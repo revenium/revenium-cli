@@ -20,7 +20,7 @@ func TestListSources(t *testing.T) {
 		assert.Equal(t, "/v2/api/sources", r.URL.Path)
 		w.Header().Set("Content-Type", "application/json")
 		fmt.Fprint(w, `[
-			{"id": "src-1", "name": "My API", "type": "API", "status": "active"},
+			{"id": "src-1", "created": "2024-01-15T10:00:00Z", "name": "My API", "type": "API", "status": "active"},
 			{"id": "src-2", "name": "AI Service", "type": "AI", "status": "inactive"}
 		]`)
 	}))
@@ -42,6 +42,8 @@ func TestListSources(t *testing.T) {
 	assert.Contains(t, out, "active")
 	assert.Contains(t, out, "src-2")
 	assert.Contains(t, out, "AI Service")
+	assert.Contains(t, out, "Created")
+	assert.Contains(t, out, "2024-01-15 10:00:00 UTC")
 }
 
 func TestListSourcesEmpty(t *testing.T) {

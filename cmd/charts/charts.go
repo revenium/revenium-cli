@@ -46,7 +46,7 @@ func toRows(charts []map[string]interface{}) [][]string {
 			str(c, "id"),
 			str(c, "label"),
 			str(c, "type"),
-			str(c, "created"),
+			output.TimestampVal(c, "created"),
 		}
 	}
 	return rows
@@ -62,11 +62,5 @@ func str(m map[string]interface{}, key string) string {
 
 // renderChart renders a single chart as a single-row table or JSON.
 func renderChart(chart map[string]interface{}) error {
-	rows := [][]string{{
-		str(chart, "id"),
-		str(chart, "label"),
-		str(chart, "type"),
-		str(chart, "created"),
-	}}
-	return cmd.Output.Render(tableDef, rows, chart)
+	return cmd.Output.Render(tableDef, toRows([]map[string]interface{}{chart}), chart)
 }

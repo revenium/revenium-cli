@@ -61,7 +61,7 @@ func TestEnforcementEventsList(t *testing.T) {
 	// Composite "Used" column (currentValue/threshold) from toEnforcementEventRows
 	assert.Contains(t, out, "1023.5/1000")
 	// Time column sourced via eventTime helper's first candidate "created"
-	assert.Contains(t, out, "2026-05-12T18:42:15Z")
+	assert.Contains(t, out, "2026-05-12 18:42:15 UTC")
 }
 
 // TestEnforcementEventsListEmpty exercises the empty-list branch — plain JSON [] from server,

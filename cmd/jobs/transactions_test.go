@@ -85,7 +85,7 @@ func TestTransactions(t *testing.T) {
 	assert.Contains(t, out, "Cost")
 	assert.Contains(t, out, "Status")
 	// row values
-	assert.Contains(t, out, "2026-04-26T04:16:31.874Z")
+	assert.Contains(t, out, "2026-04-26 04:16:31 UTC")
 	assert.Contains(t, out, "claude-3-5-haiku-latest")
 	// FormatCurrency rounds 0.010468 (%.2f) -> $0.01 — pins the Cost cell wiring
 	assert.Contains(t, out, "$0.01")

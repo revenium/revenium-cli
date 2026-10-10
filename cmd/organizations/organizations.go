@@ -34,10 +34,10 @@ func init() {
 	Cmd.AddCommand(newChildrenCmd())
 }
 
-// tableDef defines the shared 3-column layout for list/get/children verbs (D-04).
+// tableDef defines the shared column layout for list/get/children verbs (D-04).
 // Strict mirror of cmd/jobs/jobs.go — Status column is index 2 (zero-indexed).
 var tableDef = output.TableDef{
-	Headers:      []string{"ID", "Name", "Status"},
+	Headers:      []string{"ID", "Name", "Status", "Created"},
 	StatusColumn: 2,
 }
 
@@ -67,7 +67,7 @@ func orgStatus(m map[string]interface{}) string {
 	return ""
 }
 
-// toRows converts a slice of organization maps to 3-col table row strings.
+// toRows converts a slice of organization maps to table row strings.
 // Shared by the list and children verbs (D-03 / D-04c).
 func toRows(orgs []map[string]interface{}) [][]string {
 	rows := make([][]string, len(orgs))
@@ -80,6 +80,7 @@ func toRows(orgs []map[string]interface{}) [][]string {
 			str(o, "id"),
 			name,
 			orgStatus(o),
+			output.TimestampVal(o, "created"),
 		}
 	}
 	return rows
@@ -88,14 +89,5 @@ func toRows(orgs []map[string]interface{}) [][]string {
 // renderOrg renders a single organization as a single-row table or JSON.
 // Shared by the get / create / update verbs (D-04c).
 func renderOrg(org map[string]interface{}) error {
-	name := str(org, "name")
-	if name == "" {
-		name = str(org, "label")
-	}
-	rows := [][]string{{
-		str(org, "id"),
-		name,
-		orgStatus(org),
-	}}
-	return cmd.Output.Render(tableDef, rows, org)
+	return cmd.Output.Render(tableDef, toRows([]map[string]interface{}{org}), org)
 }

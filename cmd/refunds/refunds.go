@@ -28,7 +28,7 @@ func init() {
 
 // refundsTableDef defines the shared column layout for the list/get verbs.
 var refundsTableDef = output.TableDef{
-	Headers:      []string{"ID", "Amount", "Currency", "Status"},
+	Headers:      []string{"ID", "Amount", "Currency", "Status", "Created"},
 	StatusColumn: 3,
 }
 
@@ -49,6 +49,7 @@ func refundsToRows(refunds []map[string]interface{}) [][]string {
 			str(r, "amount"),
 			str(r, "currency"),
 			str(r, "status"),
+			output.TimestampVal(r, "created"),
 		}
 	}
 	return rows
@@ -56,11 +57,5 @@ func refundsToRows(refunds []map[string]interface{}) [][]string {
 
 // renderRefund renders a single refund as a single-row table or JSON.
 func renderRefund(refund map[string]interface{}) error {
-	rows := [][]string{{
-		str(refund, "id"),
-		str(refund, "amount"),
-		str(refund, "currency"),
-		str(refund, "status"),
-	}}
-	return cmd.Output.Render(refundsTableDef, rows, refund)
+	return cmd.Output.Render(refundsTableDef, refundsToRows([]map[string]interface{}{refund}), refund)
 }

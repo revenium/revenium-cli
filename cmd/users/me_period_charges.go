@@ -15,7 +15,7 @@ func init() {
 }
 
 var mePeriodChargesTableDef = output.TableDef{
-	Headers:      []string{"ID", "Amount", "Currency"},
+	Headers:      []string{"ID", "Amount", "Currency", "Created"},
 	StatusColumn: -1,
 }
 
@@ -26,6 +26,7 @@ func mePeriodChargesToRows(items []map[string]interface{}) [][]string {
 			str(m, "id"),
 			str(m, "amount"),
 			str(m, "currency"),
+			output.TimestampVal(m, "created"),
 		}
 	}
 	return rows

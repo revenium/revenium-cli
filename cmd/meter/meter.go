@@ -87,7 +87,7 @@ func renderResponse(result map[string]interface{}) error {
 		str(result, "id"),
 		str(result, "resourceType"),
 		str(result, "label"),
-		str(result, "created"),
+		output.TimestampVal(result, "created"),
 	}}
 	return cmd.Output.Render(responseDef, rows, result)
 }

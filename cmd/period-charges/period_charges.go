@@ -26,10 +26,10 @@ func init() {
 	Cmd.AddCommand(newGetCmd())
 }
 
-// tableDef defines the shared 3-column layout for the list/get verbs.
+// tableDef defines the shared column layout for the list/get verbs.
 // Period charges have no natural lifecycle status field, so StatusColumn is -1.
 var tableDef = output.TableDef{
-	Headers:      []string{"ID", "Amount", "Currency"},
+	Headers:      []string{"ID", "Amount", "Currency", "Created"},
 	StatusColumn: -1,
 }
 
@@ -41,7 +41,7 @@ func str(m map[string]interface{}, key string) string {
 	return ""
 }
 
-// toRows converts a slice of period-charge maps to 3-col table row strings.
+// toRows converts a slice of period-charge maps to table row strings.
 func toRows(items []map[string]interface{}) [][]string {
 	rows := make([][]string, len(items))
 	for i, m := range items {
@@ -49,6 +49,7 @@ func toRows(items []map[string]interface{}) [][]string {
 			str(m, "id"),
 			str(m, "amount"),
 			str(m, "currency"),
+			output.TimestampVal(m, "created"),
 		}
 	}
 	return rows
@@ -56,10 +57,5 @@ func toRows(items []map[string]interface{}) [][]string {
 
 // renderPeriodCharge renders a single period charge as a single-row table or JSON.
 func renderPeriodCharge(pc map[string]interface{}) error {
-	rows := [][]string{{
-		str(pc, "id"),
-		str(pc, "amount"),
-		str(pc, "currency"),
-	}}
-	return cmd.Output.Render(tableDef, rows, pc)
+	return cmd.Output.Render(tableDef, toRows([]map[string]interface{}{pc}), pc)
 }

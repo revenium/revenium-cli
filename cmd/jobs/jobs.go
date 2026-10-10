@@ -34,7 +34,7 @@ func init() {
 // is no top-level `status` field on JobResource_Read. Empty cell when
 // executionStatus is absent (job still in flight) is intentional.
 var tableDef = output.TableDef{
-	Headers:      []string{"ID", "Name", "Status"},
+	Headers:      []string{"ID", "Name", "Status", "Created", "Updated"},
 	StatusColumn: 2,
 }
 
@@ -47,6 +47,8 @@ func toRows(jobs []map[string]interface{}) [][]string {
 			str(j, "id"),
 			str(j, "label"),
 			str(j, "executionStatus"),
+			output.TimestampVal(j, "created"),
+			output.TimestampVal(j, "updated"),
 		}
 	}
 	return rows
@@ -63,10 +65,5 @@ func str(m map[string]interface{}, key string) string {
 // renderJob renders a single job as a single-row table or JSON.
 // Used by get/create/update in this and subsequent plans.
 func renderJob(job map[string]interface{}) error {
-	rows := [][]string{{
-		str(job, "id"),
-		str(job, "label"),
-		str(job, "executionStatus"),
-	}}
-	return cmd.Output.Render(tableDef, rows, job)
+	return cmd.Output.Render(tableDef, toRows([]map[string]interface{}{job}), job)
 }

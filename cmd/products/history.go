@@ -30,7 +30,7 @@ func toRevisionRows(revisions []map[string]interface{}) [][]string {
 			str(r, "changeType"),
 			str(r, "previousValue"),
 			str(r, "currentValue"),
-			str(r, "changeDate"),
+			output.TimestampVal(r, "changeDate"),
 			str(r, "user"),
 		}
 	}

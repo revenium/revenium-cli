@@ -37,7 +37,7 @@ func init() {
 
 // modelTableDef defines the table layout for model output.
 var modelTableDef = output.TableDef{
-	Headers:      []string{"ID", "Name", "Provider", "Mode"},
+	Headers:      []string{"ID", "Name", "Provider", "Mode", "Created"},
 	StatusColumn: -1,
 }
 
@@ -50,6 +50,7 @@ func toModelRows(models []map[string]interface{}) [][]string {
 			str(m, "name"),
 			str(m, "provider"),
 			str(m, "mode"),
+			output.TimestampVal(m, "created"),
 		}
 	}
 	return rows
@@ -65,11 +66,5 @@ func str(m map[string]interface{}, key string) string {
 
 // renderModel renders a single model as a single-row table or JSON.
 func renderModel(model map[string]interface{}) error {
-	rows := [][]string{{
-		str(model, "id"),
-		str(model, "name"),
-		str(model, "provider"),
-		str(model, "mode"),
-	}}
-	return cmd.Output.Render(modelTableDef, rows, model)
+	return cmd.Output.Render(modelTableDef, toModelRows([]map[string]interface{}{model}), model)
 }

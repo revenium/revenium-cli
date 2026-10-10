@@ -11,7 +11,7 @@ import (
 
 // newBudgetRulesGetCmd returns the `revenium guardrails budget-rules get <id>` command.
 // Endpoint: GET /v2/api/ai/cost-controls/{id} (RESEARCH-corrected base). The single-row
-// 3-col render (D-05) is delegated to the package-level renderRule helper from
+// table render (D-05) is delegated to the package-level renderRule helper from
 // budget_rules.go. Args validation uses cobra.MatchAll(ExactArgs(1), ValidResourceID)
 // per CF-12-16. 404 / other errors flow through internal/api/client.go default mapping
 // (CF-13-18).

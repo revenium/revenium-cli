@@ -34,7 +34,7 @@ func init() {
 
 // tableDef defines the table layout for source output.
 var tableDef = output.TableDef{
-	Headers:      []string{"ID", "Name", "Type", "Status"},
+	Headers:      []string{"ID", "Name", "Type", "Status", "Created"},
 	StatusColumn: 3,
 }
 
@@ -47,6 +47,7 @@ func toRows(sources []map[string]interface{}) [][]string {
 			str(s, "name"),
 			str(s, "type"),
 			str(s, "status"),
+			output.TimestampVal(s, "created"),
 		}
 	}
 	return rows
@@ -62,11 +63,5 @@ func str(m map[string]interface{}, key string) string {
 
 // renderSource renders a single source as a single-row table or JSON.
 func renderSource(source map[string]interface{}) error {
-	rows := [][]string{{
-		str(source, "id"),
-		str(source, "name"),
-		str(source, "type"),
-		str(source, "status"),
-	}}
-	return cmd.Output.Render(tableDef, rows, source)
+	return cmd.Output.Render(tableDef, toRows([]map[string]interface{}{source}), source)
 }

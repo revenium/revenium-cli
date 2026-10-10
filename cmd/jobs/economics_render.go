@@ -223,8 +223,8 @@ func renderCurrentBaselineSection(w io.Writer, resource map[string]interface{}) 
 		{"Provenance", str(baseline, "provenance")},
 		{"Declared By", str(baseline, "declaredBy")},
 		{"Evidence URL", str(baseline, "evidenceUrl")},
-		{"Effective From", str(baseline, "effectiveFrom")},
-		{"Created", str(baseline, "created")},
+		{"Effective From", output.TimestampVal(baseline, "effectiveFrom")},
+		{"Created", output.TimestampVal(baseline, "created")},
 	}
 	return cmd.Output.RenderTable(currentBaselineTableDef, rows)
 }

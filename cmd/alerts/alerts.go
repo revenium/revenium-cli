@@ -46,7 +46,7 @@ func toAlertRows(alerts []map[string]interface{}) [][]string {
 		rows[i] = []string{
 			str(a, "id"),
 			str(a, "label"),
-			str(a, "created"),
+			output.TimestampVal(a, "created"),
 		}
 	}
 	return rows
@@ -62,10 +62,5 @@ func str(m map[string]interface{}, key string) string {
 
 // renderAlert renders a single alert as a single-row table or JSON.
 func renderAlert(alert map[string]interface{}) error {
-	rows := [][]string{{
-		str(alert, "id"),
-		str(alert, "label"),
-		str(alert, "created"),
-	}}
-	return cmd.Output.Render(alertTableDef, rows, alert)
+	return cmd.Output.Render(alertTableDef, toAlertRows([]map[string]interface{}{alert}), alert)
 }

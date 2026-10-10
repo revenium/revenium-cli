@@ -26,7 +26,7 @@ func TestUsersMeInvoices(t *testing.T) {
 		case "/v2/api/users/me":
 			fmt.Fprint(w, `{"id": "user-1"}`)
 		case "/v2/api/users/user-1/invoices":
-			fmt.Fprint(w, `[{"id":"inv-1","invoiceNumber":"INV-001","state":"PAID","totalAmount":42.5,"currency":"USD"}]`)
+			fmt.Fprint(w, `[{"id":"inv-1","created":"2024-01-15T10:00:00Z","invoiceNumber":"INV-001","state":"PAID","totalAmount":42.5,"currency":"USD"}]`)
 		default:
 			t.Fatalf("unexpected path: %s", r.URL.Path)
 		}
@@ -47,6 +47,8 @@ func TestUsersMeInvoices(t *testing.T) {
 	out := buf.String()
 	assert.Contains(t, out, "inv-1")
 	assert.Contains(t, out, "INV-001")
+	assert.Contains(t, out, "Created")
+	assert.Contains(t, out, "2024-01-15 10:00:00 UTC")
 }
 
 func TestUsersMeInvoicesEmpty(t *testing.T) {

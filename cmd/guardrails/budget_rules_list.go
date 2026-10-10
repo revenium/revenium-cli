@@ -10,8 +10,8 @@ import (
 
 // newBudgetRulesListCmd returns the `revenium guardrails budget-rules list` command.
 // Endpoint: GET /v2/api/ai/cost-controls (RESEARCH-corrected base, NOT the CONTEXT.md
-// CF-12-22 `/v2/api/budget-rules` guess). Renders the package-level 3-col tableDef
-// (ID / Name / Status) populated via toRows; empty list emits "No budget rules found."
+// CF-12-22 `/v2/api/budget-rules` guess). Renders the package-level tableDef
+// populated via toRows; empty list emits "No budget rules found."
 // (D-06) for non-JSON or `[]` JSON. DoList handles HATEOAS `_embedded.objectList`
 // unwrap and auto-pagination via cmd.AddListFlags (CF-12-19).
 func newBudgetRulesListCmd() *cobra.Command {

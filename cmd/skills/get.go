@@ -31,8 +31,7 @@ var getTableDef = output.TableDef{
 // renderSkill renders a single skill's usage detail as a one-row table, or as
 // the raw response object under --json.
 //
-// The two timestamps are rendered by str — raw ISO-8601, no reformatting.
-// str also returns "" for a nil value, which is exactly what the seven
+// str and output.TimestampVal return "" for a nil value, which is exactly what the seven
 // nullable properties (kind, source, originCategory, pluginName,
 // marketplaceName, firstSeen, lastSeen) need: an empty cell rather than the
 // "<nil>" that fmt.Sprint would otherwise produce.
@@ -48,8 +47,8 @@ func renderSkill(skill map[string]interface{}) error {
 		formatNumber(floatVal(skill, "callCount")),
 		formatNumber(floatVal(skill, "traceCount")),
 		formatCost(floatVal(skill, "totalCost")),
-		str(skill, "firstSeen"),
-		str(skill, "lastSeen"),
+		output.TimestampVal(skill, "firstSeen"),
+		output.TimestampVal(skill, "lastSeen"),
 	}}
 	return cmd.Output.Render(getTableDef, rows, skill)
 }

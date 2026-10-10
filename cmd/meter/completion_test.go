@@ -60,6 +60,7 @@ func TestMeterCompletion(t *testing.T) {
 	assert.Equal(t, float64(700), receivedBody["totalTokenCount"])
 	assert.Equal(t, "END", receivedBody["stopReason"])
 	assert.Equal(t, true, receivedBody["isStreamed"])
+	assert.Contains(t, out, "2024-01-15 10:00:00 UTC")
 }
 
 func TestMeterCompletionWithOptionalFields(t *testing.T) {

@@ -30,7 +30,7 @@ func outcomeHistoryToRows(revisions []map[string]interface{}) [][]string {
 	for i, r := range revisions {
 		rows[i] = []string{
 			str(r, "sequence"),
-			str(r, "reportedAt"),
+			output.TimestampVal(r, "reportedAt"),
 			str(r, "reportedBy"),
 			str(r, "executionStatus"),
 			str(r, "reason"),

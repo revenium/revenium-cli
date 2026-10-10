@@ -27,7 +27,7 @@ func TestUsersMeCredentials(t *testing.T) {
 		case "/v2/api/users/me":
 			fmt.Fprint(w, `{"id": "user-1", "email": "jane@example.com"}`)
 		case "/v2/api/users/user-1/credentials":
-			fmt.Fprint(w, `[{"id":"cred-1","name":"My Cred","externalId":"ext-1","externalSecret":"super-secret","identityProvider":"okta"}]`)
+			fmt.Fprint(w, `[{"id":"cred-1","created":"2024-01-15T10:00:00Z","name":"My Cred","externalId":"ext-1","externalSecret":"super-secret","identityProvider":"okta"}]`)
 		default:
 			t.Fatalf("unexpected path: %s", r.URL.Path)
 		}
@@ -49,6 +49,8 @@ func TestUsersMeCredentials(t *testing.T) {
 	assert.Contains(t, out, "cred-1")
 	assert.Contains(t, out, "My Cred")
 	assert.NotContains(t, out, "super-secret", "externalSecret must not be rendered in table mode")
+	assert.Contains(t, out, "Created")
+	assert.Contains(t, out, "2024-01-15 10:00:00 UTC")
 }
 
 // TestUsersMeCredentialsProductID asserts --product-id, when passed, is sent

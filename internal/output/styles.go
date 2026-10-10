@@ -76,7 +76,16 @@ var columnRole = map[string]lipgloss.Style{
 	"Latency": quantityStyle,
 
 	// Dates
-	"Created": dateStyle,
+	"Created":        dateStyle,
+	"Updated":        dateStyle,
+	"Triggered":      dateStyle,
+	"Time":           dateStyle,
+	"Timestamp":      dateStyle,
+	"Reported At":    dateStyle,
+	"First Seen":     dateStyle,
+	"Last Seen":      dateStyle,
+	"Changed":        dateStyle,
+	"Effective From": dateStyle,
 
 	// Secondary / dim
 	"Description": dimStyle,

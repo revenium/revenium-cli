@@ -73,7 +73,7 @@ func newTransactionsCmd() *cobra.Command {
 			rows := make([][]string, len(txns))
 			for i, t := range txns {
 				rows[i] = []string{
-					str(t, "timestamp"),
+					output.TimestampVal(t, "timestamp"),
 					str(t, "model"),
 					// Cost is always USD per OAS (RESEARCH §A3). Uses Plan 13-01's
 					// extracted helpers — no local formatCurrency or floatVal.

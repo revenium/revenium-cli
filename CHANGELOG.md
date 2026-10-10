@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.8.0] - 2026-10-10
+
+### Changed
+
+- **Created and Updated on jobs.** `revenium jobs list` and `revenium jobs get` end with `Created` and `Updated` columns, as do the tables `jobs create`, `jobs update`, `jobs outcome` and `jobs outcome-update` print. Other entities get `Created` only; `updated` stays one `--json` away.
+- **Created on 21 more tables.** `anomalies`, `guardrails budget-rules`, `invoices`, `metering-elements`, `models`, `organizations` (including `children`), `period-charges`, `products`, `refunds`, `sources`, `subscribers`, `subscriptions`, `teams` (including `children`), `tools` and `users` list and get, plus `tenants get`, `workspaces list`, and `users me subscriptions|invoices|period-charges|credentials`, end with a `Created` column. The create and update commands that print these tables gain it too. Existing columns keep their order, so `--fields` selections of existing headers are unaffected.
+- **One timestamp format in table output.** Every timestamp column renders as `YYYY-MM-DD HH:MM:SS UTC`, converted from whatever offset the API sent. This covers the new columns above and the existing ones in `alerts list|get`, `alerts events`, `charts list|get`, `guardrails enforcement-events list`, `jobs transactions`, `jobs outcome-history`, `jobs types baselines list`, `jobs types economics get`, `products|models|sources history`, `skills get`, `squads timeline`, `sessions attribution`, and the `meter` commands. A value that is not a full RFC 3339 timestamp, such as a date-only or zone-less one, renders exactly as before and is never relabelled as UTC.
+- **`--json` is unchanged.** JSON output still carries the raw API values (e.g. `2026-01-15T10:00:00.123Z`). Scripts should parse `--json`, not the table.
+
 ## [1.7.0] - 2026-09-26
 
 This release carries two internal milestones at once — v1.6 (API drift sweep and release-path hardening) and v1.7 (jobs economics and dev-spec coverage) — neither of which was ever tagged publicly. It adds 26 commands, the largest of them a complete job-type economics and ROI surface. No public v1.6.0 release exists; this supersedes it.
@@ -129,7 +138,8 @@ This release reconciles the CLI against all three Revenium OpenAPI specs — pla
 
 (See https://github.com/revenium/revenium-cli/releases/tag/v1.0.3 — v1.0.x history is not back-filled in this CHANGELOG; only v1.1.0+ entries are curated.)
 
-[Unreleased]: https://github.com/revenium/revenium-cli/compare/v1.7.0...HEAD
+[Unreleased]: https://github.com/revenium/revenium-cli/compare/v1.8.0...HEAD
+[1.8.0]: https://github.com/revenium/revenium-cli/compare/v1.7.0...v1.8.0
 [1.7.0]: https://github.com/revenium/revenium-cli/compare/v1.5.0...v1.7.0
 [1.5.0]: https://github.com/revenium/revenium-cli/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/revenium/revenium-cli/compare/v1.3.0...v1.4.0

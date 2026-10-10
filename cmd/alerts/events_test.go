@@ -43,6 +43,7 @@ func TestAlertsEvents(t *testing.T) {
 	out := buf.String()
 	assert.Contains(t, out, "alert-1")
 	assert.Contains(t, out, "High Cost")
+	assert.Contains(t, out, "2026-07-19 00:00:00 UTC")
 }
 
 // TestAlertsEventsResolvedFlagPresent asserts --resolved adds a `resolved`

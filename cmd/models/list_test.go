@@ -20,7 +20,7 @@ func TestListModels(t *testing.T) {
 		assert.Equal(t, "/v2/api/sources/ai/models", r.URL.Path)
 		w.Header().Set("Content-Type", "application/json")
 		fmt.Fprint(w, `[
-			{"id": "mdl-1", "name": "GPT-4", "provider": "OpenAI", "mode": "chat"},
+			{"id": "mdl-1", "created": "2024-01-15T10:00:00Z", "name": "GPT-4", "provider": "OpenAI", "mode": "chat"},
 			{"id": "mdl-2", "name": "Claude", "provider": "Anthropic", "mode": "completion"}
 		]`)
 	}))
@@ -43,6 +43,8 @@ func TestListModels(t *testing.T) {
 	assert.Contains(t, out, "mdl-2")
 	assert.Contains(t, out, "Claude")
 	assert.Contains(t, out, "Anthropic")
+	assert.Contains(t, out, "Created")
+	assert.Contains(t, out, "2024-01-15 10:00:00 UTC")
 }
 
 func TestListModelsEmpty(t *testing.T) {

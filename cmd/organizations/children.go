@@ -12,7 +12,7 @@ import (
 // newChildrenCmd returns the `revenium organizations children <parentId>` command.
 // Endpoint: GET /v2/api/organizations/parent/{parentId} (RESEARCH Pitfall 1 — the
 // literal `parent/` segment is mandatory; `/{id}/children` returns 404). Renders
-// the shared 3-col tableDef (ID / Name / Status) populated via toRows; empty list
+// the shared tableDef (ID / Name / Status / Created) populated via toRows; empty list
 // emits the no-children-found empty-state phrase (D-03) for non-JSON or [] JSON. DoList
 // handles HATEOAS `_embedded.organizationResourceList` unwrap and auto-pagination
 // via cmd.AddListFlags (CF-12-19).

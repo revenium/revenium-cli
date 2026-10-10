@@ -19,7 +19,7 @@ func init() {
 // through (items), per the codebase's existing table-mask/JSON-passthrough
 // convention.
 var meCredentialsTableDef = output.TableDef{
-	Headers:      []string{"ID", "Name", "External ID", "Identity Provider"},
+	Headers:      []string{"ID", "Name", "External ID", "Identity Provider", "Created"},
 	StatusColumn: -1,
 }
 
@@ -31,6 +31,7 @@ func meCredentialsToRows(items []map[string]interface{}) [][]string {
 			str(m, "name"),
 			str(m, "externalId"),
 			str(m, "identityProvider"),
+			output.TimestampVal(m, "created"),
 		}
 	}
 	return rows

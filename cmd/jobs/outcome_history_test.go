@@ -53,6 +53,7 @@ func TestOutcomeHistory(t *testing.T) {
 
 	assert.Contains(t, buf.String(), "initial report")
 	assert.Contains(t, buf.String(), "corrected value")
+	assert.Contains(t, buf.String(), "2026-05-01 00:00:00 UTC")
 }
 
 // TestOutcomeHistoryNoPageFlags asserts the command exposes no

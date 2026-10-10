@@ -43,7 +43,7 @@ func init() {
 
 // tableDef defines the table layout for user output.
 var tableDef = output.TableDef{
-	Headers:      []string{"ID", "Email", "Name", "Roles"},
+	Headers:      []string{"ID", "Email", "Name", "Roles", "Created"},
 	StatusColumn: -1,
 }
 
@@ -57,6 +57,7 @@ func toRows(users []map[string]interface{}) [][]string {
 			str(u, "email"),
 			name,
 			rolesStr(u),
+			output.TimestampVal(u, "created"),
 		}
 	}
 	return rows
@@ -89,12 +90,5 @@ func rolesStr(m map[string]interface{}) string {
 
 // renderUser renders a single user as a single-row table or JSON.
 func renderUser(user map[string]interface{}) error {
-	name := strings.TrimSpace(str(user, "firstName") + " " + str(user, "lastName"))
-	rows := [][]string{{
-		str(user, "id"),
-		str(user, "email"),
-		name,
-		rolesStr(user),
-	}}
-	return cmd.Output.Render(tableDef, rows, user)
+	return cmd.Output.Render(tableDef, toRows([]map[string]interface{}{user}), user)
 }

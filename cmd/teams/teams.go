@@ -48,7 +48,7 @@ func init() {
 
 // tableDef defines the table layout for team output.
 var tableDef = output.TableDef{
-	Headers:      []string{"ID", "Name"},
+	Headers:      []string{"ID", "Name", "Created"},
 	StatusColumn: -1,
 }
 
@@ -70,6 +70,7 @@ func toRows(teams []map[string]interface{}) [][]string {
 		rows[i] = []string{
 			str(t, "id"),
 			name,
+			output.TimestampVal(t, "created"),
 		}
 	}
 	return rows
@@ -85,13 +86,5 @@ func str(m map[string]interface{}, key string) string {
 
 // renderTeam renders a single team as a single-row table or JSON.
 func renderTeam(team map[string]interface{}) error {
-	name := str(team, "label")
-	if name == "" {
-		name = str(team, "name")
-	}
-	rows := [][]string{{
-		str(team, "id"),
-		name,
-	}}
-	return cmd.Output.Render(tableDef, rows, team)
+	return cmd.Output.Render(tableDef, toRows([]map[string]interface{}{team}), team)
 }

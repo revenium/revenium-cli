@@ -227,6 +227,8 @@ func TestEconomicsGet(t *testing.T) {
 	assert.Contains(t, out, "$4.25")
 	assert.Contains(t, out, "0.9550")
 	assert.Contains(t, out, "CUSTOMER_DECLARED")
+	assert.Contains(t, out, "2026-01-01 00:00:00 UTC")
+	assert.Contains(t, out, "2026-01-02 09:15:00 UTC")
 }
 
 // TestEconomicsGetEmptyStates pins D-27-09's "empty states are deliberate, not

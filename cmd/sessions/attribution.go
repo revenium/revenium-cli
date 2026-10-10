@@ -243,7 +243,7 @@ func toAttributionRows(items []map[string]interface{}) [][]string {
 	rows := make([][]string, len(items))
 	for i, it := range items {
 		rows[i] = []string{
-			str(it, "effectiveFrom"),
+			output.TimestampVal(it, "effectiveFrom"),
 			str(it, "ticketId"),
 			str(it, "ticketTitle"),
 			splitsCell(it["splits"]),
