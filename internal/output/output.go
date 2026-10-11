@@ -1,6 +1,6 @@
 // Package output provides formatted output rendering for the Revenium CLI.
-// It handles styled table rendering, JSON output, TTY detection, and color
-// profile management for pipe-safe output.
+// It handles styled table rendering, JSON output, TTY detection, color
+// profile management for pipe-safe output, and paging terminal output.
 package output
 
 import (
@@ -13,12 +13,13 @@ import (
 
 // Formatter handles output rendering based on the active mode.
 type Formatter struct {
-	writer    io.Writer // os.Stdout, colorprofile.Writer, or io.Discard
+	writer    io.Writer // os.Stdout, colorprofile.Writer, io.Discard, or the pager
 	errWriter io.Writer // os.Stderr (always, even in quiet mode)
 	jsonMode  bool
 	quiet     bool
 	isTTY     bool
 	fields    []string // field filter for --fields flag
+	pager     *pagedWriter
 }
 
 // New creates a Formatter, detecting TTY and terminal width.

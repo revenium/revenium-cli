@@ -53,6 +53,19 @@ func TestQuietFlagRegistered(t *testing.T) {
 	assert.Equal(t, "false", flag.DefValue)
 }
 
+func TestNoPagerFlagRegistered(t *testing.T) {
+	flag := rootCmd.PersistentFlags().Lookup("no-pager")
+	require.NotNil(t, flag, "--no-pager persistent flag should be registered")
+	assert.Equal(t, "false", flag.DefValue)
+	assert.Empty(t, flag.Shorthand)
+}
+
+func TestRootHelpDocumentsPager(t *testing.T) {
+	for _, want := range []string{"--no-pager", "REVENIUM_PAGER", "PAGER", "less -FRX"} {
+		assert.Contains(t, rootCmd.Long, want)
+	}
+}
+
 func TestQuietShortFlag(t *testing.T) {
 	flag := rootCmd.PersistentFlags().ShorthandLookup("q")
 	require.NotNil(t, flag, "-q shorthand should be registered")

@@ -38,6 +38,9 @@ var fieldsFlag string
 // quiet controls quiet output mode (suppress non-error output).
 var quiet bool
 
+// noPager disables the pager for terminal output.
+var noPager bool
+
 // yesMode controls whether to skip confirmation prompts.
 var yesMode bool
 
@@ -91,6 +94,9 @@ Environment Variables:
   REVENIUM_OWNER_ID             Overrides "owner-id"
   REVENIUM_ANALYTICS_API_URL    Overrides "analytics-api-url"
   REVENIUM_OUTPUT_FORMAT        Default output format ("json" or "table")
+  REVENIUM_PAGER                Pager for terminal output (default "less -FRX");
+                                an empty value or "cat" disables paging
+  PAGER                         Pager used when REVENIUM_PAGER is unset
 
   Precedence (highest to lowest): flag > env var > config file > default.
 
@@ -101,6 +107,10 @@ Output Formats:
   Resolution order: --json flag > --output flag > REVENIUM_OUTPUT_FORMAT env > table
   Use --fields to limit columns/fields in either mode.
   Use --quiet to suppress non-error output (useful in scripts).
+
+  On a terminal, output is shown through a pager: REVENIUM_PAGER, then PAGER,
+  then "less -FRX". Use --no-pager to print directly. Piped or redirected
+  output is never paged, and neither are prompts or errors.
 
 Exit Codes:
   0   Success
@@ -148,6 +158,9 @@ Programmatic Discovery:
 
 		// Always initialize the output formatter so all commands can use it
 		Output = output.New(effectiveJSON, quiet)
+		if !noPager {
+			enablePager(cmd.Root())
+		}
 
 		// Apply field filtering if --fields is set
 		if fieldsFlag != "" {
@@ -217,6 +230,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&outputFormat, "output", "", "Output format: json, table (default table)")
 	rootCmd.PersistentFlags().StringVar(&fieldsFlag, "fields", "", "Comma-separated list of fields to include in output")
 	rootCmd.PersistentFlags().BoolVarP(&quiet, "quiet", "q", false, "Suppress non-error output")
+	rootCmd.PersistentFlags().BoolVar(&noPager, "no-pager", false, "Print output directly instead of through a pager")
 	rootCmd.PersistentFlags().BoolVarP(&yesMode, "yes", "y", false, "Skip confirmation prompts")
 	rootCmd.PersistentFlags().BoolVar(&dryRun, "dry-run", false, "Preview the action without executing it")
 
@@ -271,9 +285,25 @@ func RegisterCommand(c *cobra.Command, groupID string) {
 	rootCmd.AddCommand(c)
 }
 
-// Execute runs the root command.
+// enablePager pages Formatter output and points cobra's stdout at the pager's
+// follower so lines printed after a paged table stay below it.
+func enablePager(root *cobra.Command) {
+	if follower, paging := Output.EnablePager(); paging {
+		root.SetOut(follower)
+	}
+}
+
+// Execute runs the root command and then waits for the pager, if one started.
 func Execute() error {
-	return rootCmd.Execute()
+	err := rootCmd.Execute()
+	if Output == nil {
+		return err
+	}
+	closeErr := Output.Close()
+	if err != nil {
+		return err
+	}
+	return closeErr
 }
 
 // Root returns the root command. Used by the schema command to walk the

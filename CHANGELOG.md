@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.9.0] - 2026-10-11
+
+### Added
+
+- **Pager for terminal output.** On a terminal, tables and JSON open in `REVENIUM_PAGER`, then `PAGER`, then `less -FRX`, so short output still prints and exits as before. `--no-pager` prints directly, and setting the chosen variable to an empty value or `cat` turns paging off. Piped and redirected output, `--quiet`, prompts and stderr are never paged, so scripts see the same bytes as before.
+
 ## [1.8.0] - 2026-10-10
 
 ### Changed
@@ -138,7 +144,8 @@ This release reconciles the CLI against all three Revenium OpenAPI specs — pla
 
 (See https://github.com/revenium/revenium-cli/releases/tag/v1.0.3 — v1.0.x history is not back-filled in this CHANGELOG; only v1.1.0+ entries are curated.)
 
-[Unreleased]: https://github.com/revenium/revenium-cli/compare/v1.8.0...HEAD
+[Unreleased]: https://github.com/revenium/revenium-cli/compare/v1.9.0...HEAD
+[1.9.0]: https://github.com/revenium/revenium-cli/compare/v1.8.0...v1.9.0
 [1.8.0]: https://github.com/revenium/revenium-cli/compare/v1.7.0...v1.8.0
 [1.7.0]: https://github.com/revenium/revenium-cli/compare/v1.5.0...v1.7.0
 [1.5.0]: https://github.com/revenium/revenium-cli/compare/v1.4.0...v1.5.0
