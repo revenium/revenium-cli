@@ -640,7 +640,7 @@ revenium sources delete src-123 --yes --quiet
 
 ### Pager
 
-On a terminal, tables and JSON open in a pager, the way `git log` does. The CLI uses `REVENIUM_PAGER` if it is set, otherwise `PAGER`, otherwise `less -FRX`. Setting the variable it picks to an empty value or `cat` turns paging off. With `less -FRX`, output that fits on one screen prints and exits as before, colors are kept, and the screen is not cleared. When `PAGER` is plain `less` and `LESS` is unset, the CLI passes `LESS=FRX` to it for the same behavior.
+On a terminal, tables and JSON open in a pager, the way `git log` does. The CLI uses `REVENIUM_PAGER` if it is set, otherwise `PAGER`, otherwise `less -FRX`. Setting the variable it picks to an empty value or `cat` turns paging off. With `less -FRX`, output that fits on one screen prints and exits as before, colors are kept, and the screen is not cleared. Whenever `LESS` is unset, the CLI passes `LESS=FRX` to whichever pager it runs, as git does, so a plain `less` behaves the same way. Pager values are split like shell words, so quoted arguments and quoted paths with spaces work; the value is not run through a shell. If the pager exits with an error, the command reports it.
 
 Only terminal output is paged. Piped or redirected output, `--quiet`, confirmation prompts and anything written to stderr never go through the pager.
 

@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"encoding/json"
-	"os"
+	"io"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -20,11 +20,20 @@ func newSchemaCmd() *cobra.Command {
 		RunE: func(c *cobra.Command, args []string) error {
 			root := Root()
 			schema := buildSchema(root)
-			enc := json.NewEncoder(os.Stdout)
+			enc := json.NewEncoder(schemaWriter(c))
 			enc.SetIndent("", "  ")
 			return enc.Encode(schema)
 		},
 	}
+}
+
+// The schema is the command's result, not a status message, so --quiet must not
+// discard it; the pager is never enabled in quiet mode, so nothing is lost by bypassing it.
+func schemaWriter(c *cobra.Command) io.Writer {
+	if Output.IsQuiet() {
+		return c.OutOrStdout()
+	}
+	return Output.Writer()
 }
 
 func init() {

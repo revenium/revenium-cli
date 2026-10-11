@@ -1,7 +1,7 @@
 package output
 
 import (
-	"errors"
+	"fmt"
 	"io"
 	"os"
 	"os/exec"
@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/colorprofile"
+	"github.com/mattn/go-shellwords"
 )
 
 var pagerEnvVars = []string{"REVENIUM_PAGER", "PAGER"}
@@ -35,7 +36,11 @@ func parsePagerValue(value string) []string {
 	if value == "" || value == disabledPagerValue {
 		return nil
 	}
-	return strings.Fields(value)
+	argv, err := shellwords.Parse(value)
+	if err != nil || len(argv) == 0 {
+		return nil
+	}
+	return argv
 }
 
 func pagerEnv(environ []string) []string {
@@ -127,11 +132,10 @@ func (p *pagedWriter) Close() error {
 	_ = p.stdin.Close()
 	<-p.exited
 
-	var exitErr *exec.ExitError
-	if errors.As(p.waitErr, &exitErr) {
-		return nil
+	if p.waitErr != nil {
+		return fmt.Errorf("pager %s: %w", p.argv[0], p.waitErr)
 	}
-	return p.waitErr
+	return nil
 }
 
 type pagerInput struct {

@@ -61,9 +61,10 @@ func TestNoPagerFlagRegistered(t *testing.T) {
 }
 
 func TestRootHelpDocumentsPager(t *testing.T) {
-	for _, want := range []string{"--no-pager", "REVENIUM_PAGER", "PAGER", "less -FRX"} {
+	for _, want := range []string{"--no-pager", "REVENIUM_PAGER", "less -FRX"} {
 		assert.Contains(t, rootCmd.Long, want)
 	}
+	assert.Regexp(t, `(?m)^\s+PAGER\s+Pager used when REVENIUM_PAGER is unset`, rootCmd.Long)
 }
 
 func TestQuietShortFlag(t *testing.T) {

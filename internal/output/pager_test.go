@@ -22,6 +22,8 @@ func TestPagerHelperProcess(t *testing.T) {
 		os.Exit(0)
 	case "quit":
 		os.Exit(0)
+	case "fail":
+		os.Exit(3)
 	}
 }
 
@@ -54,6 +56,9 @@ func TestPagerCommand(t *testing.T) {
 		{"PAGER empty disables", map[string]string{"PAGER": ""}, nil},
 		{"REVENIUM_PAGER beats PAGER cat", map[string]string{"REVENIUM_PAGER": "less -R", "PAGER": "cat"}, []string{"less", "-R"}},
 		{"REVENIUM_PAGER cat beats PAGER", map[string]string{"REVENIUM_PAGER": "cat", "PAGER": "less"}, nil},
+		{"quoted argument stays one word", map[string]string{"PAGER": `less -R -P"line %lt of %L"`}, []string{"less", "-R", "-Pline %lt of %L"}},
+		{"quoted path with spaces", map[string]string{"REVENIUM_PAGER": `"/opt/my tools/less" -R`}, []string{"/opt/my tools/less", "-R"}},
+		{"unparseable value disables", map[string]string{"REVENIUM_PAGER": `less "unterminated`}, nil},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -130,6 +135,17 @@ func TestPagedWriter_EarlyQuitSwallowsBrokenPipe(t *testing.T) {
 	assert.Equal(t, 5, n)
 
 	assert.NoError(t, p.Close())
+}
+
+func TestPagedWriter_FailingPagerReportsError(t *testing.T) {
+	p := newPagedWriter(helperPager(t, "fail"), os.Environ(), &bytes.Buffer{}, colorprofile.TrueColor)
+	_, err := p.Write([]byte("row\n"))
+	require.NoError(t, err)
+
+	err = p.Close()
+
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "exit status 3")
 }
 
 func TestPagedWriter_LazyStart(t *testing.T) {
