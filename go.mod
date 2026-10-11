@@ -6,6 +6,7 @@ require (
 	charm.land/lipgloss/v2 v2.0.2
 	github.com/charmbracelet/colorprofile v0.4.2
 	github.com/charmbracelet/x/term v0.2.2
+	github.com/mattn/go-shellwords v1.0.12
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/pflag v1.0.10
 	github.com/spf13/viper v1.21.0

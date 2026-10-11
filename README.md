@@ -112,6 +112,8 @@ Configuration can also be set via environment variables. The full resolution ord
 | `REVENIUM_TENANT_ID`    | `tenant-id`    |
 | `REVENIUM_OWNER_ID`     | `owner-id`     |
 | `REVENIUM_OUTPUT_FORMAT` | `--output` flag (set to `json` or `table`) |
+| `REVENIUM_PAGER`        | Pager command for terminal output (default `less -FRX`); empty or `cat` disables paging |
+| `PAGER`                 | Pager command when `REVENIUM_PAGER` is unset; empty or `cat` disables paging |
 
 ## Commands
 
@@ -636,6 +638,20 @@ Suppress non-error output with `--quiet` / `-q`. Useful in scripts where you onl
 revenium sources delete src-123 --yes --quiet
 ```
 
+### Pager
+
+On a terminal, tables and JSON open in a pager, the way `git log` does. The CLI uses `REVENIUM_PAGER` if it is set, otherwise `PAGER`, otherwise `less -FRX`. Setting the variable it picks to an empty value or `cat` turns paging off. With `less -FRX`, output that fits on one screen prints and exits as before, colors are kept, and the screen is not cleared. Whenever `LESS` is unset, the CLI passes `LESS=FRX` to whichever pager it runs, as git does, so a plain `less` behaves the same way. Pager values are split like shell words, so quoted arguments and quoted paths with spaces work; the value is not run through a shell. If the pager exits with an error, the command reports it.
+
+Only terminal output is paged. Piped or redirected output, `--quiet`, confirmation prompts and anything written to stderr never go through the pager.
+
+```sh
+# Print directly for one command
+revenium sources list --no-pager
+
+# Turn paging off for the shell session
+export REVENIUM_PAGER=cat
+```
+
 ## Dry Run
 
 Preview any mutation (create, update, delete) without executing it using `--dry-run`. This is useful for validating commands before they make changes:
@@ -681,6 +697,7 @@ The output includes all commands with their flags (types, defaults, required mar
 | `--dry-run`     |       | Preview the action without executing it                |
 | `--verbose`     | `-v`  | Enable verbose output (shows HTTP requests/responses)  |
 | `--quiet`       | `-q`  | Suppress non-error output                              |
+| `--no-pager`    |       | Print output directly instead of through a pager       |
 | `--yes`         | `-y`  | Skip confirmation prompts                              |
 | `--help`        | `-h`  | Help for any command                                   |
 
