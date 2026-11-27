@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **`meter completion --input-tokens` help says what to count.** For OpenAI, Azure OpenAI, xAI, Groq and Gemini, the input includes the cache read (the provider's own prompt count); for Anthropic, it excludes it. Revenium takes the cache read out of the input itself on the first group, so sending an input with the read already removed under-bills. Requests are unchanged.
+
 ## [1.9.0] - 2026-10-11
 
 ### Added
