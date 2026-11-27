@@ -271,7 +271,7 @@ func newCompletionCmd() *cobra.Command {
 	// Required flags
 	c.Flags().StringVar(&model, "model", "", "AI model identifier (e.g., gpt-4, claude-3-opus)")
 	c.Flags().StringVar(&provider, "provider", "", "AI provider (e.g., openai, anthropic)")
-	c.Flags().IntVar(&inputTokenCount, "input-tokens", 0, "Number of input tokens consumed. For OpenAI, Azure OpenAI, xAI, Groq and Gemini, include the cache read (the provider's own prompt count); for Anthropic, exclude it")
+	c.Flags().IntVar(&inputTokenCount, "input-tokens", 0, "Number of input tokens consumed. For OpenAI, Azure OpenAI, xAI and Groq, include the cache read (the provider's own prompt count); for Anthropic, exclude it")
 	c.Flags().IntVar(&outputTokenCount, "output-tokens", 0, "Number of output tokens generated")
 	c.Flags().IntVar(&totalTokenCount, "total-tokens", 0, "Total number of tokens")
 	c.Flags().StringVar(&stopReason, "stop-reason", "", "Stop reason (END, END_SEQUENCE, TIMEOUT, TOKEN_LIMIT, COST_LIMIT, COMPLETION_LIMIT, ERROR, CANCELLED, CONTENT_FILTER, TOOL_CALL)")
