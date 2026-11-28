@@ -465,3 +465,14 @@ func TestMeterCompletionJSON(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "cmp-123", result["id"])
 }
+
+func TestMeterCompletionTokenHelpSaysWhetherInputIncludesCacheRead(t *testing.T) {
+	c := newCompletionCmd()
+
+	inputUsage := c.Flags().Lookup("input-tokens").Usage
+	assert.Contains(t, inputUsage, "For OpenAI, Azure OpenAI, xAI and Groq, include the cache read (the provider's own prompt count)")
+	assert.Contains(t, inputUsage, "for Anthropic, exclude it")
+	assert.NotContains(t, inputUsage, "Gemini")
+
+	assert.Contains(t, c.Flags().Lookup("cache-read-tokens").Usage, "--input-tokens")
+}
